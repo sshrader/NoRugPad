@@ -40,6 +40,10 @@ export async function listCoins(): Promise<Coin[]> {
   return json<Coin[]>(await fetch('/api/coins'));
 }
 
+export async function getCoin(mint: string): Promise<Coin> {
+  return json<Coin>(await fetch(`/api/coins/${encodeURIComponent(mint)}`));
+}
+
 /* ------------------------------ cats ------------------------------ */
 
 export type Post = {

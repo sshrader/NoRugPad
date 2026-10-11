@@ -36,7 +36,7 @@ Run `npm run dry-run -- --send` first if you can. It tests the on-chain part wit
 
 Every coin's cat can talk and write.
 
-- **Chat.** "Meet <cat>" on a coin opens a chat. `POST /api/coins/:mint/chat` sends the message and the last few turns to the model and returns the reply.
+- **Chat.** Each coin page has a chat with its cat. `POST /api/coins/:mint/chat` (single coin: `GET /api/coins/:mint`) sends the message and the last few turns to the model and returns the reply.
 - **Lore.** When a coin is registered its cat writes a first diary entry, then a new one every `CAT_POST_MINUTES` (varies per coin). Entries are stored in `server/data/posts.json`, shown on the coin card and in the Cat Wire feed, and each continues from the cat's last three entries.
 - **Voices.** Five voices (mystic, hype, deadpan, lyrical, grumpy) are defined in `server/cats.mjs`. Edit the style lines to change how a cat sounds.
 - **AI brain.** `server/llm.mjs` calls any OpenAI-compatible chat API. Put `LLM_API_KEY` in `.env` (Groq has a free tier, see `.env.example`) and restart. With no key the cats answer from canned lines and say so.
@@ -62,8 +62,10 @@ server/limits.mjs       rate limit and daily call budget
 server/store.mjs        JSON-file storage (swap for a real database later)
 src/lib/createCoin.ts   the transaction. Start reading here.
 src/lib/api.ts          client calls to the API
-src/components/         create form, coin list
-src/App.tsx             header, wallet button, balance, test-SOL button
+src/router.ts           tiny hash router (#/, #/launch, #/wire, #/coin/<mint>)
+src/pages/              Explore, Launch, Cat Wire, coin page
+src/components/         create form, coin card, cat chat, post list, cat avatars
+src/App.tsx             header, nav, wallet button, balance, test-SOL button
 scripts/dry-run.ts      tests the transaction without a browser
 scripts/cat-test.mjs    tests the cat logic against a fake model server
 ```

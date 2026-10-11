@@ -3,6 +3,8 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { MIN_SOL_TO_LAUNCH, explorerAddress, explorerTx } from '../config';
 import { createCoin } from '../lib/createCoin';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
+import { voiceLabel } from '../lib/cats';
+import { href } from '../router';
 
 type Phase = 'idle' | 'uploading' | 'signing' | 'confirming' | 'registering' | 'done';
 
@@ -156,9 +158,10 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       {created && (
         <div className="success" role="status">
           <p>
-            <b>{created.name}</b> (${created.symbol}) is live. Your cat is <b>{created.cat.name}</b>, a {created.cat.breed.toLowerCase()} with a {created.cat.voice} voice.
+            <b>{created.name}</b> (${created.symbol}) is live. Your cat is <b>{created.cat.name}</b>, a {created.cat.breed.toLowerCase()} with a {voiceLabel(created.cat.voice).toLowerCase()} voice.
           </p>
           <p className="links mono">
+            <a href={href.coin(created.mint)}>Open coin page</a>
             <a href={explorerAddress(created.mint)} target="_blank" rel="noreferrer">View token</a>
             <a href={explorerTx(created.signature)} target="_blank" rel="noreferrer">View transaction</a>
           </p>

@@ -3,17 +3,31 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { CLUSTER } from './config';
-import CreateCoinForm from './components/CreateCoinForm';
-import CoinList from './components/CoinList';
-import CatWire from './components/CatWire';
+import { href, useRoute } from './router';
+import Explore from './pages/Explore';
+import Launch from './pages/Launch';
+import Wire from './pages/Wire';
+import CoinPage from './pages/CoinPage';
+
+function Paw() {
+  return (
+    <svg className="paw" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
+      <ellipse cx="8" cy="13" rx="2.6" ry="3.4" />
+      <ellipse cx="13" cy="8" rx="2.6" ry="3.6" />
+      <ellipse cx="19" cy="8" rx="2.6" ry="3.6" />
+      <ellipse cx="24" cy="13" rx="2.6" ry="3.4" />
+      <path d="M16 15c-4.3 0-7.6 3.8-7.6 7 0 2.4 1.9 3.7 4.3 3.7 1.3 0 2.2-.6 3.3-.6s2 .6 3.3.6c2.4 0 4.3-1.3 4.3-3.7 0-3.2-3.3-7-7.6-7z" />
+    </svg>
+  );
+}
 
 export default function App() {
   const { connection } = useConnection();
   const { publicKey } = useWallet();
+  const route = useRoute();
   const [balance, setBalance] = useState<number | null>(null);
   const [airdropMsg, setAirdropMsg] = useState('');
   const [airdropping, setAirdropping] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const refreshBalance = useCallback(async () => {
     if (!publicKey) return setBalance(null);
@@ -41,11 +55,18 @@ export default function App() {
       setAirdropMsg('Received 1 SOL of test money.');
       refreshBalance();
     } catch {
-      setAirdropMsg('The public faucet is rate limited. Get test SOL at faucet.solana.com instead.');
+      setAirdropMsg('The public faucet is rate limited. Get test SOL at');
     } finally {
       setAirdropping(false);
     }
   }
+
+  const section = route.name === 'coin' ? 'explore' : route.name;
+  const link = (name: 'explore' | 'launch' | 'wire', label: string) => (
+    <a className={section === name ? 'on' : ''} href={href[name]} aria-current={section === name ? 'page' : undefined}>
+      {label}
+    </a>
+  );
 
   return (
     <>
@@ -54,7 +75,15 @@ export default function App() {
       </div>
       <header className="top">
         <div className="wrap top-in">
-          <h1 className="brand">Pawpad</h1>
+          <a className="brand" href={href.explore} aria-label="Pawpad home">
+            <Paw />
+            Pawpad
+          </a>
+          <nav className="nav" aria-label="Main">
+            {link('explore', 'Explore')}
+            {link('launch', 'Launch')}
+            {link('wire', 'Cat Wire')}
+          </nav>
           <div className="wallet-area">
             {publicKey && balance !== null && <span className="bal mono">{balance.toFixed(3)} SOL</span>}
             {publicKey && CLUSTER === 'devnet' && (
@@ -66,30 +95,23 @@ export default function App() {
           </div>
         </div>
       </header>
-      <main className="wrap">
-        {airdropMsg && <p className="note">{airdropMsg} <a href="https://faucet.solana.com" target="_blank" rel="noreferrer">faucet.solana.com</a></p>}
-        <section className="hero">
-          <p className="eyebrow mono">Solana {CLUSTER}</p>
-          <h2>Launch a coin. Get a cat.</h2>
-          <p className="muted">
-            Your wallet creates the token, attaches its name and image, and revokes mint and freeze
-            authority in a single transaction. A cat is paired to the coin when it is registered.
+
+      {airdropMsg && (
+        <div className="wrap">
+          <p className="note">
+            {airdropMsg}{' '}
+            <a href="https://faucet.solana.com" target="_blank" rel="noreferrer">faucet.solana.com</a>
           </p>
-        </section>
-        <div className="layout">
-          <CreateCoinForm
-            balance={balance}
-            onCreated={() => {
-              refreshBalance();
-              setRefreshKey((k) => k + 1);
-            }}
-          />
-          <div className="rightcol">
-            <CatWire refreshKey={refreshKey} />
-            <CoinList refreshKey={refreshKey} />
-          </div>
         </div>
+      )}
+
+      <main>
+        {route.name === 'explore' && <Explore />}
+        {route.name === 'launch' && <Launch balance={balance} onCreated={refreshBalance} />}
+        {route.name === 'wire' && <Wire />}
+        {route.name === 'coin' && <CoinPage mint={route.mint} />}
       </main>
+
       <footer className="wrap foot muted">
         Prototype for {CLUSTER} only. Not audited. Do not point this at mainnet without a security review and legal advice.
       </footer>

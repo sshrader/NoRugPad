@@ -191,6 +191,12 @@ app.get('/api/coins', async (_req, res) => {
 const findCoin = async (mint) => (await store.get('coins.json', [])).find((c) => c.mint === mint);
 const asLimit = (v, fallback) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
 
+app.get('/api/coins/:mint', async (req, res) => {
+  const coin = await findCoin(req.params.mint);
+  if (!coin) return bad(res, 'Unknown coin.', 404);
+  res.json(coin);
+});
+
 // The cats' latest lore across all coins.
 app.get('/api/posts', async (req, res) => {
   res.json(await listPosts({ limit: asLimit(req.query.limit, 20) }));
