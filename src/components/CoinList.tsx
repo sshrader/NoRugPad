@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { explorerAddress } from '../config';
 import { listCoins, type Coin } from '../lib/api';
+import CatPanel from './CatPanel';
 
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
 
 export default function CoinList({ refreshKey }: { refreshKey: number }) {
   const [coins, setCoins] = useState<Coin[] | null>(null);
   const [error, setError] = useState('');
+  const [open, setOpen] = useState<string | null>(null);
 
   useEffect(() => {
     let alive = true;
@@ -26,20 +28,26 @@ export default function CoinList({ refreshKey }: { refreshKey: number }) {
       <div className="coins">
         {coins?.map((c) => (
           <article className="card coin" key={c.mint}>
-            <img src={c.imageUrl} alt="" width={56} height={56} loading="lazy" />
-            <div className="coin-body">
-              <h4>
-                {c.name} <span className="mono muted">${c.symbol}</span>
-              </h4>
-              {c.description && <p className="desc">{c.description}</p>}
-              <p className="meta mono muted">
-                <a href={explorerAddress(c.mint)} target="_blank" rel="noreferrer">{short(c.mint)}</a>
-                <span>by {short(c.creator)}</span>
-              </p>
-              <p className="cat">
-                Cat: <b>{c.cat.name}</b> · {c.cat.breed} · {c.cat.voice}
-              </p>
+            <div className="coin-row">
+              <img src={c.imageUrl} alt="" width={56} height={56} loading="lazy" />
+              <div className="coin-body">
+                <h4>
+                  {c.name} <span className="mono muted">${c.symbol}</span>
+                </h4>
+                {c.description && <p className="desc">{c.description}</p>}
+                <p className="meta mono muted">
+                  <a href={explorerAddress(c.mint)} target="_blank" rel="noreferrer">{short(c.mint)}</a>
+                  <span>by {short(c.creator)}</span>
+                </p>
+                <p className="cat">
+                  Cat: <b>{c.cat.name}</b> · {c.cat.breed} · {c.cat.voice}
+                </p>
+                <button className="btn" type="button" aria-expanded={open === c.mint} onClick={() => setOpen(open === c.mint ? null : c.mint)}>
+                  {open === c.mint ? 'Close' : `Meet ${c.cat.name}`}
+                </button>
+              </div>
             </div>
+            {open === c.mint && <CatPanel coin={c} />}
           </article>
         ))}
       </div>

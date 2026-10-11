@@ -93,7 +93,9 @@ textarea { resize: vertical; }
 
 .list { display: grid; gap: 14px; min-width: 0; }
 .coins { display: grid; gap: 12px; }
-.coin { display: flex; gap: 14px; min-width: 0; }
+.coin { display: grid; gap: 14px; min-width: 0; }
+.coin-row { display: flex; gap: 14px; min-width: 0; }
+.coin-body .btn { justify-self: start; margin-top: 4px; padding: 7px 14px; font-size: 13.5px; }
 .coin img { width: 56px; height: 56px; border-radius: 14px; object-fit: cover; flex: none; background: var(--surface-2); }
 .coin-body { min-width: 0; display: grid; gap: 4px; }
 .coin-body h4 { font-size: 17px; overflow-wrap: anywhere; }
@@ -101,5 +103,31 @@ textarea { resize: vertical; }
 .meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; }
 .cat { font-size: 13.5px; }
 .empty { padding: 24px 0; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.small { font-size: 12.5px; }
+
+.rightcol { display: grid; gap: 24px; min-width: 0; }
+.wire { display: grid; gap: 4px; }
+.wire-h { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; margin-bottom: 6px; }
+.wire h3 { font-size: 20px; }
+.entry { padding-block: 10px; border-top: 1px solid var(--line); min-width: 0; }
+.entry:first-of-type { border-top: 0; }
+.entry p { overflow-wrap: anywhere; font-size: 14.5px; margin-top: 2px; }
+.entry-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; }
+.tag { font: 500 11px var(--font-mono); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+
+.catpanel { display: grid; gap: 18px; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--line); padding-top: 14px; }
+.catpanel h5 { margin: 0 0 8px; font: 700 15px var(--font-display); }
+.chatcol, .logcol { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.chatlog { display: flex; flex-direction: column; gap: 8px; min-height: 120px; max-height: 260px; overflow: auto; padding: 2px; }
+.bubble { max-width: 88%; padding: 8px 12px; border-radius: 14px; font-size: 14px; overflow-wrap: anywhere; }
+.bubble.me { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 4px; }
+.bubble.cat { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
+.bubble.typing { color: var(--muted); font-style: italic; }
+.chatform { display: flex; gap: 8px; }
+.chatform input { flex: 1; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; }
+.chatform input:focus { outline: none; border-color: var(--accent); }
+.chatform .btn { padding: 9px 16px; }
+.logcol { max-height: 320px; overflow: auto; }
 .foot { padding-block: 24px 40px; border-top: 1px solid var(--line); font-size: 12.5px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

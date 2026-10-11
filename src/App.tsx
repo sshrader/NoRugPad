@@ -5,6 +5,7 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { CLUSTER } from './config';
 import CreateCoinForm from './components/CreateCoinForm';
 import CoinList from './components/CoinList';
+import CatWire from './components/CatWire';
 
 export default function App() {
   const { connection } = useConnection();
@@ -83,7 +84,10 @@ export default function App() {
               setRefreshKey((k) => k + 1);
             }}
           />
-          <CoinList refreshKey={refreshKey} />
+          <div className="rightcol">
+            <CatWire refreshKey={refreshKey} />
+            <CoinList refreshKey={refreshKey} />
+          </div>
         </div>
       </main>
       <footer className="wrap foot muted">
