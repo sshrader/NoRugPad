@@ -113,3 +113,10 @@ With `VITE_DBC_CONFIG` empty the app keeps the older plain-token launch (no trad
 ### If you see `429 Too many requests`
 
 The free public devnet RPC rate-limits heavily. The app caches and looks up pools directly to stay under it, but a free key from Helius (or similar) is much more reliable. Put the same URL in `VITE_RPC_URL` (browser) and `SOLANA_RPC_URL` (server) in `.env`, then restart.
+
+### Partner tools
+
+- `npm run dbc-fees -- --check` shows trading fees waiting to be claimed; `npm run dbc-fees` claims them.
+- `npm run dbc-migrate -- <mint>` graduates a full curve by hand (devnet testing). Meteora also has a manual migrator at migrator.meteora.ag.
+- `npm run dbc-inspect -- <mint>` prints what the SDK returns for a pool (debugging).
+- `docs/GO_LIVE.md` has the production checklist and the devnet graduation test.
