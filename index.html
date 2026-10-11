@@ -13,6 +13,20 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      // Some Solana packages read Node's `process` and `global`. Define them before any module runs.
+      window.global = window.global || window;
+      window.process = window.process || {
+        env: {},
+        browser: true,
+        version: '',
+        versions: {},
+        nextTick: function (fn) {
+          var args = Array.prototype.slice.call(arguments, 1);
+          queueMicrotask(function () { fn.apply(null, args); });
+        },
+      };
+    </script>
     <!-- If the app crashes while loading, show the error instead of a blank page. -->
     <script>
       function showCrash(msg) {
