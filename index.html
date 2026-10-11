@@ -13,6 +13,18 @@
   </head>
   <body>
     <div id="root"></div>
+    <!-- If the app crashes while loading, show the error instead of a blank page. -->
+    <script>
+      function showCrash(msg) {
+        var r = document.getElementById('root');
+        if (r && !r.children.length) {
+          r.innerHTML = '<pre style="padding:16px;margin:0;white-space:pre-wrap;font:13px monospace;color:#c00">App failed to start:\n' +
+            String(msg).replace(/</g, '&lt;') + '\n\nOpen the browser console (F12) for details.</pre>';
+        }
+      }
+      window.addEventListener('error', function (e) { showCrash(e.message || 'unknown error'); });
+      window.addEventListener('unhandledrejection', function (e) { showCrash(e.reason && e.reason.message || e.reason); });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

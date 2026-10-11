@@ -5,6 +5,8 @@ import react from '@vitejs/plugin-react';
 // so there is nothing to configure for CORS during development.
 export default defineConfig({
   plugins: [react()],
+  // A few Solana packages still refer to Node's `global`.
+  define: { global: 'globalThis' },
   server: {
     port: 5173,
     proxy: {
