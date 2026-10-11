@@ -51,24 +51,33 @@ export type Quote = { out: number; min: number };
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const fields = (account: any) => account?.poolState ?? account;
 
-async function poolAndConfig(connection: Connection, mint: string) {
+const configCache = new Map<string, unknown>();
+
+// Looks up ONE pool by its address (cheap), and caches the config (it never changes).
+// Searching all pools by mint is a heavy RPC call that public endpoints rate-limit.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function poolAndConfig(connection: Connection, poolAddress: string): Promise<{ client: DynamicBondingCurveClient; pool: { publicKey: PublicKey; account: any }; config: any }> {
   const client = dbcClient(connection);
-  const pool = await client.state.getPoolByBaseMint(mint);
-  if (!pool) throw new Error('This coin has no trading pool yet.');
-  const config = await client.state.getPoolConfig(fields(pool.account).config);
-  return { client, pool, config };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const raw: any = await client.state.getPool(poolAddress);
+  const account = raw?.account ?? raw;
+  if (!account) throw new Error('This coin has no trading pool yet.');
+  const cfgKey = fields(account).config;
+  const id = cfgKey.toBase58();
+  if (!configCache.has(id)) configCache.set(id, await client.state.getPoolConfig(cfgKey));
+  return { client, pool: { publicKey: new PublicKey(poolAddress), account }, config: configCache.get(id) };
 }
 
 /** Is the pool still on the curve? After graduation, trading happens on a regular DEX instead. */
-export async function curveStatus(connection: Connection, mint: string): Promise<{ migrated: boolean; progress: number }> {
-  const { client, pool } = await poolAndConfig(connection, mint);
+export async function curveStatus(connection: Connection, poolAddress: string): Promise<{ migrated: boolean; progress: number }> {
+  const { client, pool } = await poolAndConfig(connection, poolAddress);
   const progress = await client.state.getPoolQuoteTokenCurveProgress(pool.publicKey);
   return { migrated: fields(pool.account).isMigrated !== 0, progress };
 }
 
 /** amount is in SOL when buying, in coin units when selling. */
-export async function quoteSwap(connection: Connection, mint: string, side: 'buy' | 'sell', amount: number, slippageBps = 100): Promise<Quote> {
-  const { client, pool, config } = await poolAndConfig(connection, mint);
+export async function quoteSwap(connection: Connection, poolAddress: string, side: 'buy' | 'sell', amount: number, slippageBps = 100): Promise<Quote> {
+  const { client, pool, config } = await poolAndConfig(connection, poolAddress);
   const currentPoint = await getCurrentPoint(connection, config.activationType);
   const amountIn = toUnits(amount, side === 'buy' ? QUOTE_DECIMALS : BASE_DECIMALS);
   const q = client.pool.swapQuote2({
@@ -88,13 +97,13 @@ export async function quoteSwap(connection: Connection, mint: string, side: 'buy
 export async function swap(
   connection: Connection,
   wallet: WalletContextState,
-  mint: string,
+  poolAddress: string,
   side: 'buy' | 'sell',
   amount: number,
   slippageBps = 100,
 ): Promise<string> {
   if (!wallet.publicKey || !wallet.sendTransaction) throw new Error('Connect a wallet first.');
-  const { client, pool, config } = await poolAndConfig(connection, mint);
+  const { client, pool, config } = await poolAndConfig(connection, poolAddress);
   const currentPoint = await getCurrentPoint(connection, config.activationType);
   const amountIn = toUnits(amount, side === 'buy' ? QUOTE_DECIMALS : BASE_DECIMALS);
   const q = client.pool.swapQuote2({

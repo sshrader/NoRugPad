@@ -46,13 +46,21 @@ export async function solUsd() {
   return sol.usd || Number(process.env.SOL_USD_FALLBACK || 150);
 }
 
-/** Current state of a curve pool: market cap in SOL, curve progress, and whether it has graduated. */
-export async function curveState(connection, mint) {
+const states = new Map();
+
+/** Current state of a curve pool: market cap in SOL, curve progress, and whether it has graduated.
+ *  Looks up the pool by its address (cheap) and caches for 10 seconds, so polling pages do not hammer the RPC. */
+export async function curveState(connection, poolAddress) {
+  const hit = states.get(poolAddress);
+  if (hit && Date.now() - hit.at < 10_000) return hit.value;
   const c = client(connection);
-  const pool = await c.state.getPoolByBaseMint(new PublicKey(mint));
-  if (!pool) return null;
-  const f = fields(pool.account);
+  const raw = await c.state.getPool(poolAddress);
+  const account = raw?.account ?? raw;
+  if (!account) return null;
+  const f = fields(account);
   const priceSol = getPriceFromSqrtPrice(f.sqrtPrice, BASE_DECIMALS, QUOTE_DECIMALS).toNumber();
-  const progress = await c.state.getPoolQuoteTokenCurveProgress(pool.publicKey).catch(() => 0);
-  return { mcSol: priceSol * SUPPLY(), priceSol, progress, migrated: f.isMigrated !== 0 };
+  const progress = await c.state.getPoolQuoteTokenCurveProgress(poolAddress).catch(() => 0);
+  const value = { mcSol: priceSol * SUPPLY(), priceSol, progress, migrated: f.isMigrated !== 0 };
+  states.set(poolAddress, { at: Date.now(), value });
+  return value;
 }

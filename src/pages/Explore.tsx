@@ -27,7 +27,7 @@ export default function Explore() {
         .catch(() => {});
     loadMarkets();
     const timer = setInterval(load, 20000);
-    const mtimer = setInterval(loadMarkets, 5000);
+    const mtimer = setInterval(loadMarkets, 10000);
     return () => {
       alive = false;
       clearInterval(timer);

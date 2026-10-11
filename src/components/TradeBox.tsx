@@ -28,7 +28,7 @@ export default function TradeBox({ coin }: { coin: Coin }) {
   const [done, setDone] = useState('');
 
   const refresh = useCallback(async () => {
-    curveStatus(connection, coin.mint).then(setStatus).catch(() => {});
+    curveStatus(connection, coin.pool!).then(setStatus).catch(() => {});
     if (!wallet.publicKey) return setHeld(null);
     try {
       const r = await connection.getParsedTokenAccountsByOwner(wallet.publicKey, { mint: new PublicKey(coin.mint) });
@@ -40,7 +40,7 @@ export default function TradeBox({ coin }: { coin: Coin }) {
 
   useEffect(() => {
     refresh();
-    const t = setInterval(refresh, 15000);
+    const t = setInterval(refresh, 30000);
     return () => clearInterval(t);
   }, [refresh]);
 
@@ -50,10 +50,10 @@ export default function TradeBox({ coin }: { coin: Coin }) {
     if (!(n > 0)) return;
     let alive = true;
     const t = setTimeout(() => {
-      quoteSwap(connection, coin.mint, side, n)
+      quoteSwap(connection, coin.pool!, side, n)
         .then((q) => alive && (setEst(q), setError('')))
         .catch((e) => alive && setError(friendly(e)));
-    }, 350);
+    }, 700);
     return () => {
       alive = false;
       clearTimeout(t);
@@ -66,7 +66,7 @@ export default function TradeBox({ coin }: { coin: Coin }) {
     if (!(n > 0)) return setError('Enter an amount.');
     setBusy(true);
     try {
-      const sig = await swap(connection, wallet, coin.mint, side, n);
+      const sig = await swap(connection, wallet, coin.pool!, side, n);
       setDone(sig);
       setAmount('');
       refresh();

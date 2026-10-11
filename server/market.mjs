@@ -85,10 +85,10 @@ async function live(mint) {
 
 // Coins on the bonding curve: the market cap comes from the curve's own price.
 // After the coin graduates to a DEX, DexScreener takes over (live mode only).
-async function curve(mint, connection) {
+async function curve(mint, poolAddress, connection) {
   let st;
   try {
-    st = await curveState(connection, mint);
+    st = await curveState(connection, poolAddress);
   } catch (e) {
     return { source: 'error', message: e.message, history: [] };
   }
@@ -119,7 +119,7 @@ async function curve(mint, connection) {
 }
 
 export async function getMarket(mint, coin, connection) {
-  if (coin?.curve && connection) return curve(mint, connection);
+  if (coin?.curve && coin.pool && connection) return curve(mint, coin.pool, connection);
   return mode() === 'live' ? live(mint) : demo(mint);
 }
 export const marketMode = mode;

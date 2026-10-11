@@ -109,3 +109,7 @@ Pawpad uses Meteora's Dynamic Bonding Curve program, so there is no curve code o
 5. **Market cap** for curve coins is read from the curve price (market cap in SOL times the SOL price from DexScreener; `SOL_USD_FALLBACK` is used if that lookup fails).
 
 With `VITE_DBC_CONFIG` empty the app keeps the older plain-token launch (no trading).
+
+### If you see `429 Too many requests`
+
+The free public devnet RPC rate-limits heavily. The app caches and looks up pools directly to stay under it, but a free key from Helius (or similar) is much more reliable. Put the same URL in `VITE_RPC_URL` (browser) and `SOLANA_RPC_URL` (server) in `.env`, then restart.
