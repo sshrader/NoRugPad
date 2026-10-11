@@ -7,6 +7,7 @@ import { href } from '../router';
 import CatAvatar from '../components/CatAvatar';
 import MarketChart from '../components/MarketChart';
 import CatChat from '../components/CatChat';
+import TradeBox from '../components/TradeBox';
 import PostList from '../components/PostList';
 
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
@@ -102,12 +103,14 @@ export default function CoinPage({ mint }: { mint: string }) {
         </section>
       </div>
 
-      <section className="card soon">
-        <h3>Trading</h3>
-        <p className="muted">
-          Buying and selling opens once the bonding curve is built. Right now the creator holds the full supply, so there is nothing to trade on this page yet.
-        </p>
-      </section>
+      {coin.curve ? (
+        <TradeBox coin={coin} />
+      ) : (
+        <section className="card soon">
+          <h3>Trading</h3>
+          <p className="muted">This coin was launched without a bonding curve, so there is nothing to trade on this page.</p>
+        </section>
+      )}
     </div>
   );
 }

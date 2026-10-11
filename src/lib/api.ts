@@ -11,6 +11,8 @@ export type Coin = {
   metadataUri: string;
   cat: Cat;
   createdAt: number;
+  curve?: boolean;
+  pool?: string;
 };
 
 export type UploadResult = { uploadId: string; metadataUri: string; imageUrl: string; storage: 'pinata' | 'local' };
@@ -82,7 +84,10 @@ export async function sendChat(mint: string, message: string, history: ChatTurn[
 }
 
 export type Market = {
-  source: 'demo' | 'dexscreener' | 'none' | 'error';
+  source: 'demo' | 'curve' | 'dexscreener' | 'none' | 'error';
+  mcSol?: number;
+  progress?: number;
+  migrated?: boolean;
   mc?: number;
   priceUsd?: number | null;
   change24h?: number | null;

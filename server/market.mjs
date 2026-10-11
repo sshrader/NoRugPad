@@ -4,6 +4,7 @@
 // DexScreener only lists coins that trade on a DEX on mainnet, so devnet coins have no live data.
 import crypto from 'node:crypto';
 import * as store from './store.mjs';
+import { curveState, solUsd } from './curve.mjs';
 
 const mode = () => (process.env.MARKET_MODE === 'live' ? 'live' : 'demo');
 const STEP = 5 * 60_000; // one chart point per 5 minutes
@@ -82,7 +83,43 @@ async function live(mint) {
   };
 }
 
-export async function getMarket(mint) {
+// Coins on the bonding curve: the market cap comes from the curve's own price.
+// After the coin graduates to a DEX, DexScreener takes over (live mode only).
+async function curve(mint, connection) {
+  let st;
+  try {
+    st = await curveState(connection, mint);
+  } catch (e) {
+    return { source: 'error', message: e.message, history: [] };
+  }
+  if (!st) return { source: 'none', history: [] };
+  if (st.migrated && mode() === 'live') return live(mint);
+  const usd = await solUsd();
+  const mc = st.mcSol * usd;
+  const prior = (await store.get('market.json', {}))[mint] || [];
+  let history = prior;
+  const last = prior[prior.length - 1];
+  if (!last || Date.now() - last.t >= 30_000) {
+    const next = await store.update('market.json', {}, (all) => {
+      all[mint] = [...(all[mint] || []), { t: Date.now(), mc }].slice(-2000);
+      return all;
+    });
+    history = next[mint];
+  }
+  const first = history[0]?.mc || mc;
+  return {
+    source: 'curve',
+    mc,
+    mcSol: st.mcSol,
+    progress: st.progress,
+    migrated: st.migrated,
+    change24h: first ? ((mc - first) / first) * 100 : 0,
+    history: history.length > 1 ? history : [{ t: Date.now() - 1, mc }, { t: Date.now(), mc }],
+  };
+}
+
+export async function getMarket(mint, coin, connection) {
+  if (coin?.curve && connection) return curve(mint, connection);
   return mode() === 'live' ? live(mint) : demo(mint);
 }
 export const marketMode = mode;

@@ -202,3 +202,13 @@ textarea { resize: vertical; }
 .cc-mc { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); }
 .cc-mc .up { color: var(--ok); }
 .cc-mc .down { color: var(--bad); }
+
+/* Trade box */
+.trade { display: grid; gap: 12px; margin-bottom: 16px; max-width: 440px; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border-radius: 12px; background: var(--surface-2); }
+.seg button { border: 0; background: transparent; color: var(--muted); padding: 8px; border-radius: 9px; font: inherit; font-weight: 600; cursor: pointer; }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.linkbtn { background: none; border: 0; color: var(--accent-text); cursor: pointer; padding: 4px 0; text-align: left; font: inherit; }
+.progress { position: relative; height: 22px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.progress > div { position: absolute; inset: 0 auto 0 0; background: var(--accent); opacity: 0.35; }
+.progress > span { position: relative; z-index: 1; display: block; text-align: center; line-height: 22px; }

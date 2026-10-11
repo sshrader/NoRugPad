@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { MIN_SOL_TO_LAUNCH, explorerAddress, explorerTx } from '../config';
+import { CURVE_ON, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, explorerTx } from '../config';
 import { createCoin } from '../lib/createCoin';
+import { createCoinOnCurve } from '../lib/dbc';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
 import { voiceLabel } from '../lib/cats';
 import { href } from '../router';
@@ -70,8 +71,9 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
     if (!name.trim()) return setError('Give your coin a name.');
     if (!/^[A-Z0-9]{2,10}$/.test(symbol)) return setError('Ticker must be 2-10 letters or numbers.');
     if (!image) return setError('Choose an image for your coin.');
-    if (balance !== null && balance < MIN_SOL_TO_LAUNCH) {
-      return setError(`You need about ${MIN_SOL_TO_LAUNCH} SOL to launch. Use Get test SOL first.`);
+    const need = CURVE_ON ? MIN_SOL_TO_LAUNCH_CURVE : MIN_SOL_TO_LAUNCH;
+    if (balance !== null && balance < need) {
+      return setError(`You need about ${need} SOL to launch. Use Get test SOL first.`);
     }
 
     try {
@@ -79,7 +81,8 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       const up = await uploadMetadata({ name: name.trim(), symbol, description: description.trim(), image });
       setStorage(up.storage);
 
-      const { mint, signature } = await createCoin(
+      const launch = CURVE_ON ? createCoinOnCurve : createCoin;
+      const { mint, signature } = await launch(
         connection,
         wallet,
         { name: name.trim(), symbol, uri: up.metadataUri },
@@ -142,10 +145,20 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       </div>
 
       <ul className="checks">
-        <li>Mint authority revoked</li>
-        <li>Freeze authority revoked</li>
-        <li>Metadata locked (immutable)</li>
-        <li>Supply: 1,000,000,000 (6 decimals)</li>
+        {CURVE_ON ? (
+          <>
+            <li>Trades on a bonding curve from the first second</li>
+            <li>Supply: 1,000,000,000 (6 decimals), held by the curve</li>
+            <li>Moves to a DEX pool when the curve fills</li>
+          </>
+        ) : (
+          <>
+            <li>Mint authority revoked</li>
+            <li>Freeze authority revoked</li>
+            <li>Metadata locked (immutable)</li>
+            <li>Supply: 1,000,000,000 (6 decimals)</li>
+          </>
+        )}
       </ul>
 
       {busy && <p className="status" role="status">{PHASE_TEXT[phase]}</p>}

@@ -118,7 +118,9 @@ export default function MarketChart({ mint }: { mint: string }) {
       </svg>
 
       <p className="muted small mkt-foot">
-        {m.source === 'demo' ? (
+        {m.source === 'curve' ? (
+          <>Price from the bonding curve{m.mcSol != null && <> · {m.mcSol.toFixed(1)} SOL market cap</>}. History is recorded since this server first saw the coin.</>
+        ) : m.source === 'demo' ? (
           <>Demo data: these numbers are made up and move randomly, for testing. Set <span className="mono">MARKET_MODE=live</span> to use DexScreener.</>
         ) : (
           <>
