@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { explorerAddress } from '../config';
 import { listCoins, type Coin } from '../lib/api';
 import CatPanel from './CatPanel';
+import CatAvatar from './CatAvatar';
 
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
 
@@ -40,7 +41,10 @@ export default function CoinList({ refreshKey }: { refreshKey: number }) {
                   <span>by {short(c.creator)}</span>
                 </p>
                 <p className="cat">
-                  Cat: <b>{c.cat.name}</b> · {c.cat.breed} · {c.cat.voice}
+                  <CatAvatar id={c.cat.id} name={c.cat.name} size={32} />
+                  <span>
+                    <b>{c.cat.name}</b> · {c.cat.breed} · {c.cat.voice}
+                  </span>
                 </p>
                 <button className="btn" type="button" aria-expanded={open === c.mint} onClick={() => setOpen(open === c.mint ? null : c.mint)}>
                   {open === c.mint ? 'Close' : `Meet ${c.cat.name}`}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { listCoinPosts, sendChat, type ChatTurn, type Coin, type Post } from '../lib/api';
 import { ago } from '../lib/time';
+import CatAvatar from './CatAvatar';
 
 // Text a coin's cat, and read its diary.
 export default function CatPanel({ coin }: { coin: Coin }) {
@@ -56,7 +57,10 @@ export default function CatPanel({ coin }: { coin: Coin }) {
   return (
     <div className="catpanel">
       <div className="chatcol">
-        <h5>Text {cat.name}</h5>
+        <h5 className="withcat">
+          <CatAvatar id={cat.id} name={cat.name} size={32} />
+          Text {cat.name}
+        </h5>
         <div className="chatlog" ref={logRef} role="log" aria-live="polite">
           {chat.length === 0 && <p className="muted small">Say hi to {cat.name}. {cat.name} is an AI cat and cannot give financial advice.</p>}
           {chat.map((t, i) => (

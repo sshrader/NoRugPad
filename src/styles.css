@@ -101,7 +101,10 @@ textarea { resize: vertical; }
 .coin-body h4 { font-size: 17px; overflow-wrap: anywhere; }
 .desc { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
 .meta { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; }
-.cat { font-size: 13.5px; }
+.cat { font-size: 13.5px; display: flex; align-items: center; gap: 10px; }
+.withcat { display: flex; align-items: center; gap: 10px; }
+.entry.withcat { align-items: flex-start; }
+.entrybody { min-width: 0; flex: 1; }
 .empty { padding: 24px 0; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .small { font-size: 12.5px; }

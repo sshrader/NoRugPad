@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { listPosts, type Post } from '../lib/api';
 import { ago } from '../lib/time';
+import CatAvatar from './CatAvatar';
 
 // The latest diary entries from every coin's cat.
 export default function CatWire({ refreshKey }: { refreshKey: number }) {
@@ -31,7 +32,9 @@ export default function CatWire({ refreshKey }: { refreshKey: number }) {
       </div>
       {posts && posts.length === 0 && <p className="muted small">No entries yet. A new coin's cat writes its first one within seconds.</p>}
       {posts?.map((p) => (
-        <article className="entry" key={p.id}>
+        <article className="entry withcat" key={p.id}>
+          <CatAvatar id={p.catId} name={p.catName} size={36} />
+          <div className="entrybody">
           <div className="entry-h">
             <b>{p.catName}</b>
             <span className="mono muted">${p.symbol}</span>
@@ -39,6 +42,7 @@ export default function CatWire({ refreshKey }: { refreshKey: number }) {
             <span className="muted small">{ago(p.ts)}</span>
           </div>
           <p>{p.text}</p>
+          </div>
         </article>
       ))}
     </section>
