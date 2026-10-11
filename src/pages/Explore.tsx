@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { listCoins, listPosts, type Coin, type Post } from '../lib/api';
+import { getAllMarkets, listCoins, listPosts, type Coin, type Market, type Post } from '../lib/api';
 import { href } from '../router';
 import CoinCard from '../components/CoinCard';
 
@@ -8,6 +8,8 @@ export default function Explore() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [error, setError] = useState('');
   const [q, setQ] = useState('');
+  const [sort, setSort] = useState<'new' | 'mc'>('new');
+  const [markets, setMarkets] = useState<Record<string, Omit<Market, 'history'>>>({});
 
   useEffect(() => {
     let alive = true;
@@ -19,10 +21,17 @@ export default function Explore() {
         .then((p) => alive && setPosts(p))
         .catch(() => {});
     load();
+    const loadMarkets = () =>
+      getAllMarkets()
+        .then((m) => alive && setMarkets(m))
+        .catch(() => {});
+    loadMarkets();
     const timer = setInterval(load, 20000);
+    const mtimer = setInterval(loadMarkets, 5000);
     return () => {
       alive = false;
       clearInterval(timer);
+      clearInterval(mtimer);
     };
   }, []);
 
@@ -36,9 +45,9 @@ export default function Explore() {
   const shown = useMemo(() => {
     const term = q.trim().toLowerCase();
     if (!coins) return [];
-    if (!term) return coins;
-    return coins.filter((c) => [c.name, c.symbol, c.cat.name].some((s) => s.toLowerCase().includes(term)));
-  }, [coins, q]);
+    const list = term ? coins.filter((c) => [c.name, c.symbol, c.cat.name].some((s) => s.toLowerCase().includes(term))) : coins;
+    return sort === 'mc' ? [...list].sort((a, b) => (markets[b.mint]?.mc ?? 0) - (markets[a.mint]?.mc ?? 0)) : list;
+  }, [coins, q, sort, markets]);
 
   return (
     <div className="wrap">
@@ -62,6 +71,13 @@ export default function Explore() {
           <span className="sr">Search coins</span>
           <input className="in" type="text" placeholder="Search name, ticker or cat" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
         </label>
+        <label className="search">
+          <span className="sr">Sort coins</span>
+          <select className="in" value={sort} onChange={(e) => setSort(e.target.value as 'new' | 'mc')}>
+            <option value="new">Newest</option>
+            <option value="mc">Highest market cap</option>
+          </select>
+        </label>
       </section>
 
       {error && <p className="error">{error}</p>}
@@ -75,7 +91,7 @@ export default function Explore() {
       {coins && coins.length > 0 && shown.length === 0 && <p className="muted empty">No coins match "{q}".</p>}
       <div className="grid">
         {shown.map((c) => (
-          <CoinCard key={c.mint} coin={c} latest={latest.get(c.mint)} />
+          <CoinCard key={c.mint} coin={c} latest={latest.get(c.mint)} market={markets[c.mint]} />
         ))}
       </div>
     </div>

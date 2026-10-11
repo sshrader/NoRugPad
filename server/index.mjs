@@ -198,6 +198,19 @@ app.get('/api/coins/:mint', async (req, res) => {
   res.json(coin);
 });
 
+// Market cap for every coin (no history), for the Explore page.
+app.get('/api/market', async (_req, res) => {
+  const coins = await store.get('coins.json', []);
+  const out = {};
+  await Promise.all(
+    coins.map(async (c) => {
+      const { history, ...m } = await getMarket(c.mint).catch(() => ({ source: 'error' }));
+      out[c.mint] = m;
+    }),
+  );
+  res.json(out);
+});
+
 app.get('/api/coins/:mint/market', async (req, res) => {
   const coin = await findCoin(req.params.mint);
   if (!coin) return bad(res, 'Unknown coin.', 404);

@@ -197,3 +197,8 @@ textarea { resize: vertical; }
 .mkt-cross { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
 .mkt-dot { fill: var(--fg); stroke: var(--bg); stroke-width: 2; }
 .mkt-foot { margin: 0; }
+
+/* Market cap on coin cards */
+.cc-mc { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); }
+.cc-mc .up { color: var(--ok); }
+.cc-mc .down { color: var(--bad); }

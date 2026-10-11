@@ -94,3 +94,7 @@ export type Market = {
 export async function getMarket(mint: string): Promise<Market> {
   return json<Market>(await fetch(`/api/coins/${encodeURIComponent(mint)}/market`));
 }
+
+export async function getAllMarkets(): Promise<Record<string, Omit<Market, 'history'>>> {
+  return json(await fetch('/api/market'));
+}
