@@ -80,3 +80,17 @@ export async function sendChat(mint: string, message: string, history: ChatTurn[
     }),
   );
 }
+
+export type Market = {
+  source: 'demo' | 'dexscreener' | 'none' | 'error';
+  mc?: number;
+  priceUsd?: number | null;
+  change24h?: number | null;
+  pairUrl?: string;
+  message?: string;
+  history: { t: number; mc: number }[];
+};
+
+export async function getMarket(mint: string): Promise<Market> {
+  return json<Market>(await fetch(`/api/coins/${encodeURIComponent(mint)}/market`));
+}

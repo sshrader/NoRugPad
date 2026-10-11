@@ -93,3 +93,7 @@ Set `VITE_CLUSTER=testnet` and `SOLANA_RPC_URL=https://api.testnet.solana.com`, 
 | Airdrop fails | The public faucet is rate limited. Use https://faucet.solana.com |
 | "Unknown upload" on register | The API restarted between upload and register. Launch again |
 | Register says authority not revoked | The transaction did not include the two revoke steps. It should not happen unless the code was edited |
+
+## Market cap chart
+
+Each coin page shows a market cap chart. `MARKET_MODE=demo` (the default) draws made-up numbers that move randomly, which is what you want on devnet. `MARKET_MODE=live` asks DexScreener for the coin's mint address and charts the real market cap. That only works for mainnet coins that trade on a DEX. DexScreener has no free history endpoint, so the server records a point every 30 seconds into `server/data/market.json`. Code: `server/market.mjs`, `src/components/MarketChart.tsx`.

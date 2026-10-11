@@ -185,3 +185,15 @@ textarea { resize: vertical; }
 .soon { display: grid; gap: 6px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Market cap chart */
+.mkt { margin-bottom: 16px; display: grid; gap: 10px; }
+.mkt-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.mkt-v { font-size: 2rem; font-weight: 600; margin: 2px 0; }
+.mkt-chg { font-size: 1.05rem; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: var(--surface-2); }
+.mkt .up, .mkt-chg.up { color: var(--ok); }
+.mkt .down, .mkt-chg.down { color: var(--bad); }
+.mkt-svg { width: 100%; height: auto; display: block; touch-action: none; cursor: crosshair; }
+.mkt-cross { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.mkt-dot { fill: var(--fg); stroke: var(--bg); stroke-width: 2; }
+.mkt-foot { margin: 0; }

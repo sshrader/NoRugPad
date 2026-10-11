@@ -5,6 +5,7 @@ import { voiceLabel } from '../lib/cats';
 import { ago } from '../lib/time';
 import { href } from '../router';
 import CatAvatar from '../components/CatAvatar';
+import MarketChart from '../components/MarketChart';
 import CatChat from '../components/CatChat';
 import PostList from '../components/PostList';
 
@@ -78,6 +79,8 @@ export default function CoinPage({ mint }: { mint: string }) {
           </div>
         </div>
       </section>
+
+      <MarketChart mint={coin.mint} />
 
       <section className="card catcard">
         <CatAvatar id={cat.id} name={cat.name} size={88} />

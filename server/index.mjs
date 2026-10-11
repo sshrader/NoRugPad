@@ -10,6 +10,7 @@ import { reply as catReply } from './catbrain.mjs';
 import { llmInfo } from './llm.mjs';
 import { rateLimit, budgetUsed } from './limits.mjs';
 import { listPosts, makePost, startScheduler } from './lore.mjs';
+import { getMarket } from './market.mjs';
 import * as store from './store.mjs';
 
 const PORT = Number(process.env.PORT || 8787);
@@ -195,6 +196,12 @@ app.get('/api/coins/:mint', async (req, res) => {
   const coin = await findCoin(req.params.mint);
   if (!coin) return bad(res, 'Unknown coin.', 404);
   res.json(coin);
+});
+
+app.get('/api/coins/:mint/market', async (req, res) => {
+  const coin = await findCoin(req.params.mint);
+  if (!coin) return bad(res, 'Unknown coin.', 404);
+  res.json(await getMarket(coin.mint));
 });
 
 // The cats' latest lore across all coins.
