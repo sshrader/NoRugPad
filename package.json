@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "dry-run": "tsx scripts/dry-run.ts",
     "cat-test": "node scripts/cat-test.mjs",
-    "dbc-config": "tsx scripts/dbc-create-config.ts"
+    "dbc-config": "tsx scripts/dbc-create-config.ts",
+    "dbc-inspect": "tsx scripts/dbc-inspect.ts"
   },
   "dependencies": {
     "@metaplex-foundation/mpl-token-metadata": "2.13.0",

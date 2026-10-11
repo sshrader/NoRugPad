@@ -47,11 +47,15 @@ export async function createCoinOnCurve(
 
 export type Quote = { out: number; min: number };
 
+// Some SDK versions wrap the pool fields in .poolState; accept both shapes.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const fields = (account: any) => account?.poolState ?? account;
+
 async function poolAndConfig(connection: Connection, mint: string) {
   const client = dbcClient(connection);
   const pool = await client.state.getPoolByBaseMint(mint);
   if (!pool) throw new Error('This coin has no trading pool yet.');
-  const config = await client.state.getPoolConfig(pool.account.config);
+  const config = await client.state.getPoolConfig(fields(pool.account).config);
   return { client, pool, config };
 }
 
@@ -59,7 +63,7 @@ async function poolAndConfig(connection: Connection, mint: string) {
 export async function curveStatus(connection: Connection, mint: string): Promise<{ migrated: boolean; progress: number }> {
   const { client, pool } = await poolAndConfig(connection, mint);
   const progress = await client.state.getPoolQuoteTokenCurveProgress(pool.publicKey);
-  return { migrated: pool.account.isMigrated !== 0, progress };
+  return { migrated: fields(pool.account).isMigrated !== 0, progress };
 }
 
 /** amount is in SOL when buying, in coin units when selling. */

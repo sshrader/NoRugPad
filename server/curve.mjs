@@ -9,6 +9,9 @@ const BASE_DECIMALS = 6;
 const QUOTE_DECIMALS = 9;
 const SUPPLY = () => Number(process.env.DBC_SUPPLY || 1_000_000_000);
 
+// Some SDK versions wrap the pool fields in .poolState; accept both shapes.
+const fields = (account) => account?.poolState ?? account;
+
 const clients = new WeakMap();
 function client(connection) {
   if (!clients.has(connection)) clients.set(connection, new DynamicBondingCurveClient(connection, 'confirmed'));
@@ -19,8 +22,10 @@ function client(connection) {
 export async function verifyPool(connection, mint, creator) {
   const pool = await client(connection).state.getPoolByBaseMint(new PublicKey(mint));
   if (!pool) return { error: 'No bonding-curve pool exists for this mint yet.' };
-  if (pool.account.config.toBase58() !== dbcConfig()) return { error: 'This pool was not made with the Pawpad curve config.' };
-  if (pool.account.creator.toBase58() !== creator) return { error: 'Pool creator does not match the wallet.' };
+  const f = fields(pool.account);
+  if (!f?.config || !f?.creator) return { error: `Unexpected pool data from the SDK (keys: ${Object.keys(pool.account || {}).join(', ')}).` };
+  if (f.config.toBase58() !== dbcConfig()) return { error: 'This pool was not made with the Pawpad curve config.' };
+  if (f.creator.toBase58() !== creator) return { error: 'Pool creator does not match the wallet.' };
   return { pool: pool.publicKey.toBase58() };
 }
 
@@ -46,7 +51,8 @@ export async function curveState(connection, mint) {
   const c = client(connection);
   const pool = await c.state.getPoolByBaseMint(new PublicKey(mint));
   if (!pool) return null;
-  const priceSol = getPriceFromSqrtPrice(pool.account.sqrtPrice, BASE_DECIMALS, QUOTE_DECIMALS).toNumber();
+  const f = fields(pool.account);
+  const priceSol = getPriceFromSqrtPrice(f.sqrtPrice, BASE_DECIMALS, QUOTE_DECIMALS).toNumber();
   const progress = await c.state.getPoolQuoteTokenCurveProgress(pool.publicKey).catch(() => 0);
-  return { mcSol: priceSol * SUPPLY(), priceSol, progress, migrated: pool.account.isMigrated !== 0 };
+  return { mcSol: priceSol * SUPPLY(), priceSol, progress, migrated: f.isMigrated !== 0 };
 }
