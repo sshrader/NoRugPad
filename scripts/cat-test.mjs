@@ -79,6 +79,13 @@ await reply({ coin, cat, history: [{ role: 'user', content: 'first' }, { role: '
 const msgs = seen.at(-1).body.messages;
 ok(msgs[1].role === 'user' && msgs[2].role === 'assistant' && msgs[3].role === 'user', 'history keeps user and assistant roles');
 
+// 3b. gpt-oss models get a low reasoning effort and room to think; other models do not.
+ok(!('reasoning_effort' in seen.at(-1).body) && seen.at(-1).body.max_tokens === 140, 'ordinary models get no reasoning setting and a 140 token cap');
+process.env.LLM_MODEL = 'openai/gpt-oss-20b';
+await reply({ coin, cat, history: [], message: 'hi' });
+ok(seen.at(-1).body.reasoning_effort === 'low' && seen.at(-1).body.max_tokens >= 500, 'gpt-oss gets reasoning_effort low and at least 500 tokens');
+process.env.LLM_MODEL = 'test-model';
+
 // 4. If the model fails, the cat still answers with a canned line.
 mode = 'fail';
 out = await reply({ coin, cat, history: [], message: 'hi' });

@@ -8,7 +8,7 @@
 const cfg = () => ({
   base: (process.env.LLM_BASE_URL || 'https://api.groq.com/openai/v1').replace(/\/$/, ''),
   key: process.env.LLM_API_KEY || '',
-  model: process.env.LLM_MODEL || 'llama-3.3-70b-versatile',
+  model: process.env.LLM_MODEL || 'openai/gpt-oss-20b',
   timeoutMs: Number(process.env.LLM_TIMEOUT_MS || 20000),
 });
 
@@ -21,15 +21,22 @@ export function llmInfo() {
 
 export async function complete({ system, messages, maxTokens = 140, temperature = 0.9 }) {
   const c = cfg();
+  const body = {
+    model: c.model,
+    messages: [{ role: 'system', content: system }, ...messages],
+    max_tokens: maxTokens,
+    temperature,
+  };
+  // gpt-oss models think before answering, and that thinking counts toward max_tokens. Ask for
+  // little of it and leave room, otherwise a short reply can come back empty.
+  if (/gpt-oss/i.test(c.model)) {
+    body.reasoning_effort = process.env.LLM_REASONING_EFFORT || 'low';
+    body.max_tokens = Math.max(maxTokens, 500);
+  }
   const r = await fetch(`${c.base}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${c.key}` },
-    body: JSON.stringify({
-      model: c.model,
-      messages: [{ role: 'system', content: system }, ...messages],
-      max_tokens: maxTokens,
-      temperature,
-    }),
+    body: JSON.stringify(body),
     signal: AbortSignal.timeout(c.timeoutMs),
   });
   if (!r.ok) throw new Error(`LLM request failed (${r.status}): ${(await r.text()).slice(0, 200)}`);
