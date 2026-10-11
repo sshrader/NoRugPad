@@ -2,18 +2,37 @@
  * Checks the coin-creation transaction WITHOUT Phantom or the browser.
  *
  *   npm run dry-run            builds the transaction and checks its shape (works offline)
- *   npm run dry-run -- --send  also airdrops devnet SOL to a throwaway keypair, sends the
- *                              transaction for real, and reads the mint back from the chain
+ *   npm run dry-run -- --send  also sends the transaction for real from a devnet-only test
+ *                              wallet and reads the mint back from the chain
+ *
+ * The test wallet is saved in .devnet-keypair.json (git-ignored) so you can fund it once.
+ * The script tries an airdrop when it is low on SOL. The public faucet often refuses, so if
+ * that happens it prints the wallet address: paste it at https://faucet.solana.com (Devnet),
+ * then run the command again. Never put real funds in this wallet.
  *
  * Run this first. If --send works, the on-chain part is fine and any later problem is in the
  * browser or wallet layer.
  */
+import fs from 'node:fs';
+import path from 'node:path';
 import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, clusterApiUrl, sendAndConfirmTransaction } from '@solana/web3.js';
 import { getMint, getMinimumBalanceForRentExemptMint } from '@solana/spl-token';
 import { buildCreateCoinTx, DECIMALS, TOTAL_SUPPLY } from '../src/lib/createCoin';
 
 const send = process.argv.includes('--send');
-const payer = Keypair.generate();
+const KEY_FILE = path.resolve('.devnet-keypair.json');
+const MIN_BALANCE = 0.03 * LAMPORTS_PER_SOL; // a launch costs about 0.01 SOL
+
+function loadPayer(): Keypair {
+  if (fs.existsSync(KEY_FILE)) {
+    return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(KEY_FILE, 'utf8'))));
+  }
+  const kp = Keypair.generate();
+  fs.writeFileSync(KEY_FILE, JSON.stringify(Array.from(kp.secretKey)), { mode: 0o600 });
+  return kp;
+}
+
+const payer = loadPayer();
 const mint = Keypair.generate();
 const input = { name: 'Dry Run Cat', symbol: 'DRYCAT', uri: 'https://example.com/metadata.json' };
 
@@ -49,10 +68,29 @@ async function main() {
 
   // Devnet test
   const connection = new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'), 'confirmed');
-  console.log('\nRequesting airdrop…');
-  const sig = await connection.requestAirdrop(payer.publicKey, LAMPORTS_PER_SOL);
-  const latest = await connection.getLatestBlockhash();
-  await connection.confirmTransaction({ signature: sig, ...latest }, 'confirmed');
+  const address = payer.publicKey.toBase58();
+  console.log(`\nDevnet test wallet: ${address}  (saved in .devnet-keypair.json)`);
+
+  let balance = await connection.getBalance(payer.publicKey, 'confirmed');
+  console.log(`Balance: ${(balance / LAMPORTS_PER_SOL).toFixed(4)} SOL`);
+  if (balance < MIN_BALANCE) {
+    console.log('Low on SOL, requesting an airdrop…');
+    try {
+      const sig = await connection.requestAirdrop(payer.publicKey, LAMPORTS_PER_SOL);
+      const latest = await connection.getLatestBlockhash();
+      await connection.confirmTransaction({ signature: sig, ...latest }, 'confirmed');
+      balance = await connection.getBalance(payer.publicKey, 'confirmed');
+      console.log(`Balance: ${(balance / LAMPORTS_PER_SOL).toFixed(4)} SOL`);
+    } catch {
+      console.error(
+        `\nThe public faucet refused the airdrop (it is often rate limited). To continue:\n` +
+          `  1. Open https://faucet.solana.com and choose Devnet\n` +
+          `  2. Paste this address: ${address}\n` +
+          `  3. Request SOL, then run this command again.\n`,
+      );
+      process.exit(2);
+    }
+  }
 
   const rent = await getMinimumBalanceForRentExemptMint(connection);
   const real = buildCreateCoinTx({ payer: payer.publicKey, mint: mint.publicKey, rentLamports: rent, input });

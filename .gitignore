@@ -1,5 +1,6 @@
 node_modules
 dist
 .env
+.devnet-keypair.json
 server/data
 server/uploads
