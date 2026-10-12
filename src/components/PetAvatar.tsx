@@ -1,6 +1,6 @@
 // A small illustrated portrait for each pet, drawn in SVG so it needs no image files.
 import { PET_ROSTER } from '../lib/pets';
-import type { PetLook } from '../lib/petScene';
+import type { PetLook } from '../lib/petWorld';
 
 type Look = { coat: string; coat2: string; eye: string; bg: string; pattern: 'points' | 'stripes' | 'bib' | 'patches' | 'plain' };
 

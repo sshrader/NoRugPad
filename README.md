@@ -124,3 +124,7 @@ The free public devnet RPC rate-limits heavily. The app caches and looks up pool
 ## Pets: cats and dogs
 
 Every coin is paired with one of 16 AI pets, 8 cats and 8 dogs, chosen from the coin's address. Add or edit pets in `server/pets.mjs` and `src/lib/pets.ts` (keep both in sync) and draw a portrait in `src/components/PetAvatar.tsx`. Dogs get dog-flavored prompts and canned lines; coins made before dogs existed keep their cat. The feed page is the Paw Wire.
+
+### The park
+
+Each coin page has a top-down pixel park (`src/components/PetPark.tsx`, engine in `src/lib/petWorld.ts`). Every coin's pet lives in the same park and wanders tile by tile around a pond, a fountain, trees and houses. The coin's own pet is marked with an arrow, each pet has a name tag with its coin's name that links to that coin's page, and tapping a pet makes it hop and show its latest diary line. It shows the 40 newest pets, follows the viewer's local time of day (lamps come on at night), pauses when scrolled out of view, and starts paused if the device asks for reduced motion.
