@@ -12,7 +12,6 @@ import { rateLimit, budgetUsed } from './limits.mjs';
 import { listPosts, makePost, startScheduler } from './lore.mjs';
 import { getMarket } from './market.mjs';
 import { curveEnabled, verifyPool } from './curve.mjs';
-import { listCharities, charityByConfig } from './charities.mjs';
 import * as store from './store.mjs';
 
 const PORT = Number(process.env.PORT || 8787);
@@ -152,17 +151,15 @@ app.post('/api/coins', async (req, res) => {
     const data = acct?.data;
     if (!data || data.parsed?.type !== 'mint') return bad(res, 'That address is not a token mint on this network yet.');
     let pool = null;
-    let charity = null;
     if (curveEnabled()) {
       let v;
       for (let i = 0; i < 8; i++) {
-        v = await verifyPool(connection, mintKey.toBase58(), creatorKey.toBase58(), listCharities().map((c) => c.config).filter(Boolean)).catch((e) => ({ error: e.message }));
+        v = await verifyPool(connection, mintKey.toBase58(), creatorKey.toBase58()).catch((e) => ({ error: e.message }));
         if (!v.error) break;
         await sleep(1000); // the pool can take a moment to show up
       }
       if (v.error) return bad(res, v.error);
       pool = v.pool;
-      charity = charityByConfig(v.config)?.id ?? null; // decided by the pool's config on chain, not by the browser
       if (data.parsed.info.mintAuthority === creatorKey.toBase58()) return bad(res, 'The creator still controls minting, so this coin is not accepted.');
     } else {
       if (data.program !== 'spl-token') return bad(res, 'That address is not a token mint on this network yet.');
@@ -191,7 +188,6 @@ app.post('/api/coins', async (req, res) => {
       cat: pickCat(mintKey.toBase58()),
       createdAt: Date.now(),
       ...(pool ? { curve: true, pool } : {}),
-      ...(charity ? { charity } : {}),
     };
     await store.update('coins.json', [], (all) => [coin, ...all]);
     // The pet writes its first diary entry right away. The reply does not wait for it.
@@ -220,8 +216,6 @@ app.get('/api/coins/:mint', async (req, res) => {
 });
 
 // Market cap for every coin (no history), for the Explore page.
-app.get('/api/charities', (_req, res) => res.json(listCharities()));
-
 app.get('/api/market', async (_req, res) => {
   const coins = await store.get('coins.json', []);
   const out = {};

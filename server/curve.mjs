@@ -18,17 +18,15 @@ function client(connection) {
   return clients.get(connection);
 }
 
-/** Returns { pool, config } when the mint has a pool made from one of OUR configs (the default one, or
- *  `allowed` extra ones such as charity configs) and created by `creator`, else { error }. */
-export async function verifyPool(connection, mint, creator, allowed = []) {
+/** Returns { pool } when the mint has a pool made from OUR config and created by `creator`, else { error }. */
+export async function verifyPool(connection, mint, creator) {
   const pool = await client(connection).state.getPoolByBaseMint(new PublicKey(mint));
   if (!pool) return { error: 'No bonding-curve pool exists for this mint yet.' };
   const f = fields(pool.account);
   if (!f?.config || !f?.creator) return { error: `Unexpected pool data from the SDK (keys: ${Object.keys(pool.account || {}).join(', ')}).` };
-  const config = f.config.toBase58();
-  if (config !== dbcConfig() && !allowed.includes(config)) return { error: 'This pool was not made with a Pawpad curve config.' };
+  if (f.config.toBase58() !== dbcConfig()) return { error: 'This pool was not made with the Pawpad curve config.' };
   if (f.creator.toBase58() !== creator) return { error: 'Pool creator does not match the wallet.' };
-  return { pool: pool.publicKey.toBase58(), config };
+  return { pool: pool.publicKey.toBase58() };
 }
 
 let sol = { at: 0, usd: null };

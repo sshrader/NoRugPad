@@ -20,14 +20,14 @@ export const dbcClient = (connection: Connection) => new DynamicBondingCurveClie
 export async function createCoinOnCurve(
   connection: Connection,
   wallet: WalletContextState,
-  input: { name: string; symbol: string; uri: string; config?: string },
+  input: { name: string; symbol: string; uri: string },
   onStage: (s: 'signing' | 'confirming') => void,
 ): Promise<{ mint: string; signature: string }> {
   if (!wallet.publicKey || !wallet.sendTransaction) throw new Error('Connect a wallet first.');
   const mint = Keypair.generate();
   const tx = await dbcClient(connection).creator.createPool({
     baseMint: mint.publicKey,
-    config: new PublicKey(input.config || DBC_CONFIG),
+    config: new PublicKey(DBC_CONFIG),
     name: input.name,
     symbol: input.symbol,
     uri: input.uri,
