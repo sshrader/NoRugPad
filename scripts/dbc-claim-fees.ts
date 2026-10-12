@@ -5,21 +5,20 @@
  * Uses .devnet-keypair.json, the same wallet that created the config.
  */
 import 'dotenv/config';
-import fs from 'node:fs';
-import path from 'node:path';
 import BN from 'bn.js';
-import { Connection, Keypair, LAMPORTS_PER_SOL, PublicKey, clusterApiUrl } from '@solana/web3.js';
+import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { connect, loadPartner, requireMainnetConfirm } from './common';
 import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk';
 
 const checkOnly = process.argv.includes('--check');
 const config = (process.env.DBC_CONFIG || '').trim();
 if (!config) throw new Error('DBC_CONFIG is empty. Run `npm run dbc-config` first.');
 
-const KEY_FILE = path.resolve('.devnet-keypair.json');
-const partner = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(KEY_FILE, 'utf8'))));
-const connection = new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'), 'confirmed');
+const partner = loadPartner();
+const { connection, mainnet } = await connect();
 const client = new DynamicBondingCurveClient(connection, 'confirmed');
 
+if (!checkOnly) requireMainnetConfirm(mainnet, 'Claiming fees');
 const fees = await client.state.getPoolsFeesByConfig(new PublicKey(config));
 const sol = (b: BN) => Number(b.toString()) / LAMPORTS_PER_SOL;
 let total = 0;

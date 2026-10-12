@@ -5,18 +5,17 @@
  * to test graduation on devnet. The curve must be 100% full first.
  */
 import 'dotenv/config';
-import fs from 'node:fs';
-import path from 'node:path';
-import { Connection, Keypair, clusterApiUrl } from '@solana/web3.js';
+import { connect, loadPartner, requireMainnetConfirm } from './common';
 import { DAMM_V2_MIGRATION_FEE_ADDRESS, DynamicBondingCurveClient, MigrationFeeOption } from '@meteora-ag/dynamic-bonding-curve-sdk';
 
 const mint = process.argv[2];
 if (!mint) throw new Error('Usage: npm run dbc-migrate -- <mint address>');
 
-const partner = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(path.resolve('.devnet-keypair.json'), 'utf8'))));
-const connection = new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'), 'confirmed');
+const partner = loadPartner();
+const { connection, mainnet } = await connect();
 const client = new DynamicBondingCurveClient(connection, 'confirmed');
 
+requireMainnetConfirm(mainnet, 'Migrating');
 const found = await client.state.getPoolByBaseMint(mint);
 if (!found) throw new Error('No pool found for that mint.');
 const progress = await client.state.getPoolQuoteTokenCurveProgress(found.publicKey);

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { CLUSTER } from './config';
+import { CLUSTER, IS_MAINNET } from './config';
 import { href, useRoute } from './router';
 import Explore from './pages/Explore';
 import Launch from './pages/Launch';
@@ -71,7 +71,11 @@ export default function App() {
   return (
     <>
       <div className="banner">
-        You are on Solana <b>{CLUSTER}</b>. Coins made here are test coins with no value.
+        {IS_MAINNET ? (
+          <>Beta on Solana mainnet. Real money: memecoins are extremely risky, you can lose everything. Not financial advice.</>
+        ) : (
+          <>You are on Solana <b>{CLUSTER}</b>. Coins made here are test coins with no value.</>
+        )}
       </div>
       <header className="top">
         <div className="wrap top-in">
@@ -113,7 +117,9 @@ export default function App() {
       </main>
 
       <footer className="wrap foot muted">
-        Prototype for {CLUSTER} only. Not audited. Do not point this at mainnet without a security review and legal advice.
+        {IS_MAINNET
+          ? 'Pawpad is unaudited beta software. Pets are AI characters and their posts are not advice. Coins are not endorsed by Pawpad. Only risk what you can lose.'
+          : `Prototype running on ${CLUSTER}. Not audited.`}
       </footer>
     </>
   );

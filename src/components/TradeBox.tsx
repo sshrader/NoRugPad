@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
-import { explorerTx } from '../config';
+import { IS_MAINNET, explorerTx } from '../config';
 import { curveStatus, quoteSwap, swap } from '../lib/dbc';
 import type { Coin } from '../lib/api';
 
@@ -130,7 +130,7 @@ export default function TradeBox({ coin }: { coin: Coin }) {
       <button className="btn primary wide" disabled={busy || !wallet.publicKey || !(n > 0)} onClick={go}>
         {!wallet.publicKey ? 'Connect a wallet to trade' : busy ? 'Waiting…' : side === 'buy' ? `Buy ${coin.symbol}` : `Sell ${coin.symbol}`}
       </button>
-      <p className="muted small">Trading fees apply and prices move with every trade. Test coins on devnet have no value.</p>
+      <p className="muted small">Trading fees apply and prices move with every trade. {IS_MAINNET ? 'You can lose everything you put in.' : 'Test coins on devnet have no value.'}</p>
     </section>
   );
 }

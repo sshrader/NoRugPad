@@ -78,7 +78,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
 
     try {
       setPhase('uploading');
-      const up = await uploadMetadata({ name: name.trim(), symbol, description: description.trim(), image });
+      const up = await uploadMetadata({ name: name.trim(), symbol, description: description.trim(), image, creator: wallet.publicKey.toBase58() });
       setStorage(up.storage);
 
       const launch = CURVE_ON ? createCoinOnCurve : createCoin;

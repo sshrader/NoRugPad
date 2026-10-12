@@ -23,11 +23,12 @@ async function json<T>(res: Response): Promise<T> {
   return body as T;
 }
 
-export async function uploadMetadata(fields: { name: string; symbol: string; description: string; image: File }): Promise<UploadResult> {
+export async function uploadMetadata(fields: { name: string; symbol: string; description: string; image: File; creator: string }): Promise<UploadResult> {
   const form = new FormData();
   form.append('name', fields.name);
   form.append('symbol', fields.symbol);
   form.append('description', fields.description);
+  form.append('creator', fields.creator);
   form.append('image', fields.image);
   return json<UploadResult>(await fetch('/api/upload', { method: 'POST', body: form }));
 }

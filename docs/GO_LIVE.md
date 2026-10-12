@@ -27,7 +27,7 @@ Not legal advice. Costs are rough estimates unless a source is named.
 - [ ] HTTPS, domain, strict CORS, a trusted-proxy setting so rate limits see real visitor IPs.
 - [ ] Hosting with logs, error alerts, uptime monitoring.
 - [ ] Paid Pinata plan, or your own IPFS pinning.
-- [ ] `VITE_CLUSTER` for mainnet (the app currently supports devnet/testnet only, so add mainnet-beta to `src/config.ts` and the banner text), `MARKET_MODE=live`.
+- [x] Mainnet support is in the code; follow `docs/MAINNET.md` for the steps and env vars (`VITE_CLUSTER=mainnet-beta`, `SOLANA_CLUSTER`, `MARKET_MODE=live`).
 - [ ] Set `LLM_DAILY_LIMIT` against real cost.
 
 ## 5. Security review

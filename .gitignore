@@ -4,3 +4,5 @@ dist
 .devnet-keypair.json
 server/data
 server/uploads
+*.keypair.json
+keypair*.json

@@ -12,6 +12,7 @@ import { rateLimit, budgetUsed } from './limits.mjs';
 import { listPosts, makePost, startScheduler } from './lore.mjs';
 import { getMarket } from './market.mjs';
 import { curveEnabled, verifyPool } from './curve.mjs';
+import { applyGuards, checkNetwork, launchAllowed, launchesRestricted } from './guard.mjs';
 import * as store from './store.mjs';
 
 const PORT = Number(process.env.PORT || 8787);
@@ -29,6 +30,7 @@ const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 *
 
 const app = express();
 app.disable('x-powered-by');
+applyGuards(app);
 app.use(express.json({ limit: '50kb' }));
 
 // Local mode only: files we saved ourselves. nosniff stops browsers from guessing a type.
@@ -74,6 +76,14 @@ app.get('/api/health', (_req, res) => {
 // that goes on chain. Nothing is trusted from the client later; /api/coins reads this record back.
 app.post('/api/upload', upload.single('image'), async (req, res) => {
   try {
+    let creatorKey;
+    try {
+      creatorKey = new PublicKey(String(req.body.creator)).toBase58();
+    } catch {
+      return bad(res, 'Connect your wallet first.');
+    }
+    const blocked = launchAllowed(creatorKey); // beta allowlist + per-wallet daily limit
+    if (blocked) return bad(res, blocked, 429);
     const name = clean(req.body.name, 32);
     const symbol = clean(req.body.symbol, 10).toUpperCase();
     const description = clean(req.body.description, 280);
@@ -104,7 +114,7 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     }
     if (metadataUri.length > 200) return bad(res, 'Metadata link is too long for on-chain storage (200 max).', 500);
 
-    const record = { id, name, symbol, description, imageUrl, metadataUri, createdAt: Date.now() };
+    const record = { id, creator: creatorKey, name, symbol, description, imageUrl, metadataUri, createdAt: Date.now() };
     await store.update('uploads.json', {}, (all) => ({ ...all, [id]: record }));
     res.json({ uploadId: id, metadataUri, imageUrl, storage: PINATA_JWT ? 'pinata' : 'local' });
   } catch (e) {
@@ -141,6 +151,7 @@ app.post('/api/coins', async (req, res) => {
     const uploads = await store.get('uploads.json', {});
     const up = uploads[String(uploadId)];
     if (!up) return bad(res, 'Unknown upload. Upload the image again.', 404);
+    if (up.creator && up.creator !== creatorKey.toBase58()) return bad(res, 'This upload belongs to a different wallet.', 403);
 
     const existing = await store.get('coins.json', []);
     if (existing.some((c) => c.mint === mintKey.toBase58())) return bad(res, 'This coin is already registered.', 409);
@@ -277,7 +288,13 @@ app.use((err, _req, res, _next) => {
   bad(res, 'Server error.', 500);
 });
 
+const network = await checkNetwork(connection).catch((e) => {
+  console.error('\nRefusing to start:', e.message);
+  process.exit(1);
+});
+
 app.listen(PORT, () => {
+  console.log(`Network: ${network}${launchesRestricted() ? ' (launches limited to the allowlist)' : ''}`);
   const llm = llmInfo();
   console.log(`Pawpad API on http://localhost:${PORT}  (rpc: ${RPC_URL}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);
   console.log(llm.enabled ? `Cats: AI on (${llm.model} via ${llm.host})` : 'Cats: canned lines only. Add LLM_API_KEY to .env to turn the AI on.');

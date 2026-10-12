@@ -12,8 +12,6 @@
  *   DBC_CREATOR_FEE_PCT=0 share of your fees (after Meteora's 20% cut) that goes to the coin's creator, 0-100
  */
 import 'dotenv/config';
-import fs from 'node:fs';
-import path from 'node:path';
 import { Connection, Keypair, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
 import { NATIVE_MINT } from '@solana/spl-token';
 import {
@@ -32,7 +30,6 @@ import {
 } from '@meteora-ag/dynamic-bonding-curve-sdk';
 
 const checkOnly = process.argv.includes('--check');
-const KEY_FILE = path.resolve('.devnet-keypair.json');
 const num = (name: string, fallback: number) => (process.env[name] ? Number(process.env[name]) : fallback);
 
 const initialMC = num('DBC_INITIAL_MC', 30);
@@ -107,13 +104,16 @@ if (checkOnly) {
   process.exit(0);
 }
 
-if (!fs.existsSync(KEY_FILE)) throw new Error('No .devnet-keypair.json yet. Run `npm run dry-run -- --send` once to create and fund a test wallet.');
-const partner = Keypair.fromSecretKey(Uint8Array.from(JSON.parse(fs.readFileSync(KEY_FILE, 'utf8'))));
-const connection = new Connection(process.env.SOLANA_RPC_URL || clusterApiUrl('devnet'), 'confirmed');
+const partner = loadPartner();
+const { connection, mainnet } = await connect();
+if (mainnet) {
+  console.log('\nMAINNET: these numbers are permanent. Fees, curve and graduation size cannot be edited after this.');
+  requireMainnetConfirm(mainnet, 'Creating the config');
+}
 
 const balance = await connection.getBalance(partner.publicKey);
 console.log(`\nPartner wallet ${partner.publicKey.toBase58()}  (${(balance / LAMPORTS_PER_SOL).toFixed(3)} SOL)`);
-if (balance < 0.05 * LAMPORTS_PER_SOL) throw new Error('Fund this wallet with at least 0.05 SOL first (faucet.solana.com for devnet).');
+if (balance < 0.05 * LAMPORTS_PER_SOL) throw new Error('Fund this wallet with at least 0.05 SOL first (devnet: faucet.solana.com).');
 
 const config = Keypair.generate();
 const client = new DynamicBondingCurveClient(connection, 'confirmed');
@@ -136,4 +136,4 @@ console.log(`\nConfig created. Transaction: ${sig}`);
 console.log('\nAdd these two lines to .env, then restart `npm run dev`:\n');
 console.log(`DBC_CONFIG=${config.publicKey.toBase58()}`);
 console.log(`VITE_DBC_CONFIG=${config.publicKey.toBase58()}`);
-console.log('\nTrading fees you earn are claimed with the partner wallet above. Keep .devnet-keypair.json safe.');
+console.log('\nTrading fees you earn are claimed with the partner wallet above. Keep the wallet file safe and backed up: losing it means losing the fees.');
