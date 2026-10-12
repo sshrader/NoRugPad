@@ -220,3 +220,12 @@ textarea { resize: vertical; }
 .ca-btn { flex: none; min-width: 96px; }
 .ca-links { margin: 2px 0 0; }
 .roster-h { margin: 14px 0 0; }
+
+/* Pixel park */
+.park { display: grid; gap: 10px; margin-bottom: 16px; }
+.park-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.park-h h3 { margin: 2px 0 0; }
+.park-stage { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); line-height: 0; }
+.park-canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; cursor: pointer; background: var(--surface-2); }
+.park-bubble { position: absolute; left: 10px; right: 10px; top: 10px; line-height: 1.4; padding: 8px 12px; border-radius: 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+.park-foot { margin: 0; }

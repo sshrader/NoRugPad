@@ -1,5 +1,6 @@
 // A small illustrated portrait for each pet, drawn in SVG so it needs no image files.
 import { PET_ROSTER } from '../lib/pets';
+import type { PetLook } from '../lib/petScene';
 
 type Look = { coat: string; coat2: string; eye: string; bg: string; pattern: 'points' | 'stripes' | 'bib' | 'patches' | 'plain' };
 
@@ -156,4 +157,15 @@ function DogAvatar({ id, name, size }: { id: string; name?: string; size: number
 export default function PetAvatar({ id, name, size = 40 }: { id: string; name?: string; size?: number }) {
   const species = PET_ROSTER.find((p) => p.id === id)?.species ?? 'cat';
   return species === 'dog' ? <DogAvatar id={id} name={name} size={size} /> : <CatAvatar id={id} name={name} size={size} />;
+}
+
+/** Colors and markings for the animated scene. */
+export function petLook(id: string): PetLook {
+  const isDog = PET_ROSTER.find((p) => p.id === id)?.species === 'dog';
+  if (isDog) {
+    const d = DOGS[id] ?? DOGS.kuri;
+    return { species: 'dog', coat: d.coat, coat2: d.coat2, ear: d.ear, eye: d.eye, kind: d.mark, earStyle: d.earStyle, tongue: d.tongue, short: id === 'pretzel' || id === 'olive' };
+  }
+  const c = LOOKS[id] ?? LOOKS.miso;
+  return { species: 'cat', coat: c.coat, coat2: c.coat2, ear: c.pattern === 'points' ? c.coat2 : c.coat, eye: c.eye, kind: c.pattern };
 }

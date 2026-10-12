@@ -7,6 +7,7 @@ import { href } from '../router';
 import CopyAddress from '../components/CopyAddress';
 import PetAvatar from '../components/PetAvatar';
 import MarketChart from '../components/MarketChart';
+import PetPark from '../components/PetPark';
 import PetChat from '../components/PetChat';
 import TradeBox from '../components/TradeBox';
 import PostList from '../components/PostList';
@@ -95,6 +96,8 @@ export default function CoinPage({ mint }: { mint: string }) {
           <p className="muted">{cat.breed} · {voiceLabel(cat.voice)} voice</p>
         </div>
       </section>
+
+      <PetPark coin={coin} line={posts[0]?.text} />
 
       <div className="cp-grid">
         <PetChat coin={coin} />
