@@ -23,15 +23,20 @@ const progress = await client.state.getPoolQuoteTokenCurveProgress(found.publicK
 console.log(`Pool ${found.publicKey.toBase58()}  curve ${(progress * 100).toFixed(1)}% full`);
 if (progress < 1) throw new Error('The curve is not full yet, so it cannot graduate. Keep buying.');
 
-const tx = await client.migration.migrateToDammV2({
+// Newer SDK versions return { transaction, firstPositionNftKeypair, secondPositionNftKeypair }.
+// The two position keypairs must sign as well. Older versions return the transaction directly.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const res: any = await client.migration.migrateToDammV2({
   payer: partner.publicKey,
   pool: found.publicKey,
   dammConfig: DAMM_V2_MIGRATION_FEE_ADDRESS[MigrationFeeOption.Customizable],
 });
+const tx = res.transaction ?? res;
+const signers: Keypair[] = [partner, res.firstPositionNftKeypair, res.secondPositionNftKeypair].filter(Boolean);
 const latest = await connection.getLatestBlockhash('confirmed');
 tx.feePayer = partner.publicKey;
 tx.recentBlockhash = latest.blockhash;
-tx.sign(partner);
+tx.sign(...signers);
 const sig = await connection.sendRawTransaction(tx.serialize());
 await connection.confirmTransaction({ signature: sig, ...latest }, 'confirmed');
 console.log(`Migrated. tx ${sig}\nThe coin now trades on a DAMM v2 pool. If this script fails, try https://migrator.meteora.ag`);
