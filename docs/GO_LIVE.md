@@ -40,7 +40,7 @@ Not legal advice. Costs are rough estimates unless a source is named.
 3. Open up gradually.
 
 ## Testing graduation on devnet
-1. In `.env` temporarily set `DBC_INITIAL_MC=2` and `DBC_MIGRATION_MC=6`, run `npm run dbc-config`, and point `DBC_CONFIG` and `VITE_DBC_CONFIG` at the NEW config. Restart.
+1. In `.env` temporarily set small values such as `DBC_INITIAL_MC=1` and `DBC_MIGRATION_MC=3` (run `npm run dbc-config -- --check` first: it prints how much SOL of buys fills the curve), then run `npm run dbc-config`, and point `DBC_CONFIG` and `VITE_DBC_CONFIG` at the NEW config. Restart.
 2. Launch a coin and buy until the progress bar reaches 100%.
 3. Wait a few minutes for Meteora's service, or run `npm run dbc-migrate -- <mint>` (or use https://migrator.meteora.ag).
 4. The coin page should then say the coin moved to a DEX.
