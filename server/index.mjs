@@ -5,8 +5,8 @@ import path from 'node:path';
 import express from 'express';
 import multer from 'multer';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { CATS } from './cats.mjs';
-import { reply as catReply } from './catbrain.mjs';
+import { PETS } from './pets.mjs';
+import { reply as catReply } from './petbrain.mjs';
 import { llmInfo } from './llm.mjs';
 import { rateLimit, budgetUsed } from './limits.mjs';
 import { listPosts, makePost, startScheduler } from './lore.mjs';
@@ -122,7 +122,7 @@ async function retry(fn, tries = 8, ms = 1000) {
   return null;
 }
 
-const pickCat = (mint) => CATS[crypto.createHash('sha256').update(mint).digest()[0] % CATS.length];
+const pickCat = (mint) => PETS[crypto.createHash('sha256').update(mint).digest().readUInt16BE(0) % PETS.length];
 
 // Step 3: after the wallet signed and the transaction confirmed, the client registers the coin.
 // The server checks the chain itself instead of believing the client.
@@ -190,7 +190,7 @@ app.post('/api/coins', async (req, res) => {
       ...(pool ? { curve: true, pool } : {}),
     };
     await store.update('coins.json', [], (all) => [coin, ...all]);
-    // The cat writes its first diary entry right away. The reply does not wait for it.
+    // The pet writes its first diary entry right away. The reply does not wait for it.
     makePost(coin).catch((e) => console.error('first post failed:', e.message));
     res.status(201).json(coin);
   } catch (e) {
@@ -260,7 +260,7 @@ app.post('/api/coins/:mint/chat', async (req, res) => {
     res.json({ reply: out.text, source: out.source });
   } catch (e) {
     console.error('chat failed', e);
-    bad(res, 'The cat is napping. Try again.', 500);
+    bad(res, 'Your pet is napping. Try again.', 500);
   }
 });
 

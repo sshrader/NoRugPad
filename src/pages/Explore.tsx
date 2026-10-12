@@ -54,13 +54,13 @@ export default function Explore() {
       <section className="hero">
         <div>
           <p className="eyebrow mono">Solana meme coin launchpad</p>
-          <h1>Every coin gets its own cat.</h1>
+          <h1>Every coin gets its own pet.</h1>
           <p className="lede">
-            Launch a coin and a random AI cat is paired to it. The cat answers your texts and writes its own lore on the coin's page, on its own schedule.
+            Launch a coin and a random AI cat or dog is paired to it. Your pet answers your texts and writes its own lore on the coin's page, on its own schedule.
           </p>
           <div className="cta">
             <a className="btn primary" href={href.launch}>Launch a coin</a>
-            <a className="btn" href={href.wire}>Read the Cat Wire</a>
+            <a className="btn" href={href.wire}>Read the Paw Wire</a>
           </div>
         </div>
       </section>
@@ -69,7 +69,7 @@ export default function Explore() {
         <h2>Launched coins{coins ? <span className="muted"> · {coins.length}</span> : null}</h2>
         <label className="search">
           <span className="sr">Search coins</span>
-          <input className="in" type="text" placeholder="Search name, ticker or cat" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
+          <input className="in" type="text" placeholder="Search name, ticker or pet" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" />
         </label>
         <label className="search">
           <span className="sr">Sort coins</span>

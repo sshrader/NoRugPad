@@ -1,7 +1,7 @@
 import type { Post } from '../lib/api';
 import { ago } from '../lib/time';
 import { href } from '../router';
-import CatAvatar from './CatAvatar';
+import PetAvatar from './PetAvatar';
 
 // A list of diary entries. 'wire' shows who wrote each one and links to the coin.
 // 'log' is for one cat's own page, so it shows chapter numbers instead.
@@ -10,7 +10,7 @@ export default function PostList({ posts, mode }: { posts: Post[]; mode: 'wire' 
     <div className="posts">
       {posts.map((p) => (
         <article className={`entry${mode === 'wire' ? ' withcat' : ''}`} key={p.id}>
-          {mode === 'wire' && <CatAvatar id={p.catId} name={p.catName} size={40} />}
+          {mode === 'wire' && <PetAvatar id={p.catId} name={p.catName} size={40} />}
           <div className="entrybody">
             <div className="entry-h">
               {mode === 'wire' ? (

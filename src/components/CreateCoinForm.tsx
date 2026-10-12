@@ -4,7 +4,7 @@ import { CURVE_ON, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, 
 import { createCoin } from '../lib/createCoin';
 import { createCoinOnCurve } from '../lib/dbc';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
-import { voiceLabel } from '../lib/cats';
+import { voiceLabel } from '../lib/pets';
 import { href } from '../router';
 
 type Phase = 'idle' | 'uploading' | 'signing' | 'confirming' | 'registering' | 'done';
@@ -14,7 +14,7 @@ const PHASE_TEXT: Record<Phase, string> = {
   uploading: 'Uploading image and metadata…',
   signing: 'Approve the transaction in your wallet…',
   confirming: 'Waiting for the network to confirm…',
-  registering: 'Verifying on chain and pairing your cat…',
+  registering: 'Verifying on chain and pairing your pet…',
   done: '',
 };
 
@@ -171,7 +171,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       {created && (
         <div className="success" role="status">
           <p>
-            <b>{created.name}</b> (${created.symbol}) is live. Your cat is <b>{created.cat.name}</b>, a {created.cat.breed.toLowerCase()} with a {voiceLabel(created.cat.voice).toLowerCase()} voice.
+            <b>{created.name}</b> (${created.symbol}) is live. Your pet is <b>{created.cat.name}</b>, a {created.cat.breed.toLowerCase()} with a {voiceLabel(created.cat.voice).toLowerCase()} voice.
           </p>
           <p className="links mono">
             <a href={href.coin(created.mint)}>Open coin page</a>

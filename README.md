@@ -2,7 +2,7 @@
 
 Wallet connection, real token creation on Solana devnet, and a small API that stores coins and pairs each one with an AI cat that answers texts and writes its own lore. The bonding curve comes later.
 
-> **Status:** the token creation, wallet flow and Pinata upload have been run on devnet. The cat AI logic is covered by `npm run cat-test` (a fake model server), but it has not yet been run against a real provider. The cat screens in the browser are new.
+> **Status:** the token creation, wallet flow and Pinata upload have been run on devnet. The cat AI logic is covered by `npm run pet-test` (a fake model server), but it has not yet been run against a real provider. The cat screens in the browser are new.
 
 ## 1. Prepare Phantom (devnet)
 
@@ -30,20 +30,20 @@ Run `npm run dry-run -- --send` first if you can. It tests the on-chain part wit
 
 1. **Upload.** The browser sends the image, name, ticker and description to `POST /api/upload`. The server stores the image and a metadata JSON file and returns the metadata link.
 2. **One transaction** (`src/lib/createCoin.ts`), signed in Phantom: create mint, initialise (6 decimals), create your token account, mint 1,000,000,000 tokens, attach the metadata, revoke mint authority, revoke freeze authority. All or nothing.
-3. **Register.** The browser sends the mint and signature to `POST /api/coins`. The server does not trust it. It reads the chain itself and rejects the coin unless the mint exists, both authorities are revoked, and the transaction succeeded and was paid by the creator. It then pairs a cat by hashing the mint address, so the pairing looks random but cannot be rerolled.
+3. **Register.** The browser sends the mint and signature to `POST /api/coins`. The server does not trust it. It reads the chain itself and rejects the coin unless the mint exists, both authorities are revoked, and the transaction succeeded and was paid by the creator. It then pairs a pet (cat or dog) by hashing the mint address, so the pairing looks random but cannot be rerolled.
 
 ## The cats
 
 Every coin's cat can talk and write.
 
 - **Chat.** Each coin page has a chat with its cat. `POST /api/coins/:mint/chat` (single coin: `GET /api/coins/:mint`) sends the message and the last few turns to the model and returns the reply.
-- **Lore.** When a coin is registered its cat writes a first diary entry, then a new one every `CAT_POST_MINUTES` (varies per coin). Entries are stored in `server/data/posts.json`, shown on the coin card and in the Cat Wire feed, and each continues from the cat's last three entries.
-- **Voices.** Five voices (mystic, hype, deadpan, lyrical, grumpy) are defined in `server/cats.mjs`. Edit the style lines to change how a cat sounds.
+- **Lore.** When a coin is registered its cat writes a first diary entry, then a new one every `CAT_POST_MINUTES` (varies per coin). Entries are stored in `server/data/posts.json`, shown on the coin card and in the Paw Wire feed, and each continues from the cat's last three entries.
+- **Voices.** Five voices (mystic, hype, deadpan, lyrical, grumpy) are defined in `server/pets.mjs`. Edit the style lines to change how a cat sounds.
 - **AI brain.** `server/llm.mjs` calls any OpenAI-compatible chat API. Put `LLM_API_KEY` in `.env` (Groq has a free tier, see `.env.example`) and restart. With no key the cats answer from canned lines and say so.
-- **Safety rules** are in `server/catbrain.mjs`. Cats say they are AI, never predict prices or tell anyone to buy or sell, and treat coin descriptions and chat messages as untrusted text. Replies are stripped of links and markdown. Posts are labelled AI in the UI.
+- **Safety rules** are in `server/petbrain.mjs`. Pets say they are AI, never predict prices or tell anyone to buy or sell, and treat coin descriptions and chat messages as untrusted text. Replies are stripped of links and markdown. Posts are labelled AI in the UI.
 - **Cost control.** Chat is limited to 12 messages a minute per visitor, and the server stops calling the model after `LLM_DAILY_LIMIT` calls a day (lore posts stop earlier, at 70%, so chat keeps working). After that, cats fall back to canned lines.
 
-Test the logic without a key or internet: `npm run cat-test`.
+Test the logic without a key or internet: `npm run pet-test`.
 
 ## Metadata storage
 
@@ -54,8 +54,8 @@ Test the logic without a key or internet: `npm run cat-test`.
 
 ```
 server/index.mjs        API: upload, register (verifies on chain), list
-server/cats.mjs         the cat roster and voices
-server/catbrain.mjs     what the cats say: prompts, safety rules, cleanup, canned fallback
+server/pets.mjs         the pet roster (8 cats, 8 dogs) and voices
+server/petbrain.mjs     what the pets say: prompts, safety rules, cleanup, canned fallback
 server/llm.mjs          the model client (any OpenAI-compatible API)
 server/lore.mjs         diary entries and the background writer
 server/limits.mjs       rate limit and daily call budget
@@ -63,11 +63,11 @@ server/store.mjs        JSON-file storage (swap for a real database later)
 src/lib/createCoin.ts   the transaction. Start reading here.
 src/lib/api.ts          client calls to the API
 src/router.ts           tiny hash router (#/, #/launch, #/wire, #/coin/<mint>)
-src/pages/              Explore, Launch, Cat Wire, coin page
+src/pages/              Explore, Launch, Paw Wire, coin page
 src/components/         create form, coin card, cat chat, post list, cat avatars
 src/App.tsx             header, nav, wallet button, balance, test-SOL button
 scripts/dry-run.ts      tests the transaction without a browser
-scripts/cat-test.mjs    tests the cat logic against a fake model server
+scripts/pet-test.mjs    tests the pet logic against a fake model server
 ```
 
 ## Known limits (on purpose, for now)
@@ -120,3 +120,7 @@ The free public devnet RPC rate-limits heavily. The app caches and looks up pool
 - `npm run dbc-migrate -- <mint>` graduates a full curve by hand (devnet testing). Meteora also has a manual migrator at migrator.meteora.ag.
 - `npm run dbc-inspect -- <mint>` prints what the SDK returns for a pool (debugging).
 - `docs/GO_LIVE.md` has the production checklist and the devnet graduation test.
+
+## Pets: cats and dogs
+
+Every coin is paired with one of 16 AI pets, 8 cats and 8 dogs, chosen from the coin's address. Add or edit pets in `server/pets.mjs` and `src/lib/pets.ts` (keep both in sync) and draw a portrait in `src/components/PetAvatar.tsx`. Dogs get dog-flavored prompts and canned lines; coins made before dogs existed keep their cat. The feed page is the Paw Wire.

@@ -1,6 +1,6 @@
-// What a cat says. It asks the model when it can and falls back to canned lines when it
+// What a pet (cat or dog) says. It asks the model when it can and falls back to canned lines when it
 // cannot (no key, quota used up, provider down), so the app never goes silent.
-import { VOICES } from './cats.mjs';
+import { FLAVOR, VOICES, speciesOf } from './pets.mjs';
 import { complete, llmEnabled, llmInfo } from './llm.mjs';
 import { takeBudget } from './limits.mjs';
 
@@ -27,9 +27,11 @@ export const tidy = (s, max = 400) =>
 
 export function systemPrompt(cat, coin, task) {
   const voice = VOICES[cat.voice] ?? VOICES.oracle;
+  const species = speciesOf(cat);
   return [
-    `You are ${cat.name}, a ${cat.breed} cat. You are an AI character and you say so plainly if anyone asks. You are the resident cat of a meme coin called "${scrub(coin.name, 40)}" ($${scrub(coin.symbol, 10)}) on the Solana test network.`,
-    `Voice: ${voice.style}`,
+    `You are ${cat.name}, a ${cat.breed} ${species}. You are an AI character and you say so plainly if anyone asks. You are the resident ${species} of a meme coin called "${scrub(coin.name, 40)}" ($${scrub(coin.symbol, 10)}) on the Solana test network.`,
+    `Voice: ${voice.style.replace(/\{pet\}/g, species)}`,
+    FLAVOR[species],
     'Rules:',
     '- Stay in character. Plain text only: no emoji, hashtags, links or markdown.',
     '- You are a mascot, not an advisor. Never predict prices, promise returns, call anything safe or guaranteed, or tell anyone to buy or sell. If asked, deflect in character and say you cannot give financial advice.',
@@ -45,7 +47,7 @@ export function systemPrompt(cat, coin, task) {
 
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
-const CANNED_REPLIES = {
+const CAT_REPLIES = {
   oracle: ['The omens are quiet tonight, but I am listening.', 'Hm. I will weave that into the next page of the scroll.', 'Ask again at dusk. The windows speak clearer then.'],
   degen: ['LOL say less, adding that to the lore.', 'Zoomies activated. What else you got?', 'I knocked a glass off the table thinking about it. Respect.'],
   auditor: ['Noted and filed under miscellaneous.', 'I cannot verify that, but I have logged it.', 'No irregularities observed. Proceeding with the nap.'],
@@ -53,13 +55,32 @@ const CANNED_REPLIES = {
   grump: ['Fascinating. Truly. Anything else?', 'I heard you. I am choosing not to react.', 'Fine. That was almost interesting.'],
 };
 
-const CANNED_POSTS = {
+const CAT_POSTS = {
   oracle: ['A whisper from {coin}: the long scroll gains a new line tonight.', 'I dreamed of a golden bone carved with the letters {tick}. Something is about to be found.'],
   degen: ['New chapter drop! {coin} just ran through the whole house at 3am. Nobody saw it coming.', 'Found something shiny behind the couch. It says {tick}. Zoomies resume.'],
   auditor: ['Log entry: {coin} remains in good order. One suspicious houseplant observed.', 'Status: napped twice, inspected the hallway. No anomalies, except the usual.'],
   poet: ['Fog on the window, and {coin} hums like a lamp left on for the night.', 'Soft paws on the keyboard. {tick} drifts like dust in a ray of light.'],
   grump: ['Another day on watch for {coin}. A dog barked. I left the room.', 'Someone asked about {tick}. I pretended to be asleep.'],
 };
+
+const DOG_REPLIES = {
+  oracle: ['The wind carried your words to me. I howled once, softly, in reply.', 'I sense a treat in the future. Possibly yours.', 'Ask again after walkies. The omens are clearer outside.'],
+  degen: ['LOL say less, tail is wagging, adding that to the lore!', 'Zoomies activated! What else you got?', 'I heard a doorbell in my head just now. Respect.'],
+  auditor: ['Noted and filed under squirrels, miscellaneous.', 'I cannot verify that, but I have logged it and wagged once.', 'No irregularities observed. Resuming patrol of the hallway.'],
+  poet: ['Such a small phrase to hold so much. I will keep it like a favorite stick.', 'The evening took your words and handed them back softer.', 'Stay a while. The porch is warm.'],
+  grump: ['Fascinating. Truly. Is this about walkies or not?', 'I heard you. I am choosing not to get off the couch.', 'Fine. That was almost worth a tail wag.'],
+};
+
+const DOG_POSTS = {
+  oracle: ['A howl from {coin}: the long road gains a new bend tonight.', 'I dreamed of a golden bone carved with the letters {tick}. Something is about to be found.'],
+  degen: ['New chapter drop! {coin} just ran laps around the whole yard. Nobody saw it coming.', 'Dug up something shiny by the fence. It says {tick}. Zoomies resume!'],
+  auditor: ['Log entry: {coin} remains in good order. One suspicious mailman observed.', 'Status: patrolled the yard twice, inspected the fence. No anomalies, except the squirrel.'],
+  poet: ['Dusk on the porch, and {coin} hums like a lamp left on for the walk home.', 'Muddy paws on the doorstep. {tick} drifts like dust in the last of the light.'],
+  grump: ['Another day on watch for {coin}. A squirrel walked past. I did not move.', 'Someone asked about {tick}. I pretended to be asleep on the good couch.'],
+};
+
+const repliesFor = (cat) => (speciesOf(cat) === 'dog' ? DOG_REPLIES : CAT_REPLIES)[cat.voice] ?? CAT_REPLIES.oracle;
+const postsFor = (cat) => (speciesOf(cat) === 'dog' ? DOG_POSTS : CAT_POSTS)[cat.voice] ?? CAT_POSTS.oracle;
 
 // Function replacers, so a coin name like "$&" is inserted literally.
 const fillCanned = (line, coin) => line.replace(/\{coin\}/g, () => coin.name).replace(/\{tick\}/g, () => `$${coin.symbol}`);
@@ -89,10 +110,10 @@ export async function reply({ coin, cat, history = [], message }) {
       );
       if (text) return { text, source: 'ai', model: llmInfo().model };
     } catch (e) {
-      console.error('cat reply failed:', e.message);
+      console.error('pet reply failed:', e.message);
     }
   }
-  return { text: fillCanned(pick(CANNED_REPLIES[cat.voice] ?? CANNED_REPLIES.oracle), coin), source: 'template', model: null };
+  return { text: fillCanned(pick(repliesFor(cat)), coin), source: 'template', model: null };
 }
 
 // recent: the cat's latest posts, newest first, so the story continues instead of repeating.
@@ -114,8 +135,8 @@ export async function writePost({ coin, cat, recent = [], chapter }) {
       );
       if (text) return { text, source: 'ai', model: llmInfo().model };
     } catch (e) {
-      console.error('cat post failed:', e.message);
+      console.error('pet post failed:', e.message);
     }
   }
-  return { text: fillCanned(pick(CANNED_POSTS[cat.voice] ?? CANNED_POSTS.oracle), coin), source: 'template', model: null };
+  return { text: fillCanned(pick(postsFor(cat)), coin), source: 'template', model: null };
 }

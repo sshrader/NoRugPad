@@ -82,7 +82,7 @@ export default function App() {
           <nav className="nav" aria-label="Main">
             {link('explore', 'Explore')}
             {link('launch', 'Launch')}
-            {link('wire', 'Cat Wire')}
+            {link('wire', 'Paw Wire')}
           </nav>
           <div className="wallet-area">
             {publicKey && balance !== null && <span className="bal mono">{balance.toFixed(3)} SOL</span>}

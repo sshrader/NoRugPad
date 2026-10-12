@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { explorerAddress } from '../config';
 import { getCoin, listCoinPosts, type Coin, type Post } from '../lib/api';
-import { voiceLabel } from '../lib/cats';
+import { voiceLabel } from '../lib/pets';
 import { ago } from '../lib/time';
 import { href } from '../router';
 import CopyAddress from '../components/CopyAddress';
-import CatAvatar from '../components/CatAvatar';
+import PetAvatar from '../components/PetAvatar';
 import MarketChart from '../components/MarketChart';
-import CatChat from '../components/CatChat';
+import PetChat from '../components/PetChat';
 import TradeBox from '../components/TradeBox';
 import PostList from '../components/PostList';
 
@@ -80,7 +80,7 @@ export default function CoinPage({ mint }: { mint: string }) {
           <div className="badges">
             <span className="badge">{ck} Mint revoked</span>
             <span className="badge">{ck} Freeze revoked</span>
-            <span className="badge">{ck} Cat posts labelled AI</span>
+            <span className="badge">{ck} Pet posts labelled AI</span>
           </div>
         </div>
       </section>
@@ -88,20 +88,20 @@ export default function CoinPage({ mint }: { mint: string }) {
       <MarketChart mint={coin.mint} />
 
       <section className="card catcard">
-        <CatAvatar id={cat.id} name={cat.name} size={88} />
+        <PetAvatar id={cat.id} name={cat.name} size={88} />
         <div>
-          <p className="eyebrow mono">This coin's cat</p>
+          <p className="eyebrow mono">This coin's pet</p>
           <h2>{cat.name}</h2>
           <p className="muted">{cat.breed} · {voiceLabel(cat.voice)} voice</p>
         </div>
       </section>
 
       <div className="cp-grid">
-        <CatChat coin={coin} />
+        <PetChat coin={coin} />
         <section className="card logcard" aria-label={`${cat.name}'s log`}>
           <div className="log-h">
             <h3>{cat.name}'s log</h3>
-            <span className="muted small">Written by an AI cat</span>
+            <span className="muted small">Written by an AI pet</span>
           </div>
           {posts.length === 0 ? <p className="muted small">{cat.name} is writing the first entry…</p> : <PostList posts={posts} mode="log" />}
         </section>

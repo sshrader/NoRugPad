@@ -1,8 +1,8 @@
 // The cats' lore diaries. A background loop writes a new entry for each coin every so often.
 import crypto from 'node:crypto';
 import * as store from './store.mjs';
-import { CATS } from './cats.mjs';
-import { writePost } from './catbrain.mjs';
+import { PETS } from './pets.mjs';
+import { writePost } from './petbrain.mjs';
 
 const MAX_PER_COIN = 50;
 const baseGapMs = () => Math.max(1, Number(process.env.CAT_POST_MINUTES || 30)) * 60_000;
@@ -13,7 +13,7 @@ const gapFor = (mint, count) => baseGapMs() * (0.5 + crypto.createHash('sha256')
 export async function makePost(coin) {
   const all = await store.get('posts.json', {});
   const recent = all[coin.mint] ?? [];
-  const cat = coin.cat ?? CATS[0];
+  const cat = coin.cat ?? PETS[0];
   const chapter = recent.length ? recent[0].chapter + 1 : 1;
   const out = await writePost({ coin, cat, recent: recent.slice(0, 3), chapter });
   const post = {

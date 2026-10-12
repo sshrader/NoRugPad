@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { sendChat, type ChatTurn, type Coin } from '../lib/api';
-import { voiceLabel } from '../lib/cats';
-import CatAvatar from './CatAvatar';
+import { voiceLabel } from '../lib/pets';
+import PetAvatar from './PetAvatar';
 
 const SUGGESTIONS = ['Who are you?', 'Tell me the lore', 'Is this safe?', 'Will it moon?'];
 
-// Text a coin's cat.
-export default function CatChat({ coin }: { coin: Coin }) {
+// Text a coin's pet.
+export default function PetChat({ coin }: { coin: Coin }) {
   const cat = coin.cat;
   const [chat, setChat] = useState<ChatTurn[]>([]);
   const [text, setText] = useState('');
@@ -32,7 +32,7 @@ export default function CatChat({ coin }: { coin: Coin }) {
       setCanned(out.source === 'template');
       setChat((c) => [...c, { role: 'cat', text: out.reply }]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not reach the cat.');
+      setError(err instanceof Error ? err.message : 'Could not reach your pet.');
     } finally {
       setBusy(false);
     }
@@ -46,11 +46,11 @@ export default function CatChat({ coin }: { coin: Coin }) {
   return (
     <section className="card chatcard" aria-label={`Chat with ${cat.name}`}>
       <div className="chat-head">
-        <CatAvatar id={cat.id} name={cat.name} size={48} />
+        <PetAvatar id={cat.id} name={cat.name} size={48} />
         <div>
           <h3>Text {cat.name}</h3>
           <p className="muted small">
-            {cat.breed} · {voiceLabel(cat.voice)} voice · an AI cat, not a financial advisor
+            {cat.breed} · {voiceLabel(cat.voice)} voice · an AI pet, not a financial advisor
           </p>
         </div>
       </div>
