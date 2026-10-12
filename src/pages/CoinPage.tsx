@@ -4,6 +4,7 @@ import { getCoin, listCoinPosts, type Coin, type Post } from '../lib/api';
 import { voiceLabel } from '../lib/cats';
 import { ago } from '../lib/time';
 import { href } from '../router';
+import CopyAddress from '../components/CopyAddress';
 import CatAvatar from '../components/CatAvatar';
 import MarketChart from '../components/MarketChart';
 import CatChat from '../components/CatChat';
@@ -69,8 +70,11 @@ export default function CoinPage({ mint }: { mint: string }) {
         <div className="ch-main">
           <h1>{coin.name} <span className="mono muted">${coin.symbol}</span></h1>
           <p className="mono muted small">
-            <a href={explorerAddress(coin.mint)} target="_blank" rel="noreferrer">{short(coin.mint)}</a>
-            {' · '}by {short(coin.creator)} · launched {ago(coin.createdAt)}
+            by {short(coin.creator)} · launched {ago(coin.createdAt)}
+          </p>
+          <CopyAddress address={coin.mint} />
+          <p className="small ca-links">
+            <a href={explorerAddress(coin.mint)} target="_blank" rel="noreferrer">View on Solana Explorer</a>
           </p>
           {coin.description && <p className="ch-desc">{coin.description}</p>}
           <div className="badges">
