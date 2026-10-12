@@ -3,7 +3,7 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { CURVE_ON, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, explorerTx } from '../config';
 import { createCoin } from '../lib/createCoin';
 import { createCoinOnCurve } from '../lib/dbc';
-import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
+import { listCharities, registerCoin, uploadMetadata, type Charity, type Coin, type UploadResult } from '../lib/api';
 import { voiceLabel } from '../lib/pets';
 import { href } from '../router';
 
@@ -38,7 +38,13 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState('');
   const [created, setCreated] = useState<Coin | null>(null);
+  const [charities, setCharities] = useState<Charity[]>([]);
+  const [charityId, setCharityId] = useState('');
   const [storage, setStorage] = useState<UploadResult['storage'] | null>(null);
+
+  useEffect(() => {
+    if (CURVE_ON) listCharities().then(setCharities).catch(() => setCharities([]));
+  }, []);
 
   useEffect(() => {
     if (!image) return setPreview(null);
@@ -85,7 +91,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       const { mint, signature } = await launch(
         connection,
         wallet,
-        { name: name.trim(), symbol, uri: up.metadataUri },
+        { name: name.trim(), symbol, uri: up.metadataUri, config: charities.find((c) => c.id === charityId)?.config || undefined },
         (stage) => setPhase(stage),
       );
 
@@ -99,6 +105,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       setSymbolTouched(false);
       setDescription('');
       setImage(null);
+      setCharityId('');
     } catch (err) {
       setPhase('idle');
       setError(friendlyError(err));
@@ -143,6 +150,25 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
         <label htmlFor="desc">Description</label>
         <textarea id="desc" value={description} maxLength={280} rows={3} placeholder="What is this coin about?" onChange={(e) => setDescription(e.target.value)} />
       </div>
+
+      {CURVE_ON && charities.length > 0 && (
+        <div className="field">
+          <label htmlFor="charity">Send trading fees to a charity (optional)</label>
+          <select id="charity" value={charityId} onChange={(e) => setCharityId(e.target.value)}>
+            <option value="">No charity</option>
+            {charities.map((c) => (
+              <option key={c.id} value={c.id} disabled={!c.config}>
+                {c.name}{c.config ? '' : ' (not set up yet)'}
+              </option>
+            ))}
+          </select>
+          <p className="muted small">
+            {charityId
+              ? 'The fees from every trade of this coin go to this charity\'s wallet, set when the coin is created and impossible to change later. Pawpad is not affiliated with or endorsed by the charity.'
+              : 'Pick one to donate the trading fees from this coin.'}
+          </p>
+        </div>
+      )}
 
       <ul className="checks">
         {CURVE_ON ? (

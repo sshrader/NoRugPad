@@ -4,6 +4,7 @@ import { getCoin, listCoinPosts, type Coin, type Post } from '../lib/api';
 import { voiceLabel } from '../lib/pets';
 import { ago } from '../lib/time';
 import { href } from '../router';
+import { CHARITY_NAMES } from '../lib/api';
 import CopyAddress from '../components/CopyAddress';
 import PetAvatar from '../components/PetAvatar';
 import MarketChart from '../components/MarketChart';
@@ -61,6 +62,7 @@ export default function CoinPage({ mint }: { mint: string }) {
   }
 
   const cat = coin.cat;
+  const charityName = coin.charity ? CHARITY_NAMES[coin.charity] : '';
   const ck = <span className="okmark" aria-hidden="true">✓</span>;
   return (
     <div className="wrap">
@@ -82,6 +84,7 @@ export default function CoinPage({ mint }: { mint: string }) {
             <span className="badge">{ck} Mint revoked</span>
             <span className="badge">{ck} Freeze revoked</span>
             <span className="badge">{ck} Pet posts labelled AI</span>
+            {charityName && <span className="badge">♥ Fees to {charityName}</span>}
           </div>
         </div>
       </section>

@@ -13,7 +13,10 @@ export type Coin = {
   createdAt: number;
   curve?: boolean;
   pool?: string;
+  charity?: string;
 };
+
+export type Charity = { id: string; name: string; config: string };
 
 export type UploadResult = { uploadId: string; metadataUri: string; imageUrl: string; storage: 'pinata' | 'local' };
 
@@ -103,3 +106,12 @@ export async function getMarket(mint: string): Promise<Market> {
 export async function getAllMarkets(): Promise<Record<string, Omit<Market, 'history'>>> {
   return json(await fetch('/api/market'));
 }
+
+export async function listCharities(): Promise<Charity[]> {
+  return json<Charity[]>(await fetch('/api/charities'));
+}
+
+export const CHARITY_NAMES: Record<string, string> = {
+  'animal-humane-society': 'Animal Humane Society',
+  'dogs-and-cats-forever': 'Dogs and Cats Forever',
+};

@@ -3,6 +3,7 @@
  * Every coin launched in the app is a pool made from this config, so these numbers set your fees and curve shape.
  *
  *   npm run dbc-config            build it and send it (uses .devnet-keypair.json as the partner wallet)
+ *   npm run dbc-config -- --claimer <wallet>   charity config: trading fees go to that wallet instead of yours
  *   npm run dbc-config -- --check build and print the settings without sending anything
  *
  * Settings come from .env (all optional). Market caps are in SOL, not dollars.
@@ -14,7 +15,7 @@
 import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
-import { Connection, Keypair, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
 import { NATIVE_MINT } from '@solana/spl-token';
 import {
   ActivationType,
@@ -32,6 +33,7 @@ import {
 } from '@meteora-ag/dynamic-bonding-curve-sdk';
 
 const checkOnly = process.argv.includes('--check');
+const claimerArg = process.argv.includes('--claimer') ? process.argv[process.argv.indexOf('--claimer') + 1] : '';
 const KEY_FILE = path.resolve('.devnet-keypair.json');
 const num = (name: string, fallback: number) => (process.env[name] ? Number(process.env[name]) : fallback);
 
@@ -115,11 +117,13 @@ const balance = await connection.getBalance(partner.publicKey);
 console.log(`\nPartner wallet ${partner.publicKey.toBase58()}  (${(balance / LAMPORTS_PER_SOL).toFixed(3)} SOL)`);
 if (balance < 0.05 * LAMPORTS_PER_SOL) throw new Error('Fund this wallet with at least 0.05 SOL first (faucet.solana.com for devnet).');
 
+const claimer = claimerArg ? new PublicKey(claimerArg) : partner.publicKey;
+if (claimerArg) console.log(`Charity config: trading fees will be claimable ONLY by ${claimer.toBase58()}`);
 const config = Keypair.generate();
 const client = new DynamicBondingCurveClient(connection, 'confirmed');
 const tx = await client.partner.createConfig({
   config: config.publicKey,
-  feeClaimer: partner.publicKey,
+  feeClaimer: claimer,
   leftoverReceiver: partner.publicKey,
   payer: partner.publicKey,
   quoteMint: NATIVE_MINT,
@@ -133,7 +137,12 @@ const sig = await connection.sendRawTransaction(tx.serialize());
 await connection.confirmTransaction({ signature: sig, ...latest }, 'confirmed');
 
 console.log(`\nConfig created. Transaction: ${sig}`);
-console.log('\nAdd these two lines to .env, then restart `npm run dev`:\n');
-console.log(`DBC_CONFIG=${config.publicKey.toBase58()}`);
-console.log(`VITE_DBC_CONFIG=${config.publicKey.toBase58()}`);
+if (claimerArg) {
+  console.log('\nAdd this line to .env (use the variable for the right charity, see server/charities.mjs), then restart:\n');
+  console.log(`DBC_CONFIG_<CHARITY>=${config.publicKey.toBase58()}`);
+} else {
+  console.log('\nAdd these two lines to .env, then restart `npm run dev`:\n');
+  console.log(`DBC_CONFIG=${config.publicKey.toBase58()}`);
+  console.log(`VITE_DBC_CONFIG=${config.publicKey.toBase58()}`);
+}
 console.log('\nTrading fees you earn are claimed with the partner wallet above. Keep .devnet-keypair.json safe.');

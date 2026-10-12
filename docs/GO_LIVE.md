@@ -45,3 +45,14 @@ Not legal advice. Costs are rough estimates unless a source is named.
 3. Wait a few minutes for Meteora's service, or run `npm run dbc-migrate -- <mint>` (or use https://migrator.meteora.ag).
 4. The coin page should then say the coin moved to a DEX.
 5. Change `.env` back to your real config afterwards.
+
+## Charity fees
+
+The launch form has an optional "Send trading fees to a charity" dropdown (Animal Humane Society, Dogs and Cats Forever).
+Meteora fixes the fee-claiming wallet inside a curve config, so each charity has its own config:
+
+1. Get the wallet address FROM the charity (a published donation address, or one from a processor such as The Giving Block or Endaoment). Never guess one, and get their OK before using their name.
+2. `npm run dbc-config -- --claimer <charity wallet>`, then put the printed key in `.env` as `DBC_CONFIG_ANIMAL_HUMANE_SOCIETY` or `DBC_CONFIG_DOGS_AND_CATS_FOREVER`.
+3. Restart. That charity becomes selectable. Coins launched with it show a "Fees to ..." badge, set from the pool's config on chain.
+
+Those coins earn you no trading fees (the charity's wallet claims them, minus Meteora's 20%). Check charitable-solicitation rules and avoid implying endorsement.
