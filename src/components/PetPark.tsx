@@ -184,7 +184,8 @@ export default function PetPark({ coin, line }: { coin: Coin; line?: string }) {
               onFocus={() => world.hold(c.mint)}
               onBlur={() => world.hold(null)}
             >
-              {shorten(c.name)}
+              {shorten(c.name, 12)}
+              <span className="sp">/{speciesOf(c.cat)}</span>
             </a>
           ))}
         </div>

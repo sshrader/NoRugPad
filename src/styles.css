@@ -235,3 +235,4 @@ textarea { resize: vertical; }
 .park-bubble { position: absolute; left: 10px; right: 10px; bottom: 10px; line-height: 1.4; padding: 8px 12px; border-radius: 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 4; }
 .park-bubble a { color: var(--accent-text); }
 .park-foot { margin: 0; }
+.park-tag .sp { opacity: 0.75; font-weight: 500; margin-left: 1px; }
