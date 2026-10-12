@@ -96,6 +96,9 @@ console.log('\nCurve settings');
 console.log(`  starts at      ${initialMC} SOL market cap`);
 console.log(`  graduates at   ${migrationMC} SOL market cap`);
 console.log(`  trading fee    ${(feeBps / 100).toFixed(2)}% (Meteora keeps 20% of it, ${creatorFeePct}% of the rest goes to creators)`);
+// How much SOL buyers must put in before the curve is full and the coin graduates.
+const fillLamports = (curve as { migrationQuoteThreshold?: { toString(): string } }).migrationQuoteThreshold;
+if (fillLamports) console.log(`  to fill it     about ${(Number(fillLamports.toString()) / LAMPORTS_PER_SOL).toFixed(2)} SOL of buys (plus fees)`);
 console.log('  supply         1,000,000,000 (6 decimals), plain SPL token, metadata locked');
 console.log('  after graduating: liquidity moves to a DAMM v2 pool and is locked permanently');
 
