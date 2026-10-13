@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Pawpad logo">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="80%">
+      <stop offset="0" stop-color="#1b2a2e"/>
+      <stop offset="1" stop-color="#0a1012"/>
+    </radialGradient>
+    <linearGradient id="paw" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#ffb07a"/>
+      <stop offset="0.5" stop-color="#ff7b5c"/>
+      <stop offset="1" stop-color="#ff4f7a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="58%" r="50%">
+      <stop offset="0" stop-color="#ff7b5c" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#ff7b5c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <mask id="pad">
+      <rect width="1024" height="1024" fill="#fff"/>
+      <!-- coin cut-out in the main pad -->
+      <circle cx="512" cy="654" r="74" fill="none" stroke="#000" stroke-width="22"/>
+      <path d="M512 614 L522 642 L552 646 L530 666 L536 696 L512 680 L488 696 L494 666 L472 646 L502 642 Z" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="512" cy="600" r="380" fill="url(#glow)"/>
+  <g mask="url(#pad)" fill="url(#paw)">
+    <!-- toes: outer two lean out, inner two stand tall -->
+    <ellipse cx="258" cy="498" rx="76" ry="102" transform="rotate(-28 258 498)"/>
+    <ellipse cx="404" cy="332" rx="78" ry="110" transform="rotate(-9 404 332)"/>
+    <ellipse cx="620" cy="332" rx="78" ry="110" transform="rotate(9 620 332)"/>
+    <ellipse cx="766" cy="498" rx="76" ry="102" transform="rotate(28 766 498)"/>
+    <!-- main pad: soft, wide, slightly heart-shaped -->
+    <path d="M512 468
+             C 590 468 640 520 704 590
+             C 764 656 786 706 762 752
+             C 736 802 664 800 600 780
+             C 556 766 532 760 512 760
+             C 492 760 468 766 424 780
+             C 360 800 288 802 262 752
+             C 238 706 260 656 320 590
+             C 384 520 434 468 512 468 Z"/>
+  </g>
+  <!-- glossy highlight on the pad -->
+  <path d="M512 480 C 568 480 606 516 650 566 C 600 548 560 546 512 546 C 464 546 424 548 374 566 C 418 516 456 480 512 480 Z" fill="url(#shine)" opacity="0.35"/>
+</svg>
