@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer/';
-import { Connection, Keypair, PublicKey } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js';
 import type { WalletContextState } from '@solana/wallet-adapter-react';
 import {
   DynamicBondingCurveClient,
@@ -38,7 +38,7 @@ export async function createCoinOnCurve(
   tx.feePayer = wallet.publicKey;
   tx.recentBlockhash = latest.blockhash;
 
-  await dryRun(connection, tx, [mint]);
+  await dryRun(connection, tx);
   onStage('signing');
   const signature = await wallet.sendTransaction(tx, connection, { signers: [mint] });
   onStage('confirming');
@@ -46,9 +46,11 @@ export async function createCoinOnCurve(
   return { mint: mint.publicKey.toBase58(), signature };
 }
 
-/** Dry-runs a transaction so a failure shows its real reason instead of the wallet's generic "Unexpected error". */
-async function dryRun(connection: Connection, tx: import('@solana/web3.js').Transaction, signers: Keypair[] = []) {
-  const sim = await connection.simulateTransaction(tx, signers.length ? signers : undefined);
+/** Dry-runs a transaction so a failure shows its real reason instead of the wallet's generic "Unexpected error".
+ *  Uses a signature-free simulation, because the wallet has not signed yet. */
+async function dryRun(connection: Connection, tx: Transaction) {
+  const vtx = new VersionedTransaction(tx.compileMessage());
+  const sim = await connection.simulateTransaction(vtx, { sigVerify: false, replaceRecentBlockhash: true, commitment: 'confirmed' });
   if (sim.value.err) {
     const logs = (sim.value.logs ?? []).filter((l) => /error|fail|insufficient|custom program/i.test(l)).slice(-3).join(' | ');
     throw new Error(`The network rejected this transaction: ${JSON.stringify(sim.value.err)} ${logs}`.trim());

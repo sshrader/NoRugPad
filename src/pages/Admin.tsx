@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { LAMPORTS_PER_SOL, PublicKey, VersionedTransaction } from '@solana/web3.js';
 import BN from 'bn.js';
 import { DBC_CONFIG, FEE_CLAIMER, explorerTx } from '../config';
 import { dbcClient } from '../lib/dbc';
@@ -60,7 +60,7 @@ export default function Admin() {
         const latest = await connection.getLatestBlockhash('confirmed');
         tx.feePayer = wallet.publicKey;
         tx.recentBlockhash = latest.blockhash;
-        const sim = await connection.simulateTransaction(tx);
+        const sim = await connection.simulateTransaction(new VersionedTransaction(tx.compileMessage()), { sigVerify: false, replaceRecentBlockhash: true });
         if (sim.value.err) {
           throw new Error(`Claim would fail: ${JSON.stringify(sim.value.err)} ${(sim.value.logs ?? []).slice(-3).join(' | ')}`);
         }
