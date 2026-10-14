@@ -16,15 +16,22 @@ export default function Admin() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [msg, setMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [claimer, setClaimer] = useState(''); // the feeClaimer stored in the curve config on chain
 
   const me = wallet.publicKey?.toBase58() ?? '';
-  const allowed = !!me && (!FEE_CLAIMER || me === FEE_CLAIMER);
+  const expected = claimer || FEE_CLAIMER;
+  const allowed = !!me && (!expected || me === expected);
 
   const load = useCallback(async () => {
     if (!DBC_CONFIG) return;
     setMsg('');
     try {
-      const fees = await dbcClient(connection).state.getPoolsFeesByConfig(new PublicKey(DBC_CONFIG));
+      const client = dbcClient(connection);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const cfg: any = await client.state.getPoolConfig(new PublicKey(DBC_CONFIG));
+      const c = cfg?.account ?? cfg;
+      if (c?.feeClaimer) setClaimer(c.feeClaimer.toBase58());
+      const fees = await client.state.getPoolsFeesByConfig(new PublicKey(DBC_CONFIG));
       setRows(fees.map((f) => ({ pool: f.poolAddress.toBase58(), waiting: f.partnerQuoteFee as BN, total: f.totalTradingQuoteFee as BN })));
     } catch (e) {
       setMsg(e instanceof Error ? e.message : 'Could not load fees.');
@@ -32,8 +39,8 @@ export default function Admin() {
   }, [connection]);
 
   useEffect(() => {
-    if (allowed) void load();
-  }, [allowed, load]);
+    if (me) void load();
+  }, [me, load]);
 
   async function claim(list: Row[]) {
     if (!wallet.publicKey || !wallet.sendTransaction) return;
@@ -53,6 +60,10 @@ export default function Admin() {
         const latest = await connection.getLatestBlockhash('confirmed');
         tx.feePayer = wallet.publicKey;
         tx.recentBlockhash = latest.blockhash;
+        const sim = await connection.simulateTransaction(tx);
+        if (sim.value.err) {
+          throw new Error(`Claim would fail: ${JSON.stringify(sim.value.err)} ${(sim.value.logs ?? []).slice(-3).join(' | ')}`);
+        }
         const signature = await wallet.sendTransaction(tx, connection);
         await connection.confirmTransaction({ signature, ...latest }, 'confirmed');
         setMsg(`Claimed ${sol(r.waiting).toFixed(6)} SOL. `);
@@ -75,7 +86,8 @@ export default function Admin() {
       {!wallet.publicKey && <p className="muted">Connect the fee-claimer wallet.</p>}
       {wallet.publicKey && !allowed && (
         <p className="muted">
-          This wallet is not the fee claimer. Connect {FEE_CLAIMER.slice(0, 4)}…{FEE_CLAIMER.slice(-4)}.
+          This wallet is not this config's fee claimer, so a claim would fail. The claimer is{' '}
+          <span className="mono">{expected}</span>. Connect that wallet, or use a config created with your new wallet as DBC_FEE_CLAIMER.
         </p>
       )}
       {allowed && (
