@@ -12,7 +12,8 @@
  *   DBC_CREATOR_FEE_PCT=0 share of your fees (after Meteora's 20% cut) that goes to the coin's creator, 0-100
  */
 import 'dotenv/config';
-import { Connection, Keypair, LAMPORTS_PER_SOL, clusterApiUrl } from '@solana/web3.js';
+import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { connect, loadPartner, requireMainnetConfirm } from './common';
 import { NATIVE_MINT } from '@solana/spl-token';
 import {
   ActivationType,

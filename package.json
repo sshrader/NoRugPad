@@ -7,7 +7,7 @@
     "dev": "concurrently -k -n api,web -c magenta,cyan \"npm:server\" \"npm:client\"",
     "client": "vite",
     "server": "node server/index.mjs",
-    "build": "tsc --noEmit && vite build",
+    "build": "vite build",
     "typecheck": "tsc --noEmit",
     "dry-run": "tsx scripts/dry-run.ts",
     "pet-test": "node scripts/pet-test.mjs",

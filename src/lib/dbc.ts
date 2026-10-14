@@ -75,6 +75,10 @@ export async function curveStatus(connection: Connection, poolAddress: string): 
   return { migrated: fields(pool.account).isMigrated !== 0, progress };
 }
 
+// Some SDK versions leave minimumAmountOut optional; derive it from the slippage setting instead of using 0.
+const minOut = (q: { outputAmount: BN; minimumAmountOut?: BN }, slippageBps: number): BN =>
+  q.minimumAmountOut ?? q.outputAmount.muln(10_000 - slippageBps).divn(10_000);
+
 /** amount is in SOL when buying, in coin units when selling. */
 export async function quoteSwap(connection: Connection, poolAddress: string, side: 'buy' | 'sell', amount: number, slippageBps = 100): Promise<Quote> {
   const { client, pool, config } = await poolAndConfig(connection, poolAddress);
@@ -89,9 +93,10 @@ export async function quoteSwap(connection: Connection, poolAddress: string, sid
     hasReferral: false,
     currentPoint,
     swapMode: SwapMode.PartialFill,
-  });
+    eligibleForFirstSwapWithMinFee: false, // assume the normal fee: a slightly lower estimate is the safe side
+  } as Parameters<typeof client.pool.swapQuote2>[0]);
   const dec = side === 'buy' ? BASE_DECIMALS : QUOTE_DECIMALS;
-  return { out: fromUnits(q.outputAmount, dec), min: fromUnits(q.minimumAmountOut, dec) };
+  return { out: fromUnits(q.outputAmount, dec), min: fromUnits(minOut(q, slippageBps), dec) };
 }
 
 export async function swap(
@@ -115,7 +120,8 @@ export async function swap(
     hasReferral: false,
     currentPoint,
     swapMode: SwapMode.PartialFill,
-  });
+    eligibleForFirstSwapWithMinFee: false, // assume the normal fee: a slightly lower estimate is the safe side
+  } as Parameters<typeof client.pool.swapQuote2>[0]);
   const tx = await client.pool.swap2({
     owner: wallet.publicKey,
     pool: pool.publicKey,
@@ -123,7 +129,7 @@ export async function swap(
     referralTokenAccount: null,
     swapMode: SwapMode.PartialFill,
     amountIn,
-    minimumAmountOut: q.minimumAmountOut,
+    minimumAmountOut: minOut(q, slippageBps),
   });
   const latest = await connection.getLatestBlockhash('confirmed');
   tx.feePayer = wallet.publicKey;

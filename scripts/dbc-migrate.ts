@@ -5,6 +5,7 @@
  * to test graduation on devnet. The curve must be 100% full first.
  */
 import 'dotenv/config';
+import type { Keypair } from '@solana/web3.js';
 import { connect, loadPartner, requireMainnetConfirm } from './common';
 import { DAMM_V2_MIGRATION_FEE_ADDRESS, DynamicBondingCurveClient, MigrationFeeOption } from '@meteora-ag/dynamic-bonding-curve-sdk';
 
