@@ -22,6 +22,14 @@ const PINATA_JWT = process.env.PINATA_JWT || '';
 const IPFS_GATEWAY = (process.env.IPFS_GATEWAY || 'https://ipfs.io').replace(/\/$/, '');
 const UPLOAD_DIR = path.resolve('server/uploads');
 
+// Show only the host of the RPC URL anywhere it is displayed or logged: the URL usually contains a secret API key.
+const RPC_HOST = (() => {
+  try {
+    return new URL(RPC_URL).host;
+  } catch {
+    return 'unknown';
+  }
+})();
 const connection = new Connection(RPC_URL, 'confirmed');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -69,7 +77,7 @@ async function saveLocal(buffer, filename) {
 /* ------------------------------ routes ------------------------------ */
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, rpc: RPC_URL, storage: PINATA_JWT ? 'pinata' : 'local', llm: { ...llmInfo(), callsToday: budgetUsed() } });
+  res.json({ ok: true, rpc: RPC_HOST, storage: PINATA_JWT ? 'pinata' : 'local', llm: { ...llmInfo(), callsToday: budgetUsed() } });
 });
 
 // Step 1 of creating a coin: store the image and the metadata JSON, return the metadata link
@@ -296,7 +304,7 @@ const network = await checkNetwork(connection).catch((e) => {
 app.listen(PORT, () => {
   console.log(`Network: ${network}${launchesRestricted() ? ' (launches limited to the allowlist)' : ''}`);
   const llm = llmInfo();
-  console.log(`Pawpad API on http://localhost:${PORT}  (rpc: ${RPC_URL}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);
+  console.log(`Pawpad API on http://localhost:${PORT}  (rpc: ${RPC_HOST}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);
   console.log(llm.enabled ? `Cats: AI on (${llm.model} via ${llm.host})` : 'Cats: canned lines only. Add LLM_API_KEY to .env to turn the AI on.');
   startScheduler();
 });
