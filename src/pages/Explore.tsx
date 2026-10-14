@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { getAllMarkets, listCoins, listPosts, type Coin, type Market, type Post } from '../lib/api';
 import { href } from '../router';
 import CoinCard from '../components/CoinCard';
+import PetPark from '../components/PetPark';
 
 export default function Explore() {
   const [coins, setCoins] = useState<Coin[] | null>(null);
@@ -64,6 +65,8 @@ export default function Explore() {
           </div>
         </div>
       </section>
+
+      {coins && coins.length > 0 && <PetPark />}
 
       <section className="filters">
         <h2>Launched coins{coins ? <span className="muted"> · {coins.length}</span> : null}</h2>
