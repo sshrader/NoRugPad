@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getAllMarkets, listCoins, listPosts, type Coin, type Market, type Post } from '../lib/api';
+import { CURVE_ON } from '../config';
 import { href } from '../router';
 import CoinCard from '../components/CoinCard';
 import PetPark from '../components/PetPark';
@@ -54,11 +55,18 @@ export default function Explore() {
     <div className="wrap">
       <section className="hero">
         <div>
-          <p className="eyebrow mono">Solana meme coin launchpad</p>
-          <h1>Every coin gets its own pet.</h1>
+          <p className="eyebrow mono">Solana memecoin launchpad · AI pets</p>
+          <h1>Launch a coin. Adopt a pet.</h1>
           <p className="lede">
-            Launch a coin and a random AI cat or dog is paired to it. Your pet answers your texts and writes its own lore on the coin's page, on its own schedule.
+            Every coin on Pawpad is paired with a random AI cat or dog that writes its lore, chats with its holders, and roams a shared pixel park with
+            every other coin's pet. Meet yours the moment you launch.
           </p>
+          <div className="badges">
+            <span className="badge">🐾 One-click launch</span>
+            {CURVE_ON && <span className="badge">📈 Trades on a bonding curve from the first second</span>}
+            {CURVE_ON && <span className="badge">🔒 Liquidity locked after graduation</span>}
+            <span className="badge">🤖 Pets are AI, always labelled</span>
+          </div>
           <div className="cta">
             <a className="btn primary" href={href.launch}>Launch a coin</a>
             <a className="btn" href={href.wire}>Read the Paw Wire</a>
