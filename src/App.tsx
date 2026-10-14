@@ -8,6 +8,7 @@ import Explore from './pages/Explore';
 import Launch from './pages/Launch';
 import Wire from './pages/Wire';
 import CoinPage from './pages/CoinPage';
+import Admin from './pages/Admin';
 
 function Paw() {
   return (
@@ -61,7 +62,7 @@ export default function App() {
     }
   }
 
-  const section = route.name === 'coin' ? 'explore' : route.name;
+  const section = route.name === 'coin' ? 'explore' : route.name === 'admin' ? '' : route.name;
   const link = (name: 'explore' | 'launch' | 'wire', label: string) => (
     <a className={section === name ? 'on' : ''} href={href[name]} aria-current={section === name ? 'page' : undefined}>
       {label}
@@ -113,6 +114,7 @@ export default function App() {
         {route.name === 'explore' && <Explore />}
         {route.name === 'launch' && <Launch balance={balance} onCreated={refreshBalance} />}
         {route.name === 'wire' && <Wire />}
+        {route.name === 'admin' && <Admin />}
         {route.name === 'coin' && <CoinPage mint={route.mint} />}
       </main>
 

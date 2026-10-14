@@ -9,11 +9,12 @@
  *   DBC_INITIAL_MC=30     market cap when a coin starts
  *   DBC_MIGRATION_MC=300  market cap at which the curve is full and the coin moves to a DEX
  *   DBC_FEE_BPS=100       trading fee in basis points (100 = 1%). Meteora's minimum is 25.
+ *   DBC_FEE_CLAIMER=<address>  wallet that can claim your fees (use a hardware wallet or multisig on mainnet). Default: the key-file wallet
  *   DBC_CREATOR_FEE_PCT=0 share of your fees (after Meteora's 20% cut) that goes to the coin's creator, 0-100
  */
 import 'dotenv/config';
 import { Keypair, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { connect, loadPartner, requireMainnetConfirm } from './common';
+import { connect, feeClaimerFor, loadPartner, requireMainnetConfirm } from './common';
 import { NATIVE_MINT } from '@solana/spl-token';
 import {
   ActivationType,
@@ -109,19 +110,25 @@ const partner = loadPartner();
 const { connection, mainnet } = await connect();
 if (mainnet) {
   console.log('\nMAINNET: these numbers are permanent. Fees, curve and graduation size cannot be edited after this.');
-  requireMainnetConfirm(mainnet, 'Creating the config');
 }
 
 const balance = await connection.getBalance(partner.publicKey);
 console.log(`\nPartner wallet ${partner.publicKey.toBase58()}  (${(balance / LAMPORTS_PER_SOL).toFixed(3)} SOL)`);
 if (balance < 0.05 * LAMPORTS_PER_SOL) throw new Error('Fund this wallet with at least 0.05 SOL first (devnet: faucet.solana.com).');
 
+const claimer = feeClaimerFor(partner);
+console.log(`Deployer wallet (pays for this, no special rights): ${partner.publicKey.toBase58()}`);
+console.log(`Fee claimer (the ONLY wallet that can ever claim fees, set forever): ${claimer.toBase58()}`);
+if (mainnet && claimer.equals(partner.publicKey)) {
+  console.log('\nWARNING: the fee claimer is the same key-file wallet that sits on this machine. Set DBC_FEE_CLAIMER to a hardware wallet or multisig address unless you accept that risk.');
+}
+requireMainnetConfirm(mainnet, 'Creating the config'); // after the claimer is shown, so you see who gets the fees first
 const config = Keypair.generate();
 const client = new DynamicBondingCurveClient(connection, 'confirmed');
 const tx = await client.partner.createConfig({
   config: config.publicKey,
-  feeClaimer: partner.publicKey,
-  leftoverReceiver: partner.publicKey,
+  feeClaimer: claimer,
+  leftoverReceiver: claimer,
   payer: partner.publicKey,
   quoteMint: NATIVE_MINT,
   ...curve,
@@ -137,4 +144,4 @@ console.log(`\nConfig created. Transaction: ${sig}`);
 console.log('\nAdd these two lines to .env, then restart `npm run dev`:\n');
 console.log(`DBC_CONFIG=${config.publicKey.toBase58()}`);
 console.log(`VITE_DBC_CONFIG=${config.publicKey.toBase58()}`);
-console.log('\nTrading fees you earn are claimed with the partner wallet above. Keep the wallet file safe and backed up: losing it means losing the fees.');
+console.log(`\nFees can only be claimed by ${claimer.toBase58()}. If that is a wallet you control in Phantom/Ledger, open https://<your site>/#/admin with it connected to claim.`);

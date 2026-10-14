@@ -2,7 +2,7 @@
 import 'dotenv/config';
 import fs from 'node:fs';
 import path from 'node:path';
-import { Connection, Keypair, clusterApiUrl } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, clusterApiUrl } from '@solana/web3.js';
 
 export const MAINNET_GENESIS = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
 
@@ -28,5 +28,17 @@ export async function connect(): Promise<{ connection: Connection; mainnet: bool
 export function requireMainnetConfirm(mainnet: boolean, what: string) {
   if (mainnet && !process.argv.includes('--confirm-mainnet')) {
     throw new Error(`${what} on MAINNET spends real SOL. Re-run with --confirm-mainnet once you have checked the settings above.`);
+  }
+}
+
+/** Who may claim trading fees (and receives leftover tokens). DBC_FEE_CLAIMER = a safe wallet (hardware wallet or multisig
+ *  address) that does NOT live in a key file. Empty = the key-file wallet itself, which is fine on devnet only. */
+export function feeClaimerFor(deployer: Keypair): PublicKey {
+  const v = (process.env.DBC_FEE_CLAIMER || '').trim();
+  if (!v) return deployer.publicKey;
+  try {
+    return new PublicKey(v);
+  } catch {
+    throw new Error('DBC_FEE_CLAIMER is not a valid Solana address.');
   }
 }

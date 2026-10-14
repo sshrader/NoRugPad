@@ -7,7 +7,7 @@
 import 'dotenv/config';
 import BN from 'bn.js';
 import { LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { connect, loadPartner, requireMainnetConfirm } from './common';
+import { connect, feeClaimerFor, loadPartner, requireMainnetConfirm } from './common';
 import { DynamicBondingCurveClient } from '@meteora-ag/dynamic-bonding-curve-sdk';
 
 const checkOnly = process.argv.includes('--check');
@@ -15,14 +15,21 @@ const config = (process.env.DBC_CONFIG || '').trim();
 if (!config) throw new Error('DBC_CONFIG is empty. Run `npm run dbc-config` first.');
 
 const partner = loadPartner();
+const claimer = feeClaimerFor(partner);
 const { connection, mainnet } = await connect();
 const client = new DynamicBondingCurveClient(connection, 'confirmed');
 
+const canSign = claimer.equals(partner.publicKey);
+if (!checkOnly && !canSign) {
+  throw new Error(
+    `Fees can only be claimed by ${claimer.toBase58()}, which is not the key-file wallet. Connect that wallet on the site's /#/admin page to claim, or run with --check to just look.`,
+  );
+}
 if (!checkOnly) requireMainnetConfirm(mainnet, 'Claiming fees');
 const fees = await client.state.getPoolsFeesByConfig(new PublicKey(config));
 const sol = (b: BN) => Number(b.toString()) / LAMPORTS_PER_SOL;
 let total = 0;
-console.log(`\nPartner wallet ${partner.publicKey.toBase58()}`);
+console.log(`\nFee claimer ${claimer.toBase58()}${canSign ? ' (this key-file wallet)' : ''}`);
 console.log(`${fees.length} pool(s) under this config\n`);
 
 for (const f of fees) {

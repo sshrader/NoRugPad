@@ -10,7 +10,10 @@ The code now supports mainnet (`VITE_CLUSTER=mainnet-beta`). Read `docs/GO_LIVE.
 - The banner, footer and trade box switch to real-money warnings; the "Get test SOL" button is devnet only; explorer links drop `?cluster=`.
 
 ## Steps
-1. **Wallet.** Create a brand-new partner wallet (ideally hardware-backed). Save its keypair file OUTSIDE the repo and set `PARTNER_KEYPAIR=/path/to/file.json`. Back it up in two places; losing it loses the fees. Fund it with a little SOL for the config account.
+1. **Two wallets.**
+   - *Deployer:* a throwaway key file that only pays for creating the config. Save it OUTSIDE the repo, set `PARTNER_KEYPAIR=/path/to/file.json`, fund it with a little SOL.
+   - *Fee claimer:* a hardware wallet (Ledger via Phantom) or multisig address. Set `DBC_FEE_CLAIMER=<address>` and `VITE_FEE_CLAIMER=<address>`. This wallet alone can claim fees and receive leftover tokens, FOREVER (it is written into the config). Back up its recovery phrase offline.
+   - Fees are claimed by connecting the fee claimer wallet at `https://<your site>/#/admin` and clicking Claim all. The `dbc-fees` script only works when the claimer is the key-file wallet (devnet); otherwise use `--check` to look.
 2. **RPC.** Get a paid mainnet RPC. Use one key for the server (`SOLANA_RPC_URL`) and a separate domain-restricted key for the browser (`VITE_RPC_URL`).
 3. **Check the curve numbers.** `npm run dbc-config -- --check` with your real `DBC_INITIAL_MC`, `DBC_MIGRATION_MC`, `DBC_FEE_BPS`, `DBC_CREATOR_FEE_PCT`. Market caps are in SOL, so the dollar size moves with the SOL price. Confirm Meteora's current fee terms.
 4. **Create the config.** Same command without `--check`, plus `--confirm-mainnet`. It is permanent. Put the printed key in both `DBC_CONFIG` and `VITE_DBC_CONFIG`.
