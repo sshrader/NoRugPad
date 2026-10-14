@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { CURVE_ON, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, explorerTx } from '../config';
 import { createCoin } from '../lib/createCoin';
@@ -38,7 +38,13 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState('');
   const [created, setCreated] = useState<Coin | null>(null);
+  const doneBox = useRef<HTMLDivElement>(null);
   const [storage, setStorage] = useState<UploadResult['storage'] | null>(null);
+
+  // Bring the success box into view once, right after a launch.
+  useEffect(() => {
+    if (created) doneBox.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [created]);
 
   useEffect(() => {
     if (!image) return setPreview(null);
@@ -169,12 +175,17 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       </button>
 
       {created && (
-        <div className="success" role="status">
-          <p>
-            <b>{created.name}</b> (${created.symbol}) is live. Your pet is <b>{created.cat.name}</b>, a {created.cat.breed.toLowerCase()} with a {voiceLabel(created.cat.voice).toLowerCase()} voice.
+        <div className="success launched" role="status" ref={doneBox}>
+          <p className="launched-title">
+            <b>{created.name}</b> (${created.symbol}) is live!
           </p>
+          <p>
+            Your pet is <b>{created.cat.name}</b>, a {created.cat.breed.toLowerCase()} with a {voiceLabel(created.cat.voice).toLowerCase()} voice.
+          </p>
+          <a className="btn primary big" href={href.coin(created.mint)}>
+            Go to your coin page →
+          </a>
           <p className="links mono">
-            <a href={href.coin(created.mint)}>Open coin page</a>
             <a href={explorerAddress(created.mint)} target="_blank" rel="noreferrer">View token</a>
             <a href={explorerTx(created.signature)} target="_blank" rel="noreferrer">View transaction</a>
           </p>
