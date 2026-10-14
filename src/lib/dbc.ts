@@ -38,11 +38,21 @@ export async function createCoinOnCurve(
   tx.feePayer = wallet.publicKey;
   tx.recentBlockhash = latest.blockhash;
 
+  await dryRun(connection, tx, [mint]);
   onStage('signing');
   const signature = await wallet.sendTransaction(tx, connection, { signers: [mint] });
   onStage('confirming');
   await connection.confirmTransaction({ signature, ...latest }, 'confirmed');
   return { mint: mint.publicKey.toBase58(), signature };
+}
+
+/** Dry-runs a transaction so a failure shows its real reason instead of the wallet's generic "Unexpected error". */
+async function dryRun(connection: Connection, tx: import('@solana/web3.js').Transaction, signers: Keypair[] = []) {
+  const sim = await connection.simulateTransaction(tx, signers.length ? signers : undefined);
+  if (sim.value.err) {
+    const logs = (sim.value.logs ?? []).filter((l) => /error|fail|insufficient|custom program/i.test(l)).slice(-3).join(' | ');
+    throw new Error(`The network rejected this transaction: ${JSON.stringify(sim.value.err)} ${logs}`.trim());
+  }
 }
 
 export type Quote = { out: number; min: number };
@@ -134,6 +144,7 @@ export async function swap(
   const latest = await connection.getLatestBlockhash('confirmed');
   tx.feePayer = wallet.publicKey;
   tx.recentBlockhash = latest.blockhash;
+  await dryRun(connection, tx);
   const signature = await wallet.sendTransaction(tx, connection);
   await connection.confirmTransaction({ signature, ...latest }, 'confirmed');
   return signature;
