@@ -14,6 +14,7 @@
     "dry-run": "tsx scripts/dry-run.ts",
     "pet-test": "node scripts/pet-test.mjs",
     "cat-test": "node scripts/pet-test.mjs",
+    "new-wallet": "tsx scripts/new-wallet.ts",
     "dbc-config": "tsx scripts/dbc-create-config.ts",
     "dbc-inspect": "tsx scripts/dbc-inspect.ts",
     "dbc-fees": "tsx scripts/dbc-claim-fees.ts",
