@@ -20,7 +20,8 @@ const RPC_URL = process.env.SOLANA_RPC_URL || clusterApiUrl('devnet');
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 const PINATA_JWT = process.env.PINATA_JWT || '';
 const IPFS_GATEWAY = (process.env.IPFS_GATEWAY || 'https://ipfs.io').replace(/\/$/, '');
-const UPLOAD_DIR = path.resolve('server/uploads');
+// Uploaded images live next to the JSON store so they sit on the same persistent volume (DATA_DIR).
+const UPLOAD_DIR = path.resolve(process.env.DATA_DIR || 'server/data', 'uploads');
 
 // Show only the host of the RPC URL anywhere it is displayed or logged: the URL usually contains a secret API key.
 const RPC_HOST = (() => {
