@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { CURVE_ON, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, explorerTx } from '../config';
+import { CURVE_ON, IS_MAINNET, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, explorerTx } from '../config';
 import { createCoin } from '../lib/createCoin';
 import { createCoinOnCurve } from '../lib/dbc';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
@@ -21,7 +21,7 @@ const PHASE_TEXT: Record<Phase, string> = {
 function friendlyError(e: unknown): string {
   const msg = e instanceof Error ? e.message : String(e);
   if (/reject|denied|cancel/i.test(msg)) return 'You declined the transaction in your wallet. Nothing was created.';
-  if (/insufficient|0x1\b|debit an account/i.test(msg)) return 'Not enough SOL in this wallet. Use Get test SOL, then try again.';
+  if (/insufficient|0x1\b|debit an account/i.test(msg)) return IS_MAINNET ? 'Not enough SOL in this wallet. Add some SOL, then try again.' : 'Not enough SOL in this wallet. Use Get test SOL, then try again.';
   return msg;
 }
 
@@ -79,7 +79,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
     if (!image) return setError('Choose an image for your coin.');
     const need = CURVE_ON ? MIN_SOL_TO_LAUNCH_CURVE : MIN_SOL_TO_LAUNCH;
     if (balance !== null && balance < need) {
-      return setError(`You need about ${need} SOL to launch. Use Get test SOL first.`);
+      return setError(`You need about ${need} SOL to launch.${IS_MAINNET ? '' : ' Use Get test SOL first.'}`);
     }
 
     try {
