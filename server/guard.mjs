@@ -61,7 +61,11 @@ export async function checkNetwork(connection) {
     const problems = [];
     if (process.env.MARKET_MODE !== 'live') problems.push('MARKET_MODE must be "live" (demo shows fake prices).');
     if (!process.env.DBC_CONFIG) problems.push('DBC_CONFIG is empty (mainnet needs the curve config).');
-    if (!process.env.PINATA_JWT) problems.push('PINATA_JWT is empty (images would be served from localhost).');
+    // Images need a public home: either IPFS (PINATA_JWT) or this site's own https address (PUBLIC_BASE_URL, files kept on the DATA_DIR volume).
+    const base = process.env.PUBLIC_BASE_URL || '';
+    const publicHttps = /^https:\/\//i.test(base) && !/localhost|127\.0\.0\.1/i.test(base);
+    if (!process.env.PINATA_JWT && !publicHttps) problems.push('Images have nowhere public to live: set PINATA_JWT (IPFS) or set PUBLIC_BASE_URL to your https site address.');
+    if (!process.env.PINATA_JWT && publicHttps && !process.env.DATA_DIR) problems.push('PUBLIC_BASE_URL is used for images, so DATA_DIR must point at a persistent volume (e.g. /data), or uploads vanish on redeploy.');
     if (/api\.mainnet-beta\.solana\.com/.test(process.env.SOLANA_RPC_URL || '')) problems.push('Use a paid RPC, not the public mainnet endpoint.');
     if (problems.length) throw new Error('Mainnet config problems:\n - ' + problems.join('\n - '));
     if (BLOCKED.length === 0) console.warn('WARNING: BLOCKED_COUNTRIES is empty. Ask your lawyer whether you need to block regions.');
