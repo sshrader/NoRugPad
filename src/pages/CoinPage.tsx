@@ -78,6 +78,13 @@ export default function CoinPage({ mint }: { mint: string }) {
             <a href={explorerAddress(coin.mint)} target="_blank" rel="noreferrer">View on Solana Explorer</a>
           </p>
           {coin.description && <p className="ch-desc">{coin.description}</p>}
+          {(coin.twitter || coin.website || coin.telegram) && (
+            <p className="small ca-links">
+              {coin.twitter && <a href={coin.twitter} target="_blank" rel="noreferrer noopener nofollow">X / Twitter</a>}
+              {coin.website && <a href={coin.website} target="_blank" rel="noreferrer noopener nofollow">Website</a>}
+              {coin.telegram && <a href={coin.telegram} target="_blank" rel="noreferrer noopener nofollow">Telegram</a>}
+            </p>
+          )}
           <div className="badges">
             <span className="badge">{ck} Mint revoked</span>
             <span className="badge">{ck} Freeze revoked</span>

@@ -33,6 +33,9 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
   const [symbol, setSymbol] = useState('');
   const [symbolTouched, setSymbolTouched] = useState(false);
   const [description, setDescription] = useState('');
+  const [website, setWebsite] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [telegram, setTelegram] = useState('');
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -84,7 +87,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
 
     try {
       setPhase('uploading');
-      const up = await uploadMetadata({ name: name.trim(), symbol, description: description.trim(), image, creator: wallet.publicKey.toBase58() });
+      const up = await uploadMetadata({ name: name.trim(), symbol, description: description.trim(), website: website.trim(), twitter: twitter.trim(), telegram: telegram.trim(), image, creator: wallet.publicKey.toBase58() });
       setStorage(up.storage);
 
       const launch = CURVE_ON ? createCoinOnCurve : createCoin;
@@ -104,6 +107,9 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       setSymbol('');
       setSymbolTouched(false);
       setDescription('');
+      setWebsite('');
+      setTwitter('');
+      setTelegram('');
       setImage(null);
     } catch (err) {
       setPhase('idle');
@@ -148,6 +154,22 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       <div className="field">
         <label htmlFor="desc">Description</label>
         <textarea id="desc" value={description} maxLength={280} rows={3} placeholder="What is this coin about?" onChange={(e) => setDescription(e.target.value)} />
+      </div>
+
+      <div className="row2">
+        <div className="field">
+          <label htmlFor="tw">X / Twitter <span className="muted">(optional)</span></label>
+          <input id="tw" className="in" type="text" value={twitter} maxLength={100} placeholder="@yourcoin or x.com/yourcoin" onChange={(e) => setTwitter(e.target.value)} autoComplete="off" />
+        </div>
+        <div className="field">
+          <label htmlFor="tg">Telegram <span className="muted">(optional)</span></label>
+          <input id="tg" className="in" type="text" value={telegram} maxLength={100} placeholder="t.me/yourcoin" onChange={(e) => setTelegram(e.target.value)} autoComplete="off" />
+        </div>
+      </div>
+
+      <div className="field">
+        <label htmlFor="web">Website <span className="muted">(optional)</span></label>
+        <input id="web" className="in" type="text" value={website} maxLength={200} placeholder="https://yourcoin.xyz" onChange={(e) => setWebsite(e.target.value)} autoComplete="off" />
       </div>
 
       <ul className="checks">

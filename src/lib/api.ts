@@ -7,6 +7,9 @@ export type Coin = {
   name: string;
   symbol: string;
   description: string;
+  website?: string;
+  twitter?: string;
+  telegram?: string;
   imageUrl: string;
   metadataUri: string;
   cat: Cat;
@@ -23,12 +26,13 @@ async function json<T>(res: Response): Promise<T> {
   return body as T;
 }
 
-export async function uploadMetadata(fields: { name: string; symbol: string; description: string; image: File; creator: string }): Promise<UploadResult> {
+export async function uploadMetadata(fields: { name: string; symbol: string; description: string; website?: string; twitter?: string; telegram?: string; image: File; creator: string }): Promise<UploadResult> {
   const form = new FormData();
   form.append('name', fields.name);
   form.append('symbol', fields.symbol);
   form.append('description', fields.description);
   form.append('creator', fields.creator);
+  for (const k of ['website', 'twitter', 'telegram'] as const) if (fields[k]) form.append(k, fields[k] as string);
   form.append('image', fields.image);
   return json<UploadResult>(await fetch('/api/upload', { method: 'POST', body: form }));
 }

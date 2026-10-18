@@ -219,6 +219,7 @@ textarea { resize: vertical; }
 .ca-addr { flex: 1 1 auto; min-width: 0; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); font-size: 13px; overflow-wrap: anywhere; user-select: all; }
 .ca-btn { flex: none; min-width: 96px; }
 .ca-links { margin: 2px 0 0; }
+.ca-links a + a { margin-left: 14px; }
 .roster-h { margin: 14px 0 0; }
 
 /* Pixel park (top-down, shared by every coin) */

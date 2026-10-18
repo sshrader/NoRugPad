@@ -51,6 +51,36 @@ app.use(
 const bad = (res, msg, code = 400) => res.status(code).json({ error: msg });
 const clean = (s, max) => String(s ?? '').replace(/[\u0000-\u001f]/g, '').trim().slice(0, max);
 
+// Optional social links. Each returns '' (empty), a clean https URL, or null (invalid).
+const LINK_HOSTS = { twitter: ['x.com', 'twitter.com', 'www.x.com', 'www.twitter.com'], telegram: ['t.me', 'telegram.me'] };
+function cleanLink(kind, raw) {
+  const v = clean(raw, 200);
+  if (!v) return '';
+  if (kind === 'website') {
+    try {
+      const u = new URL(/^https?:\/\//i.test(v) ? v : `https://${v}`);
+      if (u.protocol !== 'https:' || u.username || u.password || !u.hostname.includes('.')) return null;
+      return u.href;
+    } catch {
+      return null;
+    }
+  }
+  let handle = v.replace(/^@/, '');
+  const asUrl = /^(www\.)?(x\.com|twitter\.com|t\.me|telegram\.me)\//i.test(v) ? `https://${v}` : v;
+  if (/^https?:\/\//i.test(asUrl)) {
+    try {
+      const u = new URL(asUrl);
+      if (!LINK_HOSTS[kind].includes(u.hostname.toLowerCase())) return null;
+      handle = u.pathname.split('/').filter(Boolean)[0] || '';
+    } catch {
+      return null;
+    }
+  }
+  const ok = kind === 'twitter' ? /^[A-Za-z0-9_]{1,15}$/ : /^[A-Za-z0-9_]{5,32}$/;
+  if (!ok.test(handle)) return null;
+  return kind === 'twitter' ? `https://x.com/${handle}` : `https://t.me/${handle}`;
+}
+
 /* ------------------------------ storage ------------------------------ */
 
 async function pinFile(buffer, filename, type) {
@@ -96,6 +126,12 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     const name = clean(req.body.name, 32);
     const symbol = clean(req.body.symbol, 10).toUpperCase();
     const description = clean(req.body.description, 280);
+    const links = {};
+    for (const [kind, label] of [['website', 'Website'], ['twitter', 'X / Twitter'], ['telegram', 'Telegram']]) {
+      const v = cleanLink(kind, req.body[kind]);
+      if (v === null) return bad(res, `${label} link is not valid.`);
+      if (v) links[kind] = v;
+    }
     if (!name) return bad(res, 'Name is required (up to 32 characters).');
     if (!/^[A-Z0-9]{2,10}$/.test(symbol)) return bad(res, 'Ticker must be 2-10 letters or numbers.');
     if (!req.file) return bad(res, 'Choose an image.');
@@ -111,6 +147,8 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
         symbol,
         description,
         image,
+        ...links,
+        ...(Object.keys(links).length ? { extensions: links } : {}),
         properties: { files: [{ uri: image, type: req.file.mimetype }], category: 'image' },
       });
 
@@ -123,7 +161,7 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
     }
     if (metadataUri.length > 200) return bad(res, 'Metadata link is too long for on-chain storage (200 max).', 500);
 
-    const record = { id, creator: creatorKey, name, symbol, description, imageUrl, metadataUri, createdAt: Date.now() };
+    const record = { id, creator: creatorKey, name, symbol, description, ...links, imageUrl, metadataUri, createdAt: Date.now() };
     await store.update('uploads.json', {}, (all) => ({ ...all, [id]: record }));
     res.json({ uploadId: id, metadataUri, imageUrl, storage: PINATA_JWT ? 'pinata' : 'local' });
   } catch (e) {
@@ -203,6 +241,9 @@ app.post('/api/coins', async (req, res) => {
       name: up.name,
       symbol: up.symbol,
       description: up.description,
+      ...(up.website ? { website: up.website } : {}),
+      ...(up.twitter ? { twitter: up.twitter } : {}),
+      ...(up.telegram ? { telegram: up.telegram } : {}),
       imageUrl: up.imageUrl,
       metadataUri: up.metadataUri,
       cat: pickCat(mintKey.toBase58()),
