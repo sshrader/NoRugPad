@@ -1,4 +1,6 @@
 // Production safety for the API: network check, headers, region blocking, beta allowlist, launch limits.
+import fs from 'node:fs';
+import path from 'node:path';
 import { rateLimit } from './limits.mjs';
 
 const MAINNET_GENESIS = '5eykt4UsFv8P8NJdTREpY1vzqKqZKvdpKuc147dw2N9d';
@@ -67,6 +69,18 @@ export async function checkNetwork(connection) {
     if (!process.env.PINATA_JWT && !publicHttps) problems.push('Images have nowhere public to live: set PINATA_JWT (IPFS) or set PUBLIC_BASE_URL to your https site address.');
     if (!process.env.PINATA_JWT && publicHttps && !process.env.DATA_DIR) problems.push('PUBLIC_BASE_URL is used for images, so DATA_DIR must point at a persistent volume (e.g. /data), or uploads vanish on redeploy.');
     if (/api\.mainnet-beta\.solana\.com/.test(process.env.SOLANA_RPC_URL || '')) problems.push('Use a paid RPC, not the public mainnet endpoint.');
+    // The data folder must be on a mounted volume, not the container's throwaway disk (everything would vanish on redeploy).
+    if (process.env.ALLOW_EPHEMERAL_DATA !== '1') {
+      try {
+        const dir = path.resolve(process.env.DATA_DIR || 'server/data');
+        fs.mkdirSync(dir, { recursive: true });
+        if (fs.statSync(dir).dev === fs.statSync(path.parse(dir).root).dev) {
+          problems.push(`DATA_DIR (${dir}) is not on a mounted volume, so coins and images would be erased on every redeploy. Attach a volume at that path (set ALLOW_EPHEMERAL_DATA=1 only if your host keeps this disk).`);
+        }
+      } catch (e) {
+        problems.push(`Cannot use DATA_DIR: ${e.message}`);
+      }
+    }
     if (problems.length) throw new Error('Mainnet config problems:\n - ' + problems.join('\n - '));
     if (BLOCKED.length === 0) console.warn('WARNING: BLOCKED_COUNTRIES is empty. Ask your lawyer whether you need to block regions.');
     if (!process.env.TRUST_PROXY) console.warn('WARNING: TRUST_PROXY is not set. Behind a proxy, rate limits will see one IP for everyone.');
