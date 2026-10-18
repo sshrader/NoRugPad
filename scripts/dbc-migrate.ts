@@ -1,6 +1,7 @@
 /**
  * Move a full coin from the bonding curve to a regular DEX pool (DAMM v2), by hand.
- *   npm run dbc-migrate -- <mint address>
+ *   npm run dbc-migrate -- <mint address>                     look only: shows how full the curve is and whether it already migrated
+ *   npm run dbc-migrate -- <mint address> --confirm-mainnet   really migrate (needs a little SOL in the key-file wallet)
  * Meteora runs a service that normally does this; use this script (or https://migrator.meteora.ag)
  * to test graduation on devnet. The curve must be 100% full first.
  */
@@ -16,12 +17,21 @@ const partner = loadPartner();
 const { connection, mainnet } = await connect();
 const client = new DynamicBondingCurveClient(connection, 'confirmed');
 
-requireMainnetConfirm(mainnet, 'Migrating');
 const found = await client.state.getPoolByBaseMint(mint);
 if (!found) throw new Error('No pool found for that mint.');
 const progress = await client.state.getPoolQuoteTokenCurveProgress(found.publicKey);
-console.log(`Pool ${found.publicKey.toBase58()}  curve ${(progress * 100).toFixed(1)}% full`);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const acct: any = found.account;
+const state: any = acct.poolState ?? acct; // eslint-disable-line @typescript-eslint/no-explicit-any
+const migrated = !!state.isMigrated;
+console.log(`Pool ${found.publicKey.toBase58()}  curve ${(progress * 100).toFixed(1)}% full  ${migrated ? 'ALREADY MIGRATED' : 'not migrated'}`);
+if (migrated) {
+  console.log('Nothing to do: this coin already trades on its DEX pool.');
+  process.exit(0);
+}
 if (progress < 1) throw new Error('The curve is not full yet, so it cannot graduate. Keep buying.');
+console.log(`Key-file wallet ${partner.publicKey.toBase58()} will pay for the migration.`);
+requireMainnetConfirm(mainnet, 'Migrating');
 
 // Newer SDK versions return { transaction, firstPositionNftKeypair, secondPositionNftKeypair }.
 // The two position keypairs must sign as well. Older versions return the transaction directly.
