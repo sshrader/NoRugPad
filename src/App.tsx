@@ -73,7 +73,7 @@ export default function App() {
     <>
       <div className="banner">
         {IS_MAINNET ? (
-          <>Beta on Solana mainnet. Real money: memecoins are extremely risky, you can lose everything. Not financial advice.</>
+          <>Live on Solana mainnet. Real money: memecoins are extremely risky, you can lose everything. Not financial advice.</>
         ) : (
           <>You are on Solana <b>{CLUSTER}</b>. Coins made here are test coins with no value.</>
         )}
