@@ -22,6 +22,8 @@ export const DBC_CONFIG: string = (import.meta.env.VITE_DBC_CONFIG || '').trim()
 export const CURVE_ON = DBC_CONFIG.length > 0;
 // A curve launch needs a little more SOL for the pool accounts.
 export const MIN_SOL_TO_LAUNCH_CURVE = 0.05;
+// The most SOL a creator may spend on the block-zero dev buy at launch (a client-side limit, change it in .env).
+export const MAX_DEV_BUY_SOL = Number(import.meta.env.VITE_MAX_DEV_BUY_SOL || 5);
 
 // The wallet allowed to claim trading fees (the config's feeClaimer). Only used to show the /#/admin page to the right wallet;
 // the chain itself enforces who can claim.

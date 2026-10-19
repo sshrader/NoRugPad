@@ -234,6 +234,15 @@ app.post('/api/coins', async (req, res) => {
     if (keys[0].pubkey.toBase58() !== creatorKey.toBase58()) return bad(res, 'Creator does not match the transaction payer.');
     if (!keys.some((k) => k.pubkey.toBase58() === mintKey.toBase58())) return bad(res, 'Transaction does not involve this mint.');
 
+    // Block-zero dev buy, read from the chain (never taken from the browser): the tokens the creator holds
+    // right after the launch transaction, which can only come from a buy in that same transaction.
+    let devBuy = null;
+    if (pool) {
+      const bal = (tx.meta?.postTokenBalances || []).find((b) => b.mint === mintKey.toBase58() && b.owner === creatorKey.toBase58());
+      const tokens = Number(bal?.uiTokenAmount?.uiAmount || 0);
+      if (tokens > 0) devBuy = { tokens, pct: Math.round((tokens / Number(process.env.DBC_SUPPLY || 1_000_000_000)) * 10_000) / 100 };
+    }
+
     const coin = {
       mint: mintKey.toBase58(),
       creator: creatorKey.toBase58(),
@@ -249,6 +258,7 @@ app.post('/api/coins', async (req, res) => {
       cat: pickCat(mintKey.toBase58()),
       createdAt: Date.now(),
       ...(pool ? { curve: true, pool } : {}),
+      ...(devBuy ? { devBuy } : {}),
     };
     await store.update('coins.json', [], (all) => [coin, ...all]);
     // The pet writes its first diary entry right away. The reply does not wait for it.

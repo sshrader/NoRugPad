@@ -20,12 +20,12 @@ export const dbcClient = (connection: Connection) => new DynamicBondingCurveClie
 export async function createCoinOnCurve(
   connection: Connection,
   wallet: WalletContextState,
-  input: { name: string; symbol: string; uri: string },
+  input: { name: string; symbol: string; uri: string; devBuySol?: number },
   onStage: (s: 'signing' | 'confirming') => void,
 ): Promise<{ mint: string; signature: string }> {
   if (!wallet.publicKey || !wallet.sendTransaction) throw new Error('Connect a wallet first.');
   const mint = Keypair.generate();
-  const tx = await dbcClient(connection).creator.createPool({
+  const createPoolParam = {
     baseMint: mint.publicKey,
     config: new PublicKey(DBC_CONFIG),
     name: input.name,
@@ -33,7 +33,31 @@ export async function createCoinOnCurve(
     uri: input.uri,
     payer: wallet.publicKey,
     poolCreator: wallet.publicKey,
-  });
+  };
+  const client = dbcClient(connection);
+  let tx: Transaction;
+  if (input.devBuySol && input.devBuySol > 0) {
+    // Block zero: the pool is created and the creator's buy happens inside the SAME transaction, so nobody
+    // (no sniper, no bot) can buy before the creator. Nobody can front-run a pool that does not exist yet,
+    // so there is no slippage to guard against and the minimum out can stay at zero.
+    // The SDK exposes this on one of its services depending on the version, so look in both.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const svc: any = [(client as any).pool, (client as any).creator].find((s) => typeof s?.createPoolWithFirstBuy === 'function');
+    if (!svc) throw new Error('This version of the curve SDK cannot do a dev buy at launch.');
+    const out = await svc.createPoolWithFirstBuy({
+      createPoolParam,
+      firstBuyParam: {
+        buyer: wallet.publicKey,
+        receiver: wallet.publicKey,
+        buyAmount: toUnits(input.devBuySol, QUOTE_DECIMALS),
+        minimumAmountOut: new BN(0),
+        referralTokenAccount: null,
+      },
+    });
+    tx = out.createPoolTx ?? out; // some versions return the transaction itself
+  } else {
+    tx = await client.creator.createPool(createPoolParam);
+  }
   const latest = await connection.getLatestBlockhash('confirmed');
   tx.feePayer = wallet.publicKey;
   tx.recentBlockhash = latest.blockhash;
