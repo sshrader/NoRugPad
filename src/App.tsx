@@ -11,15 +11,7 @@ import CoinPage from './pages/CoinPage';
 import Admin from './pages/Admin';
 
 function Paw() {
-  return (
-    <svg className="paw" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true">
-      <ellipse cx="8" cy="13" rx="2.6" ry="3.4" />
-      <ellipse cx="13" cy="8" rx="2.6" ry="3.6" />
-      <ellipse cx="19" cy="8" rx="2.6" ry="3.6" />
-      <ellipse cx="24" cy="13" rx="2.6" ry="3.4" />
-      <path d="M16 15c-4.3 0-7.6 3.8-7.6 7 0 2.4 1.9 3.7 4.3 3.7 1.3 0 2.2-.6 3.3-.6s2 .6 3.3.6c2.4 0 4.3-1.3 4.3-3.7 0-3.2-3.3-7-7.6-7z" />
-    </svg>
-  );
+  return <img className="paw" src="/logo.png" width={32} height={32} alt="" />;
 }
 
 export default function App() {

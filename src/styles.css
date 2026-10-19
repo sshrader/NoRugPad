@@ -1,4 +1,4 @@
-/* Dark teal ink with one coral accent. Light theme follows the system setting. */
+/* Dark teal ink with one violet accent. Light theme follows the system setting. */
 :root {
   --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
   --font-body: 'Figtree', system-ui, sans-serif;
@@ -9,9 +9,9 @@
   --line: #27373c;
   --fg: #e8eeeb;
   --muted: #8fa3a5;
-  --accent: #ff7b5c;
-  --accent-ink: #1f0c06;
-  --accent-text: #ff9078;
+  --accent: #8b7bff;
+  --accent-ink: #0d0a2a;
+  --accent-text: #b5a9ff;
   --ok: #5eddb4;
   --bad: #ff6b7a;
   color-scheme: dark;
@@ -24,9 +24,9 @@
     --line: #d3deda;
     --fg: #0f1b1e;
     --muted: #566b6e;
-    --accent: #e8532f;
+    --accent: #5b46e8;
     --accent-ink: #ffffff;
-    --accent-text: #bf3a19;
+    --accent-text: #4a35c9;
     --ok: #0b8a65;
     --bad: #cc3547;
     color-scheme: light;
@@ -59,7 +59,7 @@ img { max-width: 100%; }
 .top { border-bottom: 1px solid var(--line); background: var(--bg); position: sticky; top: 0; z-index: 10; }
 .top-in { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding-block: 12px; }
 .brand { display: flex; align-items: center; gap: 9px; color: var(--fg); text-decoration: none; font: 800 22px var(--font-display); letter-spacing: -0.03em; }
-.paw { width: 26px; height: 26px; color: var(--accent); }
+.paw { width: 32px; height: 32px; border-radius: 9px; display: block; box-shadow: 0 0 0 1px var(--line); }
 .nav { display: flex; gap: 4px; }
 .nav a { color: var(--muted); text-decoration: none; font-weight: 600; border-radius: 999px; padding: 7px 14px; }
 .nav a:hover { color: var(--fg); }

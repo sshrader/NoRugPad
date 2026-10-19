@@ -1,20 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Pawpad logo">
   <defs>
     <radialGradient id="bg" cx="50%" cy="38%" r="80%">
-      <stop offset="0" stop-color="#1b2a2e"/>
-      <stop offset="1" stop-color="#0a1012"/>
+      <stop offset="0" stop-color="#162433"/>
+      <stop offset="1" stop-color="#080d14"/>
     </radialGradient>
-    <linearGradient id="paw" x1="0.15" y1="0" x2="0.85" y2="1">
-      <stop offset="0" stop-color="#ffb07a"/>
-      <stop offset="0.5" stop-color="#ff7b5c"/>
-      <stop offset="1" stop-color="#ff4f7a"/>
+    <linearGradient id="paw" x1="0.12" y1="0" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#c4b5ff"/>
+      <stop offset="0.45" stop-color="#7f6cff"/>
+      <stop offset="1" stop-color="#22d3ee"/>
     </linearGradient>
     <radialGradient id="glow" cx="50%" cy="58%" r="50%">
-      <stop offset="0" stop-color="#ff7b5c" stop-opacity="0.38"/>
-      <stop offset="1" stop-color="#ff7b5c" stop-opacity="0"/>
+      <stop offset="0" stop-color="#7f6cff" stop-opacity="0.40"/>
+      <stop offset="0.6" stop-color="#22d3ee" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff" stop-opacity="0.5"/>
+      <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
       <stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
     <mask id="pad">
