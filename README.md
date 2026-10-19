@@ -108,6 +108,8 @@ Pawpad uses Meteora's Dynamic Bonding Curve program, so there is no curve code o
 4. **Graduation:** when the curve fills, Meteora's keeper moves the coin to a DAMM v2 pool. The Trade box then points people to a DEX, and market cap comes from DexScreener in `MARKET_MODE=live`.
 5. **Market cap** for curve coins is read from the curve price (market cap in SOL times the SOL price from DexScreener; `SOL_USD_FALLBACK` is used if that lookup fails).
 
+**Block-zero dev buy.** With the curve on, the Launch form has an optional dev buy (in SOL). The creator's buy is built into the same transaction as pool creation (`createPoolWithFirstBuy`), so nobody can buy before the creator. The server reads the tokens the creator holds straight from that transaction and shows "Block-zero dev buy: N tokens (x% of supply)" on the coin page, so it is always disclosed and cannot be faked from the browser. The cap is `VITE_MAX_DEV_BUY_SOL` (default 5). Test it on devnet before using it on mainnet.
+
 With `VITE_DBC_CONFIG` empty the app keeps the older plain-token launch (no trading).
 
 ### If you see `429 Too many requests`

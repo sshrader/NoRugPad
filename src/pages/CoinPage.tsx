@@ -93,6 +93,12 @@ export default function CoinPage({ mint }: { mint: string }) {
         </div>
       </section>
 
+      {coin.devBuy && (
+        <p className="card devnote" role="note">
+          <b>Block-zero dev buy:</b> the creator bought {coin.devBuy.tokens.toLocaleString('en-US', { maximumFractionDigits: 0 })} tokens ({coin.devBuy.pct}% of supply) in the same transaction that created the pool.
+        </p>
+      )}
+
       <MarketChart mint={coin.mint} />
 
       <section className="card catcard">

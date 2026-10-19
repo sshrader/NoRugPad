@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
-import { CURVE_ON, IS_MAINNET, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, explorerTx } from '../config';
+import { CURVE_ON, IS_MAINNET, MAX_DEV_BUY_SOL, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LAUNCH_CURVE, explorerAddress, explorerTx } from '../config';
 import { createCoin } from '../lib/createCoin';
 import { createCoinOnCurve } from '../lib/dbc';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
@@ -36,6 +36,8 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
   const [website, setWebsite] = useState('');
   const [twitter, setTwitter] = useState('');
   const [telegram, setTelegram] = useState('');
+  const [devBuyOn, setDevBuyOn] = useState(false);
+  const [devBuy, setDevBuy] = useState('0.1');
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -80,7 +82,11 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
     if (!name.trim()) return setError('Give your coin a name.');
     if (!/^[A-Z0-9]{2,10}$/.test(symbol)) return setError('Ticker must be 2-10 letters or numbers.');
     if (!image) return setError('Choose an image for your coin.');
-    const need = CURVE_ON ? MIN_SOL_TO_LAUNCH_CURVE : MIN_SOL_TO_LAUNCH;
+    const devBuySol = CURVE_ON && devBuyOn ? Number(devBuy) : 0;
+    if (devBuyOn && CURVE_ON && !(devBuySol >= 0.01 && devBuySol <= MAX_DEV_BUY_SOL)) {
+      return setError(`The dev buy must be between 0.01 and ${MAX_DEV_BUY_SOL} SOL.`);
+    }
+    const need = (CURVE_ON ? MIN_SOL_TO_LAUNCH_CURVE : MIN_SOL_TO_LAUNCH) + devBuySol;
     if (balance !== null && balance < need) {
       return setError(`You need about ${need} SOL to launch.${IS_MAINNET ? '' : ' Use Get test SOL first.'}`);
     }
@@ -94,7 +100,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       const { mint, signature } = await launch(
         connection,
         wallet,
-        { name: name.trim(), symbol, uri: up.metadataUri },
+        { name: name.trim(), symbol, uri: up.metadataUri, devBuySol },
         (stage) => setPhase(stage),
       );
 
@@ -110,6 +116,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       setWebsite('');
       setTwitter('');
       setTelegram('');
+      setDevBuyOn(false);
       setImage(null);
     } catch (err) {
       setPhase('idle');
@@ -171,6 +178,34 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
         <label htmlFor="web">Website <span className="muted">(optional)</span></label>
         <input id="web" className="in" type="text" value={website} maxLength={200} placeholder="https://yourcoin.xyz" onChange={(e) => setWebsite(e.target.value)} autoComplete="off" />
       </div>
+
+      {CURVE_ON && (
+        <div className="field devbuy">
+          <label className="check">
+            <input type="checkbox" checked={devBuyOn} onChange={(e) => setDevBuyOn(e.target.checked)} /> Block-zero dev buy <span className="muted">(optional)</span>
+          </label>
+          {devBuyOn && (
+            <>
+              <div className="row2">
+                <input className="in" type="number" min={0.01} max={MAX_DEV_BUY_SOL} step={0.01} value={devBuy} onChange={(e) => setDevBuy(e.target.value)} aria-label="Dev buy in SOL" />
+                <span className="muted small">SOL, up to {MAX_DEV_BUY_SOL}</span>
+              </div>
+              <p className="muted small">
+                You buy in the same transaction that creates the pool, so nobody can buy before you. It moves the price up the curve like any buy, and the size is shown publicly on your coin page.
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
+      {!CURVE_ON && (
+        <div className="field devbuy">
+          <label className="check">
+            <input type="checkbox" disabled /> Block-zero dev buy <span className="muted">(needs the bonding curve)</span>
+          </label>
+          <p className="muted small">The dev buy happens inside the pool-creation transaction, so it only works once the bonding curve is set up. Run <code>npm run dbc-config</code> and put the result in <code>.env</code> as DBC_CONFIG and VITE_DBC_CONFIG, then restart.</p>
+        </div>
+      )}
 
       <ul className="checks">
         {CURVE_ON ? (

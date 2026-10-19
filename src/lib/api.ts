@@ -16,6 +16,8 @@ export type Coin = {
   createdAt: number;
   curve?: boolean;
   pool?: string;
+  /** Verified from the launch transaction: what the creator bought in the very same block as the pool. */
+  devBuy?: { tokens: number; pct: number };
 };
 
 export type UploadResult = { uploadId: string; metadataUri: string; imageUrl: string; storage: 'pinata' | 'local' };

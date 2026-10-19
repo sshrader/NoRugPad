@@ -1,4 +1,4 @@
-import { Buffer } from 'buffer/'; // trailing slash = the npm package, not Node's built-in
+import { Buffer } from 'buffer/index.js'; // trailing slash = the npm package, not Node's built-in
 import {
   Connection,
   Keypair,
