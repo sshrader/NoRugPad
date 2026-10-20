@@ -6,6 +6,7 @@ import { createCoinOnCurve } from '../lib/dbc';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
 import { voiceLabel } from '../lib/pets';
 import { href } from '../router';
+import { PLATFORMS, platformUrl } from '../lib/platforms';
 
 type Phase = 'idle' | 'uploading' | 'signing' | 'confirming' | 'registering' | 'done';
 
@@ -36,6 +37,13 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
   const [website, setWebsite] = useState('');
   const [twitter, setTwitter] = useState('');
   const [telegram, setTelegram] = useState('');
+  const [platform, setPlatform] = useState<string>(() => {
+    try {
+      return localStorage.getItem('pp-platform') || 'site';
+    } catch {
+      return 'site';
+    }
+  });
   const [devBuyOn, setDevBuyOn] = useState(false);
   const [devBuy, setDevBuy] = useState('0.1');
   const [image, setImage] = useState<File | null>(null);
@@ -107,6 +115,8 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       setPhase('registering');
       const coin = await registerCoin({ mint, signature, creator: wallet.publicKey.toBase58(), uploadId: up.uploadId });
       setCreated(coin);
+      const ext = platformUrl(platform, coin.mint, coin.pool);
+      if (ext) window.open(ext, '_blank', 'noopener');
       setPhase('done');
       onCreated(coin);
       setName('');
@@ -207,6 +217,27 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
         </div>
       )}
 
+      <div className="field">
+        <label htmlFor="plat">After launch, open my coin on</label>
+        <select
+          id="plat"
+          className="in"
+          value={platform}
+          onChange={(e) => {
+            setPlatform(e.target.value);
+            try {
+              localStorage.setItem('pp-platform', e.target.value);
+            } catch {
+              /* ignore */
+            }
+          }}
+        >
+          {PLATFORMS.map((p) => (
+            <option key={p.id} value={p.id}>{p.label}</option>
+          ))}
+        </select>
+      </div>
+
       <ul className="checks">
         {CURVE_ON ? (
           <>
@@ -242,6 +273,11 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
           <a className="btn primary big" href={href.coin(created.mint)}>
             Go to your coin page →
           </a>
+          {platformUrl(platform, created.mint, created.pool) && (
+            <a className="btn" href={platformUrl(platform, created.mint, created.pool)!} target="_blank" rel="noreferrer">
+              Open on {PLATFORMS.find((p) => p.id === platform)?.label} →
+            </a>
+          )}
           <p className="links mono">
             <a href={explorerAddress(created.mint)} target="_blank" rel="noreferrer">View token</a>
             <a href={explorerTx(created.signature)} target="_blank" rel="noreferrer">View transaction</a>
