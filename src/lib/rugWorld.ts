@@ -234,6 +234,7 @@ export function createBattle(opts: { rand?: () => number } = {}) {
     let bs = 1e9;
     for (const e of enemies) {
       if (e.state === 'dying' || e.state === 'flee') continue;
+      if (e.x > BW - 14) continue; // still walking in from off-screen: wait until it is in view
       let s = e.x;
       if (e.state === 'pull') s -= 600; // the ones tugging the rug come first
       if (s < bs) {
@@ -311,7 +312,7 @@ export function createBattle(opts: { rand?: () => number } = {}) {
       if (hero.down <= 0) hero.hp = 60;
     } else {
       hero.hp = Math.min(hero.max, hero.hp + 2.5 * dt);
-      const tgt = enemies.find((e) => e.id === hero.target && e.state !== 'dying' && e.state !== 'flee');
+      const tgt = enemies.find((e) => e.id === hero.target && e.state !== 'dying' && e.state !== 'flee' && e.x < BW + 4);
       if (hero.mode === 'dash') {
         if (!tgt) {
           hero.mode = 'idle';
