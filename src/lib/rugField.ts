@@ -5,6 +5,8 @@
 
 export const FW = 480;
 export const FH = 272;
+export const SCALE = 2; // the canvas is drawn at 2x so text and edges stay sharp when it is scaled to fit the page
+const UI_FONT = "'IBM Plex Sans', system-ui, sans-serif";
 const CX = FW / 2;
 const CY = FH / 2;
 export const MAX_DEFENDERS = 40;
@@ -24,6 +26,7 @@ export type FieldStats = {
   vault: number;
   meter: number;
   defenders: number;
+  banner: { text: string; color: string } | null;
   top: { mint: string; name: string; symbol: string; kills: number }[];
 };
 
@@ -655,7 +658,7 @@ export function createField(opts: { rand?: () => number } = {}) {
     g.stroke();
     circle(g, CX, CY, 8, '#ffd36b');
     g.fillStyle = '#2d3a5e';
-    g.font = 'bold 8px monospace';
+    g.font = `700 10px ${UI_FONT}`;
     g.textAlign = 'center';
     g.fillText('LP', CX, CY + 3);
     px(g, CX - 20, CY + 20, 40, 5, '#0c1315');
@@ -753,7 +756,7 @@ export function createField(opts: { rand?: () => number } = {}) {
       px(g, -12, -17 + bob, 24, 9, '#fff6c8');
       px(g, -12, -17 + bob, 24, 1, '#c0394b');
       g.fillStyle = '#c0394b';
-      g.font = 'bold 6px monospace';
+      g.font = `700 7px ${UI_FONT}`;
       g.textAlign = 'center';
       g.fillText('FREE $$$', 0, -10 + bob);
     } else {
@@ -800,19 +803,20 @@ export function createField(opts: { rand?: () => number } = {}) {
   }
 
   function bubble(g: CanvasRenderingContext2D, x: number, y: number, text: string) {
-    g.font = 'bold 8px monospace';
+    g.font = `600 10px ${UI_FONT}`;
     g.textAlign = 'left';
-    const w = Math.ceil(g.measureText(text).width) + 8;
+    const w = Math.ceil(g.measureText(text).width) + 10;
     const bx = Math.max(3, Math.min(FW - w - 3, Math.round(x - w / 2)));
-    const by = Math.max(3, Math.round(y - 12));
+    const by = Math.max(3, Math.round(y - 14));
     g.fillStyle = '#fff6c8';
-    g.fillRect(bx, by, w, 12);
-    g.fillRect(Math.round(x) - 2, by + 12, 4, 3);
+    g.fillRect(bx, by, w, 14);
+    g.fillRect(Math.round(x) - 2, by + 14, 4, 3);
     g.fillStyle = '#16122b';
-    g.fillText(text, bx + 4, by + 9);
+    g.fillText(text, bx + 5, by + 10.5);
   }
 
   function draw(g: CanvasRenderingContext2D) {
+    g.setTransform(SCALE, 0, 0, SCALE, 0, 0);
     g.save();
     g.imageSmoothingEnabled = false;
     if (shake > 0.3) g.translate(Math.round(rr(-shake, shake) * 0.5), Math.round(rr(-shake, shake) * 0.5));
@@ -832,7 +836,7 @@ export function createField(opts: { rand?: () => number } = {}) {
       px(g, s.x - 7, s.y - 4, 14, 8, s.back ? '#8bd0ff' : '#fff6c8');
       px(g, s.x - 7, s.y - 4, 14, 2, s.back ? '#3a7fb8' : '#c0394b');
       g.fillStyle = s.back ? '#16365a' : '#c0394b';
-      g.font = 'bold 5px monospace';
+      g.font = `700 6px ${UI_FONT}`;
       g.textAlign = 'center';
       g.fillText('LINK', s.x, s.y + 3);
     }
@@ -847,12 +851,14 @@ export function createField(opts: { rand?: () => number } = {}) {
       }
     }
     g.globalAlpha = 1;
-    g.font = 'bold 8px monospace';
+    g.font = `700 11px ${UI_FONT}`;
     g.textAlign = 'center';
+    g.lineJoin = 'round';
+    g.lineWidth = 3;
+    g.strokeStyle = '#000000';
     for (const f of floats) {
       g.globalAlpha = Math.min(1, f.life * 2);
-      g.fillStyle = '#000000';
-      g.fillText(f.text, f.x + 1, f.y + 1);
+      g.strokeText(f.text, f.x, f.y);
       g.fillStyle = f.color;
       g.fillText(f.text, f.x, f.y);
     }
@@ -866,38 +872,8 @@ export function createField(opts: { rand?: () => number } = {}) {
       }
     }
     g.restore();
-    drawHud(g);
   }
 
-  function drawHud(g: CanvasRenderingContext2D) {
-    g.textAlign = 'left';
-    g.font = 'bold 8px monospace';
-    g.fillStyle = 'rgba(12,19,21,0.7)';
-    g.fillRect(6, 6, 100, 14);
-    g.fillStyle = '#b5a9ff';
-    g.fillText('NORUGPAD FIELD', 11, 16);
-    g.textAlign = 'right';
-    g.fillStyle = 'rgba(12,19,21,0.7)';
-    g.fillRect(FW - 66, 6, 60, 14);
-    g.fillStyle = '#e8eeeb';
-    g.fillText(`WAVE ${Math.max(1, wave.n)}`, FW - 11, 16);
-    g.textAlign = 'center';
-    const full = meter >= 100;
-    px(g, FW / 2 - 61, FH - 14, 122, 8, '#0c1315');
-    px(g, FW / 2 - 60, FH - 13, Math.round(120 * (meter / 100)), 6, full && Math.floor(time * 6) % 2 === 0 ? '#ffffff' : '#b5a9ff');
-    g.font = 'bold 7px monospace';
-    g.fillStyle = '#e8eeeb';
-    g.fillText('DIAMOND HANDS', FW / 2, FH - 17);
-    if (banner.t > 0) {
-      g.globalAlpha = Math.min(1, banner.t * 2);
-      g.font = 'bold 16px monospace';
-      g.fillStyle = '#000';
-      g.fillText(banner.text, FW / 2 + 1, 51);
-      g.fillStyle = banner.color;
-      g.fillText(banner.text, FW / 2, 50);
-      g.globalAlpha = 1;
-    }
-  }
 
   return {
     update,
@@ -909,7 +885,7 @@ export function createField(opts: { rand?: () => number } = {}) {
         .sort((a, b) => b.kills - a.kills)
         .slice(0, 5)
         .map((d) => ({ mint: d.mint, name: d.name, symbol: d.symbol, kills: d.kills }));
-      return { wave: Math.max(1, wave.n), rugs, scams, vault: Math.max(0, Math.round(vault)), meter: Math.round(meter), defenders: defs.length, top };
+      return { wave: Math.max(1, wave.n), rugs, scams, vault: Math.max(0, Math.round(vault)), meter: Math.round(meter), defenders: defs.length, banner: banner.t > 0 ? { text: banner.text, color: banner.color } : null, top };
     },
     /** Which coin's logo is under this point (in 480x272 canvas units), if any. */
     hitTest(x: number, y: number): string | null {

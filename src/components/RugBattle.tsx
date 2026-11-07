@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Coin } from '../lib/api';
-import { BH, BW, createBattle, type BattleStats } from '../lib/rugWorld';
+import { BH, BW, SCALE, createBattle, type BattleStats } from '../lib/rugWorld';
 
 // NoRugPad Arena: the coin's own logo fights off cartoon rug pullers, scammers and bots to protect the liquidity vault.
 // It is only a show. It does not read or change anything on chain. Tap the scene (or the button) when the meter is full for the special move.
@@ -48,8 +48,17 @@ export default function RugBattle({ coin }: { coin: Coin }) {
     const el = canvas.current;
     const g = el?.getContext('2d');
     if (!el || !g) return;
+    let lastKey = '';
+    const publish = () => {
+      const next = battle.stats();
+      const key = JSON.stringify(next);
+      if (key !== lastKey) {
+        lastKey = key;
+        setStats(next);
+      }
+    };
     battle.draw(g);
-    setStats(battle.stats());
+    publish();
     let raf = 0;
     let last = performance.now();
     let statT = 0;
@@ -60,9 +69,9 @@ export default function RugBattle({ coin }: { coin: Coin }) {
         battle.update(dt);
         battle.draw(g);
         statT += dt;
-        if (statT > 0.25) {
+        if (statT > 0.2) {
           statT = 0;
-          setStats(battle.stats());
+          publish();
         }
       }
       raf = requestAnimationFrame(frame);
@@ -85,7 +94,7 @@ export default function RugBattle({ coin }: { coin: Coin }) {
     <section className="card rug" aria-label="NoRugPad Arena" ref={box}>
       <div className="park-h">
         <div>
-          <p className="eyebrow mono">NoRugPad Arena</p>
+          <p className="eyebrow">NoRugPad Arena</p>
           <h3>{coin.name} guards the liquidity</h3>
         </div>
         <div className="rug-btns">
@@ -101,16 +110,33 @@ export default function RugBattle({ coin }: { coin: Coin }) {
       <div className="park-stage">
         <canvas
           ref={canvas}
-          width={BW}
-          height={BH}
+          width={BW * SCALE}
+          height={BH * SCALE}
           className="rug-canvas"
           role="img"
           aria-label={`A pixel battle scene. The logo of ${coin.name} fights cartoon rug pullers, scammers and bots to protect a liquidity vault.`}
           onClick={special}
         />
+        {s && (
+          <div className="hud" aria-hidden="true">
+            <span className="hud-wave">Wave {s.wave}</span>
+            {s.combo >= 3 && <span className="hud-combo">x{s.combo} combo</span>}
+            {s.banner && (
+              <span className="hud-banner" style={{ color: s.banner.color }}>
+                {s.banner.text}
+              </span>
+            )}
+            <div className={`hud-meter${s.meter >= 100 ? ' full' : ''}`}>
+              <span>{s.meter >= 100 ? 'Tap for diamond hands' : 'Diamond hands'}</span>
+              <i>
+                <b style={{ width: `${s.meter}%` }} />
+              </i>
+            </div>
+          </div>
+        )}
       </div>
 
-      <p className="rug-stats mono small" role="status">
+      <p className="rug-stats mono small">
         {s ? (
           <>
             <span>Wave {s.wave}</span>

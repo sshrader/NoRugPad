@@ -4,6 +4,8 @@
 
 export const BW = 480;
 export const BH = 272;
+export const SCALE = 2; // the canvas is drawn at 2x so text and edges stay sharp when it is scaled to fit the page
+const UI_FONT = "'IBM Plex Sans', system-ui, sans-serif";
 const GY = 214; // ground line (feet)
 const VAULT_X = 38;
 const HOME = 150; // where the hero waits between dashes
@@ -18,6 +20,7 @@ export type BattleStats = {
   meter: number; // 0..100, special move charge
   combo: number;
   heroHp: number;
+  banner: { text: string; color: string } | null;
 };
 
 type Kind = 'rugger' | 'scammer' | 'bot' | 'boss';
@@ -569,15 +572,12 @@ export function createBattle(opts: { rand?: () => number } = {}) {
     g.arc(x, GY - 20, 8, 0, Math.PI * 2);
     g.fill();
     g.fillStyle = '#2d3a5e';
-    g.font = 'bold 8px monospace';
+    g.font = `700 10px ${UI_FONT}`;
     g.textAlign = 'center';
     g.fillText('LP', x, GY - 17);
     // bar
     px(g, x - 19, GY - 52, 38, 5, '#0c1315');
     px(g, x - 18, GY - 51, Math.round(36 * ratio), 3, ratio < 0.3 ? '#ff6b7a' : '#5eddb4');
-    g.fillStyle = '#e8eeeb';
-    g.font = 'bold 7px monospace';
-    g.fillText('LIQUIDITY', x, GY - 56);
   }
 
   function drawHero(g: CanvasRenderingContext2D) {
@@ -773,20 +773,21 @@ export function createBattle(opts: { rand?: () => number } = {}) {
   }
 
   function bubble(g: CanvasRenderingContext2D, x: number, y: number, text: string, hot: boolean) {
-    g.font = 'bold 8px monospace';
+    g.font = `600 10px ${UI_FONT}`;
     g.textAlign = 'left';
-    const w = Math.ceil(g.measureText(text).width) + 8;
+    const w = Math.ceil(g.measureText(text).width) + 10;
     const bx = Math.max(3, Math.min(BW - w - 3, Math.round(x - w / 2)));
-    const by = Math.max(3, Math.round(y - 12));
+    const by = Math.max(3, Math.round(y - 14));
     g.fillStyle = hot ? '#ffffff' : '#fff6c8';
-    g.fillRect(bx, by, w, 12);
+    g.fillRect(bx, by, w, 14);
     g.fillStyle = hot ? '#ffffff' : '#fff6c8';
-    g.fillRect(Math.round(x) - 2, by + 12, 4, 3);
+    g.fillRect(Math.round(x) - 2, by + 14, 4, 3);
     g.fillStyle = '#16122b';
-    g.fillText(text, bx + 4, by + 9);
+    g.fillText(text, bx + 5, by + 10.5);
   }
 
   function draw(g: CanvasRenderingContext2D) {
+    g.setTransform(SCALE, 0, 0, SCALE, 0, 0);
     g.save();
     g.imageSmoothingEnabled = false;
     if (shake > 0.3) g.translate(Math.round(rr(-shake, shake) * 0.5), Math.round(rr(-shake, shake) * 0.5));
@@ -799,7 +800,7 @@ export function createBattle(opts: { rand?: () => number } = {}) {
       px(g, s.x - 8, s.y - 5, 16, 10, s.back ? '#8bd0ff' : '#fff6c8');
       px(g, s.x - 8, s.y - 5, 16, 2, s.back ? '#3a7fb8' : '#c0394b');
       g.fillStyle = s.back ? '#16365a' : '#c0394b';
-      g.font = 'bold 6px monospace';
+      g.font = `700 7px ${UI_FONT}`;
       g.textAlign = 'center';
       g.fillText('LINK', s.x, s.y + 3);
     }
@@ -825,12 +826,14 @@ export function createBattle(opts: { rand?: () => number } = {}) {
       }
     }
     g.globalAlpha = 1;
-    g.font = 'bold 9px monospace';
+    g.font = `700 11px ${UI_FONT}`;
     g.textAlign = 'center';
+    g.lineJoin = 'round';
+    g.lineWidth = 3;
+    g.strokeStyle = '#000000';
     for (const f of floats) {
       g.globalAlpha = Math.min(1, f.life * 2);
-      g.fillStyle = '#000000';
-      g.fillText(f.text, f.x + 1, f.y + 1);
+      g.strokeText(f.text, f.x, f.y);
       g.fillStyle = f.color;
       g.fillText(f.text, f.x, f.y);
     }
@@ -850,46 +853,8 @@ export function createBattle(opts: { rand?: () => number } = {}) {
       }
     }
     g.restore();
-    drawHud(g);
   }
 
-  function drawHud(g: CanvasRenderingContext2D) {
-    g.textAlign = 'left';
-    g.font = 'bold 8px monospace';
-    g.fillStyle = 'rgba(12,19,21,0.7)';
-    g.fillRect(6, 6, 96, 14);
-    g.fillStyle = '#b5a9ff';
-    g.fillText('NORUGPAD ARENA', 11, 16);
-    g.textAlign = 'right';
-    g.fillStyle = 'rgba(12,19,21,0.7)';
-    g.fillRect(BW - 66, 6, 60, 14);
-    g.fillStyle = '#e8eeeb';
-    g.fillText(`WAVE ${Math.max(1, wave.n)}`, BW - 11, 16);
-    g.textAlign = 'center';
-    if (combo >= 3) {
-      g.font = 'bold 12px monospace';
-      g.fillStyle = '#000';
-      g.fillText(`x${combo} COMBO`, BW / 2 + 1, 25);
-      g.fillStyle = '#ffd36b';
-      g.fillText(`x${combo} COMBO`, BW / 2, 24);
-    }
-    // special meter
-    const full = meter >= 100;
-    px(g, BW / 2 - 61, BH - 14, 122, 8, '#0c1315');
-    px(g, BW / 2 - 60, BH - 13, Math.round(120 * (meter / 100)), 6, full && Math.floor(time * 6) % 2 === 0 ? '#ffffff' : '#b5a9ff');
-    g.font = 'bold 7px monospace';
-    g.fillStyle = '#e8eeeb';
-    g.fillText(full ? 'TAP FOR DIAMOND HANDS' : 'DIAMOND HANDS', BW / 2, BH - 17);
-    if (banner.t > 0) {
-      g.globalAlpha = Math.min(1, banner.t * 2);
-      g.font = 'bold 16px monospace';
-      g.fillStyle = '#000';
-      g.fillText(banner.text, BW / 2 + 1, 71);
-      g.fillStyle = banner.color;
-      g.fillText(banner.text, BW / 2, 70);
-      g.globalAlpha = 1;
-    }
-  }
 
   return {
     update,
@@ -899,7 +864,7 @@ export function createBattle(opts: { rand?: () => number } = {}) {
       skin = s;
     },
     stats(): BattleStats {
-      return { wave: Math.max(1, wave.n), rugs, scams, vault: Math.max(0, Math.round(vault)), vaultMax: VAULT_MAX, meter: Math.round(meter), combo, heroHp: Math.round(hero.hp) };
+      return { wave: Math.max(1, wave.n), rugs, scams, vault: Math.max(0, Math.round(vault)), vaultMax: VAULT_MAX, meter: Math.round(meter), combo, heroHp: Math.round(hero.hp), banner: banner.t > 0 ? { text: banner.text, color: banner.color } : null };
     },
     ready() {
       return meter >= 100 && hero.down <= 0;

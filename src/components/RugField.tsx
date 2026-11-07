@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Coin } from '../lib/api';
-import { FH, FW, MAX_DEFENDERS, createField, type FieldStats } from '../lib/rugField';
+import { FH, FW, MAX_DEFENDERS, SCALE, createField, type FieldStats } from '../lib/rugField';
 import { href } from '../router';
 
 // NoRugPad Field: every recent coin's logo defends a shared liquidity vault from cartoon rug pullers, scammers and bots.
@@ -62,8 +62,17 @@ export default function RugField({ coins }: { coins: Coin[] }) {
     const el = canvas.current;
     const g = el?.getContext('2d');
     if (!el || !g) return;
+    let lastKey = '';
+    const publish = () => {
+      const next = field.stats();
+      const key = JSON.stringify(next);
+      if (key !== lastKey) {
+        lastKey = key;
+        setStats(next);
+      }
+    };
     field.draw(g);
-    setStats(field.stats());
+    publish();
     let raf = 0;
     let last = performance.now();
     let statT = 0;
@@ -74,9 +83,9 @@ export default function RugField({ coins }: { coins: Coin[] }) {
         field.update(dt);
         field.draw(g);
         statT += dt;
-        if (statT > 0.5) {
+        if (statT > 0.2) {
           statT = 0;
-          setStats(field.stats());
+          publish();
         }
       }
       raf = requestAnimationFrame(frame);
@@ -104,7 +113,7 @@ export default function RugField({ coins }: { coins: Coin[] }) {
     <section className="card rug field" aria-label="NoRugPad Field" ref={box}>
       <div className="park-h">
         <div>
-          <p className="eyebrow mono">NoRugPad Field</p>
+          <p className="eyebrow">NoRugPad Field</p>
           <h3>{shown.length === 1 ? '1 coin is' : `${shown.length} coins are`} guarding the vault</h3>
         </div>
         <button type="button" className="btn" onClick={() => setPlaying((p) => !p)} aria-pressed={!playing}>
@@ -115,8 +124,8 @@ export default function RugField({ coins }: { coins: Coin[] }) {
       <div className="park-stage">
         <canvas
           ref={canvas}
-          width={FW}
-          height={FH}
+          width={FW * SCALE}
+          height={FH * SCALE}
           className="rug-canvas"
           role="img"
           aria-label={`A top-down pixel battle scene. The logos of ${shown.length} coins fight cartoon rug pullers, scammers and bots to protect a liquidity vault.`}
@@ -128,6 +137,22 @@ export default function RugField({ coins }: { coins: Coin[] }) {
             if (mint) window.location.hash = href.coin(mint);
           }}
         />
+        {s && (
+          <div className="hud" aria-hidden="true">
+            <span className="hud-wave">Wave {s.wave}</span>
+            {s.banner && (
+              <span className="hud-banner" style={{ color: s.banner.color }}>
+                {s.banner.text}
+              </span>
+            )}
+            <div className={`hud-meter${s.meter >= 100 ? ' full' : ''}`}>
+              <span>{s.meter >= 100 ? 'Diamond hands ready' : 'Diamond hands'}</span>
+              <i>
+                <b style={{ width: `${s.meter}%` }} />
+              </i>
+            </div>
+          </div>
+        )}
         {hover && (
           <a
             className="park-tag me"
@@ -141,7 +166,7 @@ export default function RugField({ coins }: { coins: Coin[] }) {
       </div>
 
       <div className="field-bottom">
-        <p className="rug-stats mono small" role="status">
+        <p className="rug-stats mono small">
           {s ? (
             <>
               <span>Wave {s.wave}</span>
@@ -153,7 +178,7 @@ export default function RugField({ coins }: { coins: Coin[] }) {
         </p>
         {s && s.top.length > 0 && (
           <div className="field-top">
-            <span className="eyebrow mono">Top defenders</span>
+            <span className="eyebrow">Top defenders</span>
             <ol>
               {s.top.map((t) => (
                 <li key={t.mint}>
