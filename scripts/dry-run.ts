@@ -34,7 +34,7 @@ function loadPayer(): Keypair {
 
 const payer = loadPayer();
 const mint = Keypair.generate();
-const input = { name: 'Dry Run Cat', symbol: 'DRYCAT', uri: 'https://example.com/metadata.json' };
+const input = { name: 'Dry Run Coin', symbol: 'DRYRUN', uri: 'https://example.com/metadata.json' };
 
 function assert(cond: unknown, msg: string): asserts cond {
   if (!cond) {

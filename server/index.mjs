@@ -5,11 +5,6 @@ import path from 'node:path';
 import express from 'express';
 import multer from 'multer';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { PETS } from './pets.mjs';
-import { reply as catReply } from './petbrain.mjs';
-import { llmInfo } from './llm.mjs';
-import { rateLimit, budgetUsed } from './limits.mjs';
-import { listPosts, makePost, startScheduler } from './lore.mjs';
 import { getMarket } from './market.mjs';
 import { curveEnabled, verifyPool } from './curve.mjs';
 import { applyGuards, checkNetwork, launchAllowed, launchesRestricted } from './guard.mjs';
@@ -108,7 +103,7 @@ async function saveLocal(buffer, filename) {
 /* ------------------------------ routes ------------------------------ */
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, rpc: RPC_HOST, storage: PINATA_JWT ? 'pinata' : 'local', llm: { ...llmInfo(), callsToday: budgetUsed() } });
+  res.json({ ok: true, rpc: RPC_HOST, storage: PINATA_JWT ? 'pinata' : 'local' });
 });
 
 // Step 1 of creating a coin: store the image and the metadata JSON, return the metadata link
@@ -178,8 +173,6 @@ async function retry(fn, tries = 8, ms = 1000) {
   }
   return null;
 }
-
-const pickCat = (mint) => PETS[crypto.createHash('sha256').update(mint).digest().readUInt16BE(0) % PETS.length];
 
 // Step 3: after the wallet signed and the transaction confirmed, the client registers the coin.
 // The server checks the chain itself instead of believing the client.
@@ -255,14 +248,11 @@ app.post('/api/coins', async (req, res) => {
       ...(up.telegram ? { telegram: up.telegram } : {}),
       imageUrl: up.imageUrl,
       metadataUri: up.metadataUri,
-      cat: pickCat(mintKey.toBase58()),
       createdAt: Date.now(),
       ...(pool ? { curve: true, pool } : {}),
       ...(devBuy ? { devBuy } : {}),
     };
     await store.update('coins.json', [], (all) => [coin, ...all]);
-    // The pet writes its first diary entry right away. The reply does not wait for it.
-    makePost(coin).catch((e) => console.error('first post failed:', e.message));
     res.status(201).json(coin);
   } catch (e) {
     console.error('register failed', e);
@@ -275,10 +265,9 @@ app.get('/api/coins', async (_req, res) => {
   res.json(coins.slice(0, 100));
 });
 
-/* ------------------------------ cats ------------------------------ */
+/* ------------------------------ coins and market ------------------------------ */
 
 const findCoin = async (mint) => (await store.get('coins.json', [])).find((c) => c.mint === mint);
-const asLimit = (v, fallback) => (Number.isFinite(Number(v)) ? Number(v) : fallback);
 
 app.get('/api/coins/:mint', async (req, res) => {
   const coin = await findCoin(req.params.mint);
@@ -305,36 +294,6 @@ app.get('/api/coins/:mint/market', async (req, res) => {
   res.json(await getMarket(coin.mint, coin, connection));
 });
 
-// The cats' latest lore across all coins.
-app.get('/api/posts', async (req, res) => {
-  res.json(await listPosts({ limit: asLimit(req.query.limit, 20) }));
-});
-
-app.get('/api/coins/:mint/posts', async (req, res) => {
-  if (!(await findCoin(req.params.mint))) return bad(res, 'Unknown coin.', 404);
-  res.json(await listPosts({ mint: req.params.mint, limit: asLimit(req.query.limit, 20) }));
-});
-
-// Text a coin's cat. The client sends the last few turns so the cat remembers the conversation.
-app.post('/api/coins/:mint/chat', async (req, res) => {
-  try {
-    if (!rateLimit(`chat:${req.ip}`, 12, 60_000)) return bad(res, 'Slow down a little. Try again in a minute.', 429);
-    const coin = await findCoin(req.params.mint);
-    if (!coin) return bad(res, 'Unknown coin.', 404);
-    const message = clean(req.body?.message, 240);
-    if (!message) return bad(res, 'Write a message first.');
-    const history = (Array.isArray(req.body?.history) ? req.body.history : [])
-      .slice(-6)
-      .map((h) => ({ role: h?.role === 'cat' ? 'assistant' : 'user', content: clean(h?.text, 300) }))
-      .filter((h) => h.content);
-    const out = await catReply({ coin, cat: coin.cat, history, message });
-    res.json({ reply: out.text, source: out.source });
-  } catch (e) {
-    console.error('chat failed', e);
-    bad(res, 'Your pet is napping. Try again.', 500);
-  }
-});
-
 // In production, serve the built client from the same process.
 const DIST = path.resolve('dist');
 if (await fs.stat(DIST).then(() => true, () => false)) {
@@ -355,8 +314,5 @@ const network = await checkNetwork(connection).catch((e) => {
 
 app.listen(PORT, () => {
   console.log(`Network: ${network}${launchesRestricted() ? ' (launches limited to the allowlist)' : ''}`);
-  const llm = llmInfo();
-  console.log(`Pawpad API on http://localhost:${PORT}  (rpc: ${RPC_HOST}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);
-  console.log(llm.enabled ? `Cats: AI on (${llm.model} via ${llm.host})` : 'Cats: canned lines only. Add LLM_API_KEY to .env to turn the AI on.');
-  startScheduler();
+  console.log(`NoRugPad API on http://localhost:${PORT}  (rpc: ${RPC_HOST}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);
 });

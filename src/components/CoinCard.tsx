@@ -1,13 +1,10 @@
-import type { Coin, Market, Post } from '../lib/api';
+import type { Coin, Market } from '../lib/api';
 import { usd } from './MarketChart';
-import { voiceLabel } from '../lib/pets';
 import { ago } from '../lib/time';
 import { href } from '../router';
-import PetAvatar from './PetAvatar';
 
 // One coin on the Explore page. The whole card is a link to the coin's page.
-export default function CoinCard({ coin, latest, market }: { coin: Coin; latest?: Post; market?: Omit<Market, 'history'> }) {
-  const cat = coin.cat;
+export default function CoinCard({ coin, market }: { coin: Coin; market?: Omit<Market, 'history'> }) {
   return (
     <a className="card coincard" href={href.coin(coin.mint)}>
       <div className="cc-top">
@@ -33,14 +30,6 @@ export default function CoinCard({ coin, latest, market }: { coin: Coin; latest?
         )}
       </div>
       {coin.description && <p className="desc clamp2">{coin.description}</p>}
-      <div className="cc-cat">
-        <PetAvatar id={cat.id} name={cat.name} size={32} />
-        <p className="clamp3">
-          <b>{cat.name}</b> <span className="muted">· {voiceLabel(cat.voice)}</span>
-          <br />
-          <span className="muted">{latest ? latest.text : `${cat.name} is writing the first entry…`}</span>
-        </p>
-      </div>
     </a>
   );
 }

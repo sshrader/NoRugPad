@@ -1,5 +1,3 @@
-export type Cat = { id: string; name: string; breed: string; voice: string; species?: 'cat' | 'dog' };
-
 export type Coin = {
   mint: string;
   creator: string;
@@ -12,7 +10,6 @@ export type Coin = {
   telegram?: string;
   imageUrl: string;
   metadataUri: string;
-  cat: Cat;
   createdAt: number;
   curve?: boolean;
   pool?: string;
@@ -51,43 +48,6 @@ export async function listCoins(): Promise<Coin[]> {
 
 export async function getCoin(mint: string): Promise<Coin> {
   return json<Coin>(await fetch(`/api/coins/${encodeURIComponent(mint)}`));
-}
-
-/* ------------------------------ cats ------------------------------ */
-
-export type Post = {
-  id: string;
-  mint: string;
-  symbol: string;
-  coinName: string;
-  catId: string;
-  catName: string;
-  voice: string;
-  text: string;
-  ts: number;
-  chapter: number;
-  source: 'ai' | 'template';
-  model: string | null;
-};
-
-export type ChatTurn = { role: 'me' | 'cat'; text: string };
-
-export async function listPosts(limit = 12): Promise<Post[]> {
-  return json<Post[]>(await fetch(`/api/posts?limit=${limit}`));
-}
-
-export async function listCoinPosts(mint: string): Promise<Post[]> {
-  return json<Post[]>(await fetch(`/api/coins/${encodeURIComponent(mint)}/posts?limit=15`));
-}
-
-export async function sendChat(mint: string, message: string, history: ChatTurn[]): Promise<{ reply: string; source: 'ai' | 'template' }> {
-  return json(
-    await fetch(`/api/coins/${encodeURIComponent(mint)}/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message, history: history.slice(-6) }),
-    }),
-  );
 }
 
 export type Market = {

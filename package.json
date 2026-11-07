@@ -1,5 +1,5 @@
 {
-  "name": "pawpad",
+  "name": "norugpad",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,8 +12,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "dry-run": "tsx scripts/dry-run.ts",
-    "pet-test": "node scripts/pet-test.mjs",
-    "cat-test": "node scripts/pet-test.mjs",
+    "rug-test": "node scripts/rug-test.mjs",
     "new-wallet": "tsx scripts/new-wallet.ts",
     "wallet-address": "tsx scripts/wallet-address.ts",
     "sweep": "tsx scripts/sweep.ts",

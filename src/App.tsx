@@ -6,7 +6,6 @@ import { CLUSTER, IS_MAINNET } from './config';
 import { href, useRoute } from './router';
 import Explore from './pages/Explore';
 import Launch from './pages/Launch';
-import Wire from './pages/Wire';
 import CoinPage from './pages/CoinPage';
 import Admin from './pages/Admin';
 
@@ -55,7 +54,7 @@ export default function App() {
   }
 
   const section = route.name === 'coin' ? 'explore' : route.name === 'admin' ? '' : route.name;
-  const link = (name: 'explore' | 'launch' | 'wire', label: string) => (
+  const link = (name: 'explore' | 'launch', label: string) => (
     <a className={section === name ? 'on' : ''} href={href[name]} aria-current={section === name ? 'page' : undefined}>
       {label}
     </a>
@@ -72,14 +71,13 @@ export default function App() {
       </div>
       <header className="top">
         <div className="wrap top-in">
-          <a className="brand" href={href.explore} aria-label="Pawpad home">
+          <a className="brand" href={href.explore} aria-label="NoRugPad home">
             <Paw />
-            Pawpad
+            NoRugPad
           </a>
           <nav className="nav" aria-label="Main">
             {link('explore', 'Explore')}
             {link('launch', 'Launch')}
-            {link('wire', 'Paw Wire')}
           </nav>
           <div className="wallet-area">
             {publicKey && balance !== null && <span className="bal mono">{balance.toFixed(3)} SOL</span>}
@@ -105,14 +103,13 @@ export default function App() {
       <main>
         {route.name === 'explore' && <Explore />}
         {route.name === 'launch' && <Launch balance={balance} onCreated={refreshBalance} />}
-        {route.name === 'wire' && <Wire />}
         {route.name === 'admin' && <Admin />}
         {route.name === 'coin' && <CoinPage mint={route.mint} />}
       </main>
 
       <footer className="wrap foot muted">
         {IS_MAINNET
-          ? 'Pawpad is unaudited beta software. Pets are AI characters and their posts are not advice. Coins are not endorsed by Pawpad. Only risk what you can lose.'
+          ? 'NoRugPad is unaudited beta software. Coins are not endorsed by NoRugPad. Only risk what you can lose.'
           : `Prototype running on ${CLUSTER}. Not audited.`}
       </footer>
     </>

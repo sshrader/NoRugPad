@@ -1,4 +1,4 @@
-// Protects the free model quota. Everything here is in memory and resets when the server restarts.
+// Simple in-memory rate limiting. Everything here resets when the server restarts.
 
 const hits = new Map();
 
@@ -19,20 +19,3 @@ setInterval(() => {
   const now = Date.now();
   for (const [k, v] of hits) if (!v.some((t) => now - t < 3_600_000)) hits.delete(k);
 }, 600_000).unref();
-
-// A shared daily allowance of model calls. Lore posts pass a reserve so chat always has room.
-let day = '';
-let used = 0;
-const today = () => new Date().toISOString().slice(0, 10);
-
-export function takeBudget(dailyLimit, reserveFraction = 0) {
-  if (day !== today()) {
-    day = today();
-    used = 0;
-  }
-  if (used >= dailyLimit * (1 - reserveFraction)) return false;
-  used += 1;
-  return true;
-}
-
-export const budgetUsed = () => (day === today() ? used : 0);

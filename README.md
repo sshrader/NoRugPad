@@ -1,8 +1,8 @@
-# Pawpad (devnet starter)
+# NoRugPad (devnet starter)
 
-Wallet connection, real token creation on Solana devnet, and a small API that stores coins and pairs each one with an AI cat that answers texts and writes its own lore. The bonding curve comes later.
+Wallet connection, real token creation on Solana, trading on a Meteora Dynamic Bonding Curve, and a small API that stores coins. Every coin page has the **NoRugPad Arena**, a cartoon battle scene where the coin's own logo fights off rug pullers, scammers and bots to protect the liquidity vault.
 
-> **Status:** the token creation, wallet flow and Pinata upload have been run on devnet. The cat AI logic is covered by `npm run pet-test` (a fake model server), but it has not yet been run against a real provider. The cat screens in the browser are new.
+> **Status:** the token creation, wallet flow, Pinata upload and bonding-curve launch have been run on devnet. The Arena runs a headless test (`npm run rug-test`) but has not yet been checked by eye in a browser. This project grew out of an earlier version with AI pets, which have been removed.
 
 ## 1. Prepare Phantom (devnet)
 
@@ -29,55 +29,50 @@ Run `npm run dry-run -- --send` first if you can. It tests the on-chain part wit
 ## What happens when you click Launch
 
 1. **Upload.** The browser sends the image, name, ticker and description to `POST /api/upload`. The server stores the image and a metadata JSON file and returns the metadata link.
-2. **One transaction** (`src/lib/createCoin.ts`), signed in Phantom: create mint, initialise (6 decimals), create your token account, mint 1,000,000,000 tokens, attach the metadata, revoke mint authority, revoke freeze authority. All or nothing.
-3. **Register.** The browser sends the mint and signature to `POST /api/coins`. The server does not trust it. It reads the chain itself and rejects the coin unless the mint exists, both authorities are revoked, and the transaction succeeded and was paid by the creator. It then pairs a pet (cat or dog) by hashing the mint address, so the pairing looks random but cannot be rerolled.
+2. **One transaction** (`src/lib/createCoin.ts`, or `src/lib/dbc.ts` with the bonding curve on), signed in Phantom. All or nothing.
+3. **Register.** The browser sends the mint and signature to `POST /api/coins`. The server does not trust it. It reads the chain itself and rejects the coin unless the mint exists, the authorities are as expected, and the transaction succeeded and was paid by the creator.
 
-## The cats
+## NoRugPad Arena
 
-Every coin's cat can talk and write.
+Each coin page has a side-on pixel battle scene (`src/components/RugBattle.tsx`, engine in `src/lib/rugWorld.ts`).
 
-- **Chat.** Each coin page has a chat with its cat. `POST /api/coins/:mint/chat` (single coin: `GET /api/coins/:mint`) sends the message and the last few turns to the model and returns the reply.
-- **Lore.** When a coin is registered its cat writes a first diary entry, then a new one every `CAT_POST_MINUTES` (varies per coin). Entries are stored in `server/data/posts.json`, shown on the coin card and in the Paw Wire feed, and each continues from the cat's last three entries.
-- **Voices.** Five voices (mystic, hype, deadpan, lyrical, grumpy) are defined in `server/pets.mjs`. Edit the style lines to change how a cat sounds.
-- **AI brain.** `server/llm.mjs` calls any OpenAI-compatible chat API. Put `LLM_API_KEY` in `.env` (Groq has a free tier, see `.env.example`) and restart. With no key the cats answer from canned lines and say so.
-- **Safety rules** are in `server/petbrain.mjs`. Pets say they are AI, never predict prices or tell anyone to buy or sell, and treat coin descriptions and chat messages as untrusted text. Replies are stripped of links and markdown. Posts are labelled AI in the UI.
-- **Cost control.** Chat is limited to 12 messages a minute per visitor, and the server stops calling the model after `LLM_DAILY_LIMIT` calls a day (lore posts stop earlier, at 70%, so chat keeps working). After that, cats fall back to canned lines.
-
-Test the logic without a key or internet: `npm run pet-test`.
+- The hero is the coin's logo. It dashes at enemies, deflects scam links and charges a **Diamond Hands** shockwave. Tap the scene when the meter is full, or let it fire on its own.
+- Enemies: rug pullers that try to yank the liquidity vault, scammers with "FREE $$$" signs that fire fake links, sniper bots that drain the vault, and a Mega Rugger boss every 4th wave.
+- It is a cartoon only. It does not read or move anything on chain, and the villains are made up.
+- It pauses when scrolled out of view, and starts paused if the device asks for reduced motion.
+- Test the engine with no browser: `npm run rug-test`.
 
 ## Metadata storage
 
-- **Local mode (default).** Files go to `server/uploads/`. The flow works, but the image link is `http://localhost…`, so Phantom and explorers cannot load it and the picture will not show.
-- **Pinata mode.** Create a free Pinata account, make an API key (JWT), put it in `.env` as `PINATA_JWT`. Images and metadata then go to IPFS and show up everywhere. The upload call is in `server/index.mjs` (`pinFile`). If Pinata changed its API, that function is the only place to edit.
+- **Local mode (default).** Files go to `server/uploads/` (or `$DATA_DIR/uploads` when set). Images are served from `PUBLIC_BASE_URL/uploads/...`, so on a hosted site set `PUBLIC_BASE_URL` to your https address and `DATA_DIR` to a persistent volume.
+- **Pinata mode.** Create a free Pinata account, make an API key (JWT), put it in `.env` as `PINATA_JWT`. Images and metadata then go to IPFS. The upload call is in `server/index.mjs` (`pinFile`).
 
 ## Files
 
 ```
-server/index.mjs        API: upload, register (verifies on chain), list
-server/pets.mjs         the pet roster (8 cats, 8 dogs) and voices
-server/petbrain.mjs     what the pets say: prompts, safety rules, cleanup, canned fallback
-server/llm.mjs          the model client (any OpenAI-compatible API)
-server/lore.mjs         diary entries and the background writer
-server/limits.mjs       rate limit and daily call budget
+server/index.mjs        API: upload, register (verifies on chain), list, market
+server/curve.mjs        checks a bonding-curve pool came from your config
+server/guard.mjs        production checks: network, allowlist, rate limits
+server/limits.mjs       in-memory rate limiting
+server/market.mjs       market cap data
 server/store.mjs        JSON-file storage (swap for a real database later)
-src/lib/createCoin.ts   the transaction. Start reading here.
+src/lib/createCoin.ts   plain token transaction
+src/lib/dbc.ts          bonding-curve launch transaction
+src/lib/rugWorld.ts     Arena battle engine
 src/lib/api.ts          client calls to the API
-src/router.ts           tiny hash router (#/, #/launch, #/wire, #/coin/<mint>)
-src/pages/              Explore, Launch, Paw Wire, coin page
-src/components/         create form, coin card, cat chat, post list, cat avatars
-src/App.tsx             header, nav, wallet button, balance, test-SOL button
-scripts/dry-run.ts      tests the transaction without a browser
-scripts/pet-test.mjs    tests the pet logic against a fake model server
+src/router.ts           tiny hash router (#/, #/launch, #/admin, #/coin/<mint>)
+src/pages/              Explore, Launch, Admin, coin page
+src/components/         create form, coin card, trade box, market chart, Arena
+scripts/                dry-run, wallet, Meteora config/fees/migrate, rug-test
 ```
 
 ## Known limits (on purpose, for now)
 
-- **The creator receives the whole supply.** That is the starter model, not a launchpad. In the next step an Anchor program holds the supply and sells it along a bonding curve.
 - Metadata is **immutable** (`isMutable: false`), so a typo in the name is permanent. Fine on devnet.
-- Only the cat chat is rate limited. Upload and register have no limits, accounts or spam protection.
-- Chat and the daily call count live in memory, so they reset when the server restarts.
+- Upload and register have no accounts or spam protection beyond the per-wallet and per-IP limits in `server/guard.mjs`.
+- Rate limits live in memory, so they reset when the server restarts.
 - JSON-file storage, no database.
-- Not audited. Do not use on mainnet without a security review and legal advice.
+- Not audited. Do not use on mainnet without a security review and legal advice. See `docs/MAINNET.md`.
 
 ## Switching to testnet
 
@@ -100,7 +95,7 @@ Each coin page shows a market cap chart. `MARKET_MODE=demo` (the default) draws 
 
 ## Trading on a bonding curve (Meteora)
 
-Pawpad uses Meteora's Dynamic Bonding Curve program, so there is no curve code of our own to maintain or audit. The flow:
+NoRugPad uses Meteora's Dynamic Bonding Curve program, so there is no curve code of our own to maintain or audit. The flow:
 
 1. **Once:** `npm run dbc-config -- --check` shows the curve settings. `npm run dbc-config` creates the config on chain with the partner wallet (`.devnet-keypair.json`) and prints `DBC_CONFIG` and `VITE_DBC_CONFIG` for `.env`.
 2. **Each launch:** one transaction creates the token and its curve pool (`src/lib/dbc.ts`). The server checks that the pool exists, came from your config, and was made by the paying wallet (`server/curve.mjs`).
@@ -114,19 +109,11 @@ With `VITE_DBC_CONFIG` empty the app keeps the older plain-token launch (no trad
 
 ### If you see `429 Too many requests`
 
-The free public devnet RPC rate-limits heavily. The app caches and looks up pools directly to stay under it, but a free key from Helius (or similar) is much more reliable. Put the same URL in `VITE_RPC_URL` (browser) and `SOLANA_RPC_URL` (server) in `.env`, then restart.
+The free public devnet RPC rate-limits heavily. A free key from Helius (or similar) is much more reliable. Put the same URL in `VITE_RPC_URL` (browser) and `SOLANA_RPC_URL` (server) in `.env`, then restart.
 
 ### Partner tools
 
-- `npm run dbc-fees -- --check` shows trading fees waiting to be claimed; `npm run dbc-fees` claims them.
+- `npm run dbc-fees -- --check` shows trading fees waiting to be claimed; `npm run dbc-fees` claims them. The `/#/admin` page does the same from the browser with the fee-claimer wallet.
 - `npm run dbc-migrate -- <mint>` graduates a full curve by hand (devnet testing). Meteora also has a manual migrator at migrator.meteora.ag.
 - `npm run dbc-inspect -- <mint>` prints what the SDK returns for a pool (debugging).
-- `docs/GO_LIVE.md` has the production checklist and the devnet graduation test.
-
-## Pets: cats and dogs
-
-Every coin is paired with one of 16 AI pets, 8 cats and 8 dogs, chosen from the coin's address. Add or edit pets in `server/pets.mjs` and `src/lib/pets.ts` (keep both in sync) and draw a portrait in `src/components/PetAvatar.tsx`. Dogs get dog-flavored prompts and canned lines; coins made before dogs existed keep their cat. The feed page is the Paw Wire.
-
-### The park
-
-Each coin page has a top-down pixel park (`src/components/PetPark.tsx`, engine in `src/lib/petWorld.ts`). Every coin's pet lives in the same park and wanders tile by tile around a pond, a fountain, trees and houses. The coin's own pet is marked with an arrow, each pet has a name tag with its coin's name that links to that coin's page, and tapping a pet makes it hop and show its latest diary line. It shows the 40 newest pets, follows the viewer's local time of day (lamps come on at night), pauses when scrolled out of view, and starts paused if the device asks for reduced motion.
+- `docs/GO_LIVE.md` has the production checklist and the devnet graduation test. `docs/DEPLOY.md` covers Railway.

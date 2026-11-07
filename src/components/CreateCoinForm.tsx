@@ -4,7 +4,6 @@ import { CURVE_ON, IS_MAINNET, MAX_DEV_BUY_SOL, MIN_SOL_TO_LAUNCH, MIN_SOL_TO_LA
 import { createCoin } from '../lib/createCoin';
 import { createCoinOnCurve } from '../lib/dbc';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
-import { voiceLabel } from '../lib/pets';
 import { href } from '../router';
 import { PLATFORMS, platformUrl } from '../lib/platforms';
 
@@ -15,7 +14,7 @@ const PHASE_TEXT: Record<Phase, string> = {
   uploading: 'Uploading image and metadata…',
   signing: 'Approve the transaction in your wallet…',
   confirming: 'Waiting for the network to confirm…',
-  registering: 'Verifying on chain and pairing your pet…',
+  registering: 'Verifying on chain…',
   done: '',
 };
 
@@ -266,9 +265,6 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
         <div className="success launched" role="status" ref={doneBox}>
           <p className="launched-title">
             <b>{created.name}</b> (${created.symbol}) is live!
-          </p>
-          <p>
-            Your pet is <b>{created.cat.name}</b>, a {created.cat.breed.toLowerCase()} with a {voiceLabel(created.cat.voice).toLowerCase()} voice.
           </p>
           <a className="btn primary big" href={href.coin(created.mint)}>
             Go to your coin page →

@@ -24,7 +24,7 @@ The code now supports mainnet (`VITE_CLUSTER=mainnet-beta`). Read `docs/GO_LIVE.
 
 ## Still not done in code
 - Postgres (the JSON file store is fine for a small beta only; back up `server/data/`). Hosts with ephemeral disks lose it on redeploy: use a persistent volume.
-- Image moderation, report/hide, reserved-name blocking, output filter on pet text.
+- Image moderation, report/hide, reserved-name blocking.
 - Terms of service, privacy policy, geoblock list: need your lawyer.
 - Rate limits and the launch counter are in memory; they reset on restart and don't span multiple server instances.
 - No in-app trading after graduation (the coin trades on Jupiter and other DEXs).

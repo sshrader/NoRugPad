@@ -1,24 +1,18 @@
 import { useEffect, useState } from 'react';
 import { explorerAddress } from '../config';
-import { getCoin, listCoinPosts, type Coin, type Post } from '../lib/api';
-import { voiceLabel } from '../lib/pets';
+import { getCoin, type Coin } from '../lib/api';
 import { ago } from '../lib/time';
 import { href } from '../router';
 import CopyAddress from '../components/CopyAddress';
-import PetAvatar from '../components/PetAvatar';
 import MarketChart from '../components/MarketChart';
-import PetPark from '../components/PetPark';
 import RugBattle from '../components/RugBattle';
-import PetChat from '../components/PetChat';
 import TradeBox from '../components/TradeBox';
-import PostList from '../components/PostList';
 
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
 
 export default function CoinPage({ mint }: { mint: string }) {
   const [coin, setCoin] = useState<Coin | null>(null);
   const [missing, setMissing] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     let alive = true;
@@ -27,18 +21,8 @@ export default function CoinPage({ mint }: { mint: string }) {
     getCoin(mint)
       .then((c) => alive && setCoin(c))
       .catch(() => alive && setMissing(true));
-    const load = () =>
-      listCoinPosts(mint)
-        .then((p) => alive && setPosts(p))
-        .catch(() => {});
-    load();
-    // A new coin's first entry appears a few seconds after launch, so check again soon.
-    const first = setTimeout(load, 6000);
-    const timer = setInterval(load, 20000);
     return () => {
       alive = false;
-      clearTimeout(first);
-      clearInterval(timer);
     };
   }, [mint]);
 
@@ -61,7 +45,6 @@ export default function CoinPage({ mint }: { mint: string }) {
     );
   }
 
-  const cat = coin.cat;
   const ck = <span className="okmark" aria-hidden="true">✓</span>;
   return (
     <div className="wrap">
@@ -89,7 +72,6 @@ export default function CoinPage({ mint }: { mint: string }) {
           <div className="badges">
             <span className="badge">{ck} Mint revoked</span>
             <span className="badge">{ck} Freeze revoked</span>
-            <span className="badge">{ck} Pet posts labelled AI</span>
           </div>
         </div>
       </section>
@@ -103,28 +85,6 @@ export default function CoinPage({ mint }: { mint: string }) {
       <MarketChart mint={coin.mint} />
 
       <RugBattle coin={coin} />
-
-      <section className="card catcard">
-        <PetAvatar id={cat.id} name={cat.name} size={88} />
-        <div>
-          <p className="eyebrow mono">This coin's pet</p>
-          <h2>{cat.name}</h2>
-          <p className="muted">{cat.breed} · {voiceLabel(cat.voice)} voice</p>
-        </div>
-      </section>
-
-      <PetPark coin={coin} line={posts[0]?.text} />
-
-      <div className="cp-grid">
-        <PetChat coin={coin} />
-        <section className="card logcard" aria-label={`${cat.name}'s log`}>
-          <div className="log-h">
-            <h3>{cat.name}'s log</h3>
-            <span className="muted small">Written by an AI pet</span>
-          </div>
-          {posts.length === 0 ? <p className="muted small">{cat.name} is writing the first entry…</p> : <PostList posts={posts} mode="log" />}
-        </section>
-      </div>
 
       {coin.curve ? (
         <TradeBox coin={coin} />

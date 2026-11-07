@@ -11,7 +11,6 @@ Not legal advice. Costs are rough estimates unless a source is named.
 - [ ] Image moderation: scan or review uploads before they are shown. Block illegal content.
 - [ ] Report and hide button, plus a takedown process (copyright complaints).
 - [ ] Reserved names: block well-known brands, people, and "official" lookalikes.
-- [ ] Output filter on cat chat and lore (they publish text under your brand). Keep the AI label. Never give price predictions or advice.
 - [ ] Per-wallet limits on launches and chat to stop spam.
 
 ## 3. Money and keys
@@ -28,7 +27,6 @@ Not legal advice. Costs are rough estimates unless a source is named.
 - [ ] Hosting with logs, error alerts, uptime monitoring.
 - [ ] Paid Pinata plan, or your own IPFS pinning.
 - [x] Mainnet support is in the code; follow `docs/MAINNET.md` for the steps and env vars (`VITE_CLUSTER=mainnet-beta`, `SOLANA_CLUSTER`, `MARKET_MODE=live`).
-- [ ] Set `LLM_DAILY_LIMIT` against real cost.
 
 ## 5. Security review
 - [ ] Third-party review of the server and the launch/trade flow. (No curve audit needed if you stay on Meteora's audited program.)
