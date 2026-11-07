@@ -11,7 +11,10 @@ export default function CoinCard({ coin, market }: { coin: Coin; market?: Omit<M
       <img className="row-img" src={coin.imageUrl} alt="" width={44} height={44} loading="lazy" />
       <div className="row-id">
         <h3>{coin.name}</h3>
-        <span className="mono muted small">${coin.symbol} · {ago(coin.createdAt)}</span>
+        <span className="mono muted small">
+          ${coin.symbol} · {ago(coin.createdAt)}
+          {coin.devBuy ? ` · creator bought ${coin.devBuy.pct}%` : ''}
+        </span>
       </div>
       <p className="row-desc clamp2">{coin.description}</p>
       <div className="row-mc">
