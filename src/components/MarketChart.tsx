@@ -49,9 +49,12 @@ export default function MarketChart({ mint }: { mint: string }) {
 
   const pts = m.history;
   const vals = pts.map((p) => p.mc);
-  const lo = Math.min(...vals);
-  const hi = Math.max(...vals);
-  const span = hi - lo || 1;
+  // Never zoom in tighter than 10% of the value, so a tiny wobble (for example the SOL price moving a little) does not look like a crash.
+  const mid = (Math.min(...vals) + Math.max(...vals)) / 2;
+  const minSpan = Math.max(mid * 0.1, 1);
+  const lo = Math.min(Math.min(...vals), mid - minSpan / 2);
+  const hi = Math.max(Math.max(...vals), mid + minSpan / 2);
+  const span = hi - lo;
   const t0 = pts[0].t;
   const t1 = pts[pts.length - 1].t;
   const x = (t: number) => PAD.l + ((t - t0) / (t1 - t0 || 1)) * (W - PAD.l - PAD.r);
@@ -63,6 +66,8 @@ export default function MarketChart({ mint }: { mint: string }) {
   const cur = m.mc ?? pts[pts.length - 1].mc;
   const change = m.change24h ?? ((cur - first) / first) * 100;
   const up = change >= 0;
+  // A percent change over a few seconds of history says nothing, so wait for at least 10 minutes of it.
+  const enoughHistory = pts.length >= 3 && t1 - t0 >= 10 * 60_000;
   const shown = hover !== null ? pts[hover] : null;
 
   function move(e: React.PointerEvent) {
@@ -81,13 +86,15 @@ export default function MarketChart({ mint }: { mint: string }) {
           <p className="eyebrow mono">Market cap</p>
           <p className="mkt-v mono">{usd(shown ? shown.mc : cur)}</p>
           <p className="muted small mono">
-            {shown ? new Date(shown.t).toLocaleString() : `last 24h`}
+            {shown ? new Date(shown.t).toLocaleString() : (enoughHistory ? 'last 24h' : 'since this server first saw the coin')}
           </p>
         </div>
-        <div className={`mkt-chg mono ${up ? 'up' : 'down'}`}>
-          {up ? '▲ +' : '▼ '}
-          {change.toFixed(1)}%
-        </div>
+        {enoughHistory && (
+          <div className={`mkt-chg mono ${up ? 'up' : 'down'}`}>
+            {up ? '▲ +' : '▼ '}
+            {change.toFixed(1)}%
+          </div>
+        )}
       </div>
 
       <svg
@@ -95,7 +102,7 @@ export default function MarketChart({ mint }: { mint: string }) {
         viewBox={`0 0 ${W} ${H}`}
         className="mkt-svg"
         role="img"
-        aria-label={`Market cap ${usd(cur)}, ${up ? 'up' : 'down'} ${Math.abs(change).toFixed(1)} percent over 24 hours`}
+        aria-label={enoughHistory ? `Market cap ${usd(cur)}, ${up ? 'up' : 'down'} ${Math.abs(change).toFixed(1)} percent over 24 hours` : `Market cap ${usd(cur)}`}
         onPointerMove={move}
         onPointerLeave={() => setHover(null)}
       >

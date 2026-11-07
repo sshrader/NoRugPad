@@ -113,7 +113,8 @@ async function curve(mint, poolAddress, connection) {
     mcSol: st.mcSol,
     progress: st.progress,
     migrated: st.migrated,
-    change24h: first ? ((mc - first) / first) * 100 : 0,
+    // Too little history says nothing: wait for 10 minutes of it before showing a change.
+    change24h: first && history.length >= 3 && history[history.length - 1].t - history[0].t >= 10 * 60_000 ? ((mc - first) / first) * 100 : null,
     history: history.length > 1 ? history : [{ t: Date.now() - 1, mc }, { t: Date.now(), mc }],
   };
 }
