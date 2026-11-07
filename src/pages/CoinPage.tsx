@@ -8,6 +8,7 @@ import CopyAddress from '../components/CopyAddress';
 import PetAvatar from '../components/PetAvatar';
 import MarketChart from '../components/MarketChart';
 import PetPark from '../components/PetPark';
+import RugBattle from '../components/RugBattle';
 import PetChat from '../components/PetChat';
 import TradeBox from '../components/TradeBox';
 import PostList from '../components/PostList';
@@ -100,6 +101,8 @@ export default function CoinPage({ mint }: { mint: string }) {
       )}
 
       <MarketChart mint={coin.mint} />
+
+      <RugBattle coin={coin} />
 
       <section className="card catcard">
         <PetAvatar id={cat.id} name={cat.name} size={88} />

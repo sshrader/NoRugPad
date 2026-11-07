@@ -236,6 +236,12 @@ textarea { resize: vertical; }
 .park-bubble { position: absolute; left: 10px; right: 10px; bottom: 10px; line-height: 1.4; padding: 8px 12px; border-radius: 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); font-size: 14px; box-shadow: 0 4px 16px rgba(0,0,0,0.25); z-index: 4; }
 .park-bubble a { color: var(--accent-text); }
 .park-foot { margin: 0; }
+/* NoRugPad Arena (side-on battle scene) */
+.rug { display: grid; gap: 10px; margin-bottom: 16px; }
+.rug-canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; background: #1b1442; cursor: pointer; }
+.rug-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.rug-btns .btn:disabled { opacity: 0.5; cursor: default; }
+.rug-stats { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); min-height: 1.4em; }
 .park-tag .sp { opacity: 0.75; font-weight: 500; margin-left: 1px; }
 
 .launched { border: 2px solid var(--accent); border-radius: 14px; padding: 18px; background: var(--surface-2); text-align: center; justify-items: center; gap: 12px; }
