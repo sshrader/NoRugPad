@@ -12,8 +12,8 @@ export function usd(n: number): string {
   return `$${n.toFixed(0)}`;
 }
 
-type Interval = '1m' | '5m' | '15m' | '1h';
-const STEP: Record<Interval, number> = { '1m': 60_000, '5m': 300_000, '15m': 900_000, '1h': 3_600_000 };
+type Interval = '10s' | '15s' | '1m' | '5m' | '15m' | '1h';
+const STEP: Record<Interval, number> = { '10s': 10_000, '15s': 15_000, '1m': 60_000, '5m': 300_000, '15m': 900_000, '1h': 3_600_000 };
 const MAX_CANDLES = 60;
 type Candle = { t: number; o: number; h: number; l: number; c: number };
 
@@ -39,7 +39,7 @@ export function buildCandles(pts: { t: number; mc: number }[], step: number): Ca
 export default function MarketChart({ mint }: { mint: string }) {
   const [m, setM] = useState<Market | null>(null);
   const [hover, setHover] = useState<number | null>(null);
-  const [interval, setInterval_] = useState<Interval>('5m');
+  const [interval, setInterval_] = useState<Interval>('1m');
   const svg = useRef<SVGSVGElement>(null);
 
   useEffect(() => {

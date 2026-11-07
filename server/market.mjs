@@ -4,7 +4,52 @@
 // DexScreener only lists coins that trade on a DEX on mainnet, so devnet coins have no live data.
 import crypto from 'node:crypto';
 import * as store from './store.mjs';
+import { addSample } from './samples.mjs';
 import { curveState, solUsd } from './curve.mjs';
+
+let samplerOn = false;
+
+/** Samples every coin that is still on its bonding curve, so candles have data even when nobody has a page open.
+ *  Runs one RPC lookup per coin per tick (curveState caches briefly) and writes once per tick. */
+export async function sampleAll(connection) {
+  const coins = (await store.get('coins.json', [])).filter((c) => c.curve && c.pool);
+  if (coins.length === 0) return;
+  const usd = await solUsd();
+  const now = Date.now();
+  const points = [];
+  await Promise.all(
+    coins.map(async (c) => {
+      try {
+        const st = await curveState(connection, c.pool);
+        if (st && !st.migrated) points.push([c.mint, st.mcSol * usd]);
+      } catch {
+        // skip this coin this time
+      }
+    }),
+  );
+  if (points.length === 0) return;
+  await store.update('market.json', {}, (all) => {
+    for (const [mint, mc] of points) all[mint] = addSample(all[mint], now, mc);
+    return all;
+  });
+}
+
+/** Start the timer. After this, page views no longer write samples themselves. */
+export function startSampler(connection, everyMs = 5000) {
+  samplerOn = true;
+  let busy = false;
+  setInterval(async () => {
+    if (busy) return;
+    busy = true;
+    try {
+      await sampleAll(connection);
+    } catch (e) {
+      console.error('market sampler:', e.message);
+    } finally {
+      busy = false;
+    }
+  }, everyMs).unref?.();
+}
 
 const mode = () => (process.env.MARKET_MODE === 'live' ? 'live' : 'demo');
 const STEP = 5 * 60_000; // one chart point per 5 minutes
@@ -99,9 +144,9 @@ async function curve(mint, poolAddress, connection) {
   const prior = (await store.get('market.json', {}))[mint] || [];
   let history = prior;
   const last = prior[prior.length - 1];
-  if (!last || Date.now() - last.t >= 30_000) {
+  if (!samplerOn && (!last || Date.now() - last.t >= 30_000)) {
     const next = await store.update('market.json', {}, (all) => {
-      all[mint] = [...(all[mint] || []), { t: Date.now(), mc }].slice(-2000);
+      all[mint] = addSample(all[mint], Date.now(), mc);
       return all;
     });
     history = next[mint];

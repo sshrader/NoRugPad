@@ -22,7 +22,7 @@ export function update(name, fallback, fn) {
     await fs.mkdir(dir(), { recursive: true });
     const data = await read(name, fallback);
     const next = await fn(data);
-    await fs.writeFile(path.join(dir(), name), JSON.stringify(next, null, 2));
+    await fs.writeFile(path.join(dir(), name), name === 'market.json' ? JSON.stringify(next) : JSON.stringify(next, null, 2));
     return next;
   };
   const result = queue.then(run);

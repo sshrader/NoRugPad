@@ -5,7 +5,7 @@ import path from 'node:path';
 import express from 'express';
 import multer from 'multer';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
-import { getMarket } from './market.mjs';
+import { getMarket, startSampler } from './market.mjs';
 import { curveEnabled, verifyPool, poolVault } from './curve.mjs';
 import { checkCoin } from './check.mjs';
 import { applyGuards, checkNetwork, launchAllowed, launchesRestricted } from './guard.mjs';
@@ -324,6 +324,8 @@ const network = await checkNetwork(connection).catch((e) => {
   console.error('\nRefusing to start:', e.message);
   process.exit(1);
 });
+
+if (curveEnabled() && process.env.MARKET_SAMPLER !== 'off') startSampler(connection, Math.max(2000, Number(process.env.MARKET_SAMPLE_MS) || 5000));
 
 app.listen(PORT, () => {
   console.log(`Network: ${network}${launchesRestricted() ? ' (launches limited to the allowlist)' : ''}`);
