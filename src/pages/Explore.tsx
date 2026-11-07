@@ -38,26 +38,23 @@ export default function Explore() {
 
   return (
     <div className="wrap">
-      <section className="hero">
-        <div>
-          <p className="eyebrow mono">Solana memecoin launchpad</p>
-          <h1>Launch a coin. Fight off the rug.</h1>
+      <section className={`hero${coins && coins.length > 0 ? '' : ' solo'}`}>
+        <div className="hero-copy">
+          <h1>Launch a coin.<br />Fight off the rug.</h1>
           <p className="lede">
-            Launch on a Meteora bonding curve with mint and freeze authority revoked. Below, the newest coins' logos fight off rug pullers, scammers
-            and bots together, and every coin page has its own arena.
+            Every coin here launches on a Meteora bonding curve. In the arena, the newest coins' logos defend the vault from cartoon rug pullers, scammers and bots.
           </p>
-          <div className="badges">
-            <span className="badge">⚡ One-click launch</span>
-            {CURVE_ON && <span className="badge">📈 Trades on a bonding curve from the first second</span>}
-            {CURVE_ON && <span className="badge">🔒 Liquidity locked after graduation</span>}
-          </div>
+          <ul className="guards">
+            <li>Mint and freeze authority are revoked at launch</li>
+            {CURVE_ON && <li>Trades on the curve from the first buy</li>}
+            {CURVE_ON && <li>Liquidity is locked after graduation</li>}
+          </ul>
           <div className="cta">
             <a className="btn primary" href={href.launch}>Launch a coin</a>
           </div>
         </div>
+        {coins && coins.length > 0 && <RugField coins={coins} />}
       </section>
-
-      {coins && coins.length > 0 && <RugField coins={coins} />}
 
       <section className="filters">
         <h2>Launched coins{coins ? <span className="muted"> · {coins.length}</span> : null}</h2>
@@ -83,11 +80,20 @@ export default function Explore() {
         </div>
       )}
       {coins && coins.length > 0 && shown.length === 0 && <p className="muted empty">No coins match "{q}".</p>}
-      <div className="grid">
-        {shown.map((c) => (
-          <CoinCard key={c.mint} coin={c} market={markets[c.mint]} />
-        ))}
-      </div>
+      {shown.length > 0 && (
+        <div className="board">
+          <div className="board-h" aria-hidden="true">
+            <span />
+            <span>Coin</span>
+            <span>About</span>
+            <span style={{ textAlign: 'right' }}>Market cap</span>
+            <span>Curve</span>
+          </div>
+          {shown.map((c) => (
+            <CoinCard key={c.mint} coin={c} market={markets[c.mint]} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

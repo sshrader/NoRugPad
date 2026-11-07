@@ -9,8 +9,15 @@ import Launch from './pages/Launch';
 import CoinPage from './pages/CoinPage';
 import Admin from './pages/Admin';
 
-function Paw() {
-  return <img className="paw" src="/logo.png" width={32} height={32} alt="" />;
+// The NoRugPad mark: a shield holding a checked gold coin.
+function Mark() {
+  return (
+    <svg className="mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M16 1.5 28.5 6v9.2c0 7.3-5 12.6-12.5 15.3C8.5 27.8 3.5 22.5 3.5 15.2V6z" fill="#161b36" stroke="#f4b63f" strokeWidth="2" strokeLinejoin="round" />
+      <circle cx="16" cy="15.5" r="7" fill="#f4b63f" />
+      <path d="m12.5 15.7 2.4 2.5 4.8-5.2" fill="none" stroke="#1a1305" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 export default function App() {
@@ -72,7 +79,7 @@ export default function App() {
       <header className="top">
         <div className="wrap top-in">
           <a className="brand" href={href.explore} aria-label="NoRugPad home">
-            <Paw />
+            <Mark />
             NoRugPad
           </a>
           <nav className="nav" aria-label="Main">
