@@ -12,9 +12,34 @@ export function usd(n: number): string {
   return `$${n.toFixed(0)}`;
 }
 
+type Interval = '1m' | '5m' | '15m' | '1h';
+const STEP: Record<Interval, number> = { '1m': 60_000, '5m': 300_000, '15m': 900_000, '1h': 3_600_000 };
+const MAX_CANDLES = 60;
+type Candle = { t: number; o: number; h: number; l: number; c: number };
+
+/** Turn recorded market-cap samples into candles. Each candle opens at the previous candle's close, so there are no jumps between them.
+ *  Time with no samples (nobody had the page open) is left out instead of invented. */
+export function buildCandles(pts: { t: number; mc: number }[], step: number): Candle[] {
+  const out: Candle[] = [];
+  for (const p of pts) {
+    const t = Math.floor(p.t / step) * step;
+    const last = out[out.length - 1];
+    if (last && last.t === t) {
+      last.h = Math.max(last.h, p.mc);
+      last.l = Math.min(last.l, p.mc);
+      last.c = p.mc;
+    } else {
+      const o = last ? last.c : p.mc;
+      out.push({ t, o, h: Math.max(o, p.mc), l: Math.min(o, p.mc), c: p.mc });
+    }
+  }
+  return out;
+}
+
 export default function MarketChart({ mint }: { mint: string }) {
   const [m, setM] = useState<Market | null>(null);
   const [hover, setHover] = useState<number | null>(null);
+  const [interval, setInterval_] = useState<Interval>('5m');
   const svg = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -48,19 +73,22 @@ export default function MarketChart({ mint }: { mint: string }) {
   }
 
   const pts = m.history;
-  const vals = pts.map((p) => p.mc);
-  // Never zoom in tighter than 10% of the value, so a tiny wobble (for example the SOL price moving a little) does not look like a crash.
-  const mid = (Math.min(...vals) + Math.max(...vals)) / 2;
-  const minSpan = Math.max(mid * 0.1, 1);
-  const lo = Math.min(Math.min(...vals), mid - minSpan / 2);
-  const hi = Math.max(Math.max(...vals), mid + minSpan / 2);
-  const span = hi - lo;
   const t0 = pts[0].t;
   const t1 = pts[pts.length - 1].t;
-  const x = (t: number) => PAD.l + ((t - t0) / (t1 - t0 || 1)) * (W - PAD.l - PAD.r);
-  const y = (v: number) => PAD.t + (1 - (v - lo) / span) * (H - PAD.t - PAD.b);
-  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.t).toFixed(1)},${y(p.mc).toFixed(1)}`).join('');
-  const area = `${line}L${x(t1).toFixed(1)},${H}L${x(t0).toFixed(1)},${H}Z`;
+  const candles = buildCandles(pts, STEP[interval]).slice(-MAX_CANDLES);
+
+  // Never zoom in tighter than 10% of the value, so a tiny wobble (for example the SOL price moving a little) does not look like a crash.
+  const highs = candles.map((c) => c.h);
+  const lows = candles.map((c) => c.l);
+  const mid = (Math.min(...lows) + Math.max(...highs)) / 2;
+  const minSpan = Math.max(mid * 0.1, 1);
+  const lo = Math.min(Math.min(...lows), mid - minSpan / 2);
+  const hi = Math.max(Math.max(...highs), mid + minSpan / 2);
+  const y = (v: number) => PAD.t + (1 - (v - lo) / (hi - lo)) * (H - PAD.t - PAD.b);
+  // Candles sit against the right edge, like a trading chart, and never get wider than 40 units each.
+  const slot = Math.min((W - PAD.l - PAD.r) / candles.length, 40);
+  const xAt = (i: number) => W - PAD.r - (candles.length - i) * slot + slot / 2;
+  const body = Math.max(3, slot * 0.62);
 
   const first = pts[0].mc;
   const cur = m.mc ?? pts[pts.length - 1].mc;
@@ -68,15 +96,14 @@ export default function MarketChart({ mint }: { mint: string }) {
   const up = change >= 0;
   // A percent change over a few seconds of history says nothing, so wait for at least 10 minutes of it.
   const enoughHistory = pts.length >= 3 && t1 - t0 >= 10 * 60_000;
-  const shown = hover !== null ? pts[hover] : null;
+  const shown = hover !== null ? candles[hover] : null;
 
   function move(e: React.PointerEvent) {
     const r = svg.current?.getBoundingClientRect();
     if (!r) return;
-    const t = t0 + ((e.clientX - r.left) / r.width) * (t1 - t0);
-    let best = 0;
-    for (let i = 1; i < pts.length; i++) if (Math.abs(pts[i].t - t) < Math.abs(pts[best].t - t)) best = i;
-    setHover(best);
+    const vx = ((e.clientX - r.left) / r.width) * W;
+    const i = Math.round((vx - (W - PAD.r - candles.length * slot) - slot / 2) / slot);
+    setHover(i >= 0 && i < candles.length ? i : null);
   }
 
   return (
@@ -84,17 +111,30 @@ export default function MarketChart({ mint }: { mint: string }) {
       <div className="mkt-h">
         <div>
           <p className="eyebrow mono">Market cap</p>
-          <p className="mkt-v mono">{usd(shown ? shown.mc : cur)}</p>
+          <p className="mkt-v mono">{usd(shown ? shown.c : cur)}</p>
           <p className="muted small mono">
-            {shown ? new Date(shown.t).toLocaleString() : (enoughHistory ? 'last 24h' : 'since this server first saw the coin')}
+            {shown
+              ? `${new Date(shown.t).toLocaleString()} · O ${usd(shown.o)} H ${usd(shown.h)} L ${usd(shown.l)} C ${usd(shown.c)}`
+              : enoughHistory
+                ? 'last 24h'
+                : 'since this server first saw the coin'}
           </p>
         </div>
-        {enoughHistory && (
-          <div className={`mkt-chg mono ${up ? 'up' : 'down'}`}>
-            {up ? '▲ +' : '▼ '}
-            {change.toFixed(1)}%
+        <div className="mkt-side">
+          {enoughHistory && (
+            <div className={`mkt-chg mono ${up ? 'up' : 'down'}`}>
+              {up ? '▲ +' : '▼ '}
+              {change.toFixed(1)}%
+            </div>
+          )}
+          <div className="mkt-iv" role="group" aria-label="Candle size">
+            {(Object.keys(STEP) as Interval[]).map((k) => (
+              <button key={k} type="button" className={k === interval ? 'on' : ''} aria-pressed={k === interval} onClick={() => { setInterval_(k); setHover(null); }}>
+                {k}
+              </button>
+            ))}
           </div>
-        )}
+        </div>
       </div>
 
       <svg
@@ -102,26 +142,23 @@ export default function MarketChart({ mint }: { mint: string }) {
         viewBox={`0 0 ${W} ${H}`}
         className="mkt-svg"
         role="img"
-        aria-label={enoughHistory ? `Market cap ${usd(cur)}, ${up ? 'up' : 'down'} ${Math.abs(change).toFixed(1)} percent over 24 hours` : `Market cap ${usd(cur)}`}
+        aria-label={enoughHistory ? `Candlestick chart. Market cap ${usd(cur)}, ${up ? 'up' : 'down'} ${Math.abs(change).toFixed(1)} percent over 24 hours` : `Candlestick chart. Market cap ${usd(cur)}`}
         onPointerMove={move}
         onPointerLeave={() => setHover(null)}
       >
-        <defs>
-          <linearGradient id="mktfill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="currentColor" stopOpacity="0.28" />
-            <stop offset="1" stopColor="currentColor" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-        <g className={up ? 'up' : 'down'}>
-          <path d={area} fill="url(#mktfill)" />
-          <path d={line} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-        </g>
-        {shown && (
-          <g>
-            <line x1={x(shown.t)} x2={x(shown.t)} y1={PAD.t} y2={H} className="mkt-cross" vectorEffect="non-scaling-stroke" />
-            <circle cx={x(shown.t)} cy={y(shown.mc)} r="4" className="mkt-dot" />
-          </g>
-        )}
+        {candles.map((c, i) => {
+          const upc = c.c >= c.o;
+          const x = xAt(i);
+          const yo = y(c.o);
+          const yc = y(c.c);
+          return (
+            <g key={c.t} className={upc ? 'up' : 'down'} opacity={hover === null || hover === i ? 1 : 0.55}>
+              <line x1={x} x2={x} y1={y(c.h)} y2={y(c.l)} stroke="currentColor" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+              <rect x={x - body / 2} y={Math.min(yo, yc)} width={body} height={Math.max(2, Math.abs(yo - yc))} fill="currentColor" />
+            </g>
+          );
+        })}
+        {shown && hover !== null && <line x1={xAt(hover)} x2={xAt(hover)} y1={PAD.t} y2={H} className="mkt-cross" vectorEffect="non-scaling-stroke" />}
       </svg>
 
       <p className="muted small mkt-foot">

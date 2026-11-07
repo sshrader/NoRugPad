@@ -278,3 +278,9 @@ textarea { resize: vertical; }
 .checks dt { font-weight: 600; color: var(--accent-text); }
 .checks dd { margin: 0; color: var(--fg); }
 @media (max-width: 600px) { .checks dl > div { grid-template-columns: 1fr; } }
+.mkt-side { display: grid; gap: 8px; justify-items: end; }
+.mkt-iv { display: inline-flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
+.mkt-iv button { font: 500 12px var(--font-mono); background: transparent; color: var(--muted); border: 0; padding: 5px 10px; cursor: pointer; }
+.mkt-iv button + button { border-left: 1px solid var(--line); }
+.mkt-iv button.on { background: var(--surface-2); color: var(--accent-text); }
+.mkt-iv button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
