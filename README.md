@@ -38,6 +38,7 @@ Each coin page has a side-on pixel battle scene (`src/components/RugBattle.tsx`,
 
 - The hero is the coin's logo. It dashes at enemies, deflects scam links and charges a **Diamond Hands** shockwave. Tap the scene when the meter is full, or let it fire on its own.
 - Enemies: rug pullers that try to yank the liquidity vault, scammers with "FREE $$$" signs that fire fake links, sniper bots that drain the vault, and a Mega Rugger boss every 4th wave.
+- **NoRugPad Field** (`src/components/RugField.tsx`, engine in `src/lib/rugField.ts`) is the shared version on the Explore page: a top-down arena where the logos of the 40 newest coins stand in rings around one liquidity vault and fight the same villains together. Each visitor's browser runs its own copy, so two people see different fights. A "Top defenders" list ranks coins by enemies stopped, and tapping a logo opens its coin. Strength has nothing to do with a coin's real safety.
 - It is a cartoon only. It does not read or move anything on chain, and the villains are made up.
 - It pauses when scrolled out of view, and starts paused if the device asks for reduced motion.
 - Test the engine with no browser: `npm run rug-test`.

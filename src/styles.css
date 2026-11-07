@@ -241,6 +241,10 @@ textarea { resize: vertical; }
 .rug-canvas { width: 100%; height: auto; display: block; image-rendering: pixelated; background: #1b1442; cursor: pointer; }
 .rug-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 .rug-btns .btn:disabled { opacity: 0.5; cursor: default; }
+.field-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; align-items: flex-start; }
+.field-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.field-top ol { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; padding: 0; list-style: none; }
+.field-top a { color: var(--accent-text); }
 .rug-stats { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); min-height: 1.4em; }
 .park-tag .sp { opacity: 0.75; font-weight: 500; margin-left: 1px; }
 

@@ -3,6 +3,7 @@ import { getAllMarkets, listCoins, type Coin, type Market } from '../lib/api';
 import { CURVE_ON } from '../config';
 import { href } from '../router';
 import CoinCard from '../components/CoinCard';
+import RugField from '../components/RugField';
 
 export default function Explore() {
   const [coins, setCoins] = useState<Coin[] | null>(null);
@@ -42,8 +43,8 @@ export default function Explore() {
           <p className="eyebrow mono">Solana memecoin launchpad</p>
           <h1>Launch a coin. Fight off the rug.</h1>
           <p className="lede">
-            Launch on a Meteora bonding curve with mint and freeze authority revoked. Every coin page has its own arena where the coin's logo
-            defends the liquidity from rug pullers, scammers and bots.
+            Launch on a Meteora bonding curve with mint and freeze authority revoked. Below, the newest coins' logos fight off rug pullers, scammers
+            and bots together, and every coin page has its own arena.
           </p>
           <div className="badges">
             <span className="badge">⚡ One-click launch</span>
@@ -55,6 +56,8 @@ export default function Explore() {
           </div>
         </div>
       </section>
+
+      {coins && coins.length > 0 && <RugField coins={coins} />}
 
       <section className="filters">
         <h2>Launched coins{coins ? <span className="muted"> · {coins.length}</span> : null}</h2>
