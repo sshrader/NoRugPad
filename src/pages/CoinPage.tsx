@@ -5,6 +5,7 @@ import { ago } from '../lib/time';
 import { href } from '../router';
 import CopyAddress from '../components/CopyAddress';
 import MarketChart from '../components/MarketChart';
+import SafetyPanel from '../components/SafetyPanel';
 import RugBattle from '../components/RugBattle';
 import TradeBox from '../components/TradeBox';
 
@@ -45,7 +46,6 @@ export default function CoinPage({ mint }: { mint: string }) {
     );
   }
 
-  const ck = <span className="okmark" aria-hidden="true">✓</span>;
   return (
     <div className="wrap">
       <p className="back"><a href={href.explore}>← All coins</a></p>
@@ -69,10 +69,6 @@ export default function CoinPage({ mint }: { mint: string }) {
               {coin.telegram && <a href={coin.telegram} target="_blank" rel="noreferrer noopener nofollow">Telegram</a>}
             </p>
           )}
-          <div className="badges">
-            <span className="badge">{ck} Mint revoked</span>
-            <span className="badge">{ck} Freeze revoked</span>
-          </div>
         </div>
       </section>
 
@@ -81,6 +77,8 @@ export default function CoinPage({ mint }: { mint: string }) {
           <b>Block-zero dev buy:</b> the creator bought {coin.devBuy.tokens.toLocaleString('en-US', { maximumFractionDigits: 0 })} tokens ({coin.devBuy.pct}% of supply) in the same transaction that created the pool.
         </p>
       )}
+
+      <SafetyPanel coin={coin} />
 
       <MarketChart mint={coin.mint} />
 

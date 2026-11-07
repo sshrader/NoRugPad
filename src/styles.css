@@ -254,3 +254,18 @@ textarea { resize: vertical; }
 .devbuy { border: 1px dashed var(--line); border-radius: 3px; padding: 10px 12px; display: grid; gap: 8px; }
 .devbuy .row2 { align-items: center; grid-template-columns: 120px 1fr; }
 .devnote { padding: 10px 14px; font-size: 14px; }
+
+/* Safety checks */
+.safety { margin-bottom: 18px; }
+.sc-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.sc-row { display: grid; grid-template-columns: 22px 1fr auto; column-gap: 12px; align-items: baseline; background: var(--surface); padding: 10px 14px; }
+.sc-note { grid-column: 2 / 4; }
+.sc-mark { font: 700 13px var(--font-mono); text-align: center; }
+.sc-row.ok .sc-mark { color: var(--ok); }
+.sc-row.warn .sc-mark { color: var(--accent); }
+.sc-row.bad .sc-mark { color: var(--bad); }
+.sc-value { font-size: 13px; }
+.sc-row.bad .sc-value { color: var(--bad); }
+.sc-more { margin-top: 12px; }
+.sc-more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+.sc-more ol { margin: 8px 0 0; padding-left: 22px; color: var(--muted); }

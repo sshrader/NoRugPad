@@ -70,3 +70,24 @@ export async function getMarket(mint: string): Promise<Market> {
 export async function getAllMarkets(): Promise<Record<string, Omit<Market, 'history'>>> {
   return json(await fetch('/api/market'));
 }
+
+export type SafetyCheck = {
+  checkedAt: number;
+  mintRevoked: boolean;
+  freezeRevoked: boolean;
+  supply: number;
+  holders: null | {
+    top10Pct: number;
+    top1Pct: number;
+    creatorPct: number;
+    curvePct: number;
+    programPct: number;
+    holders: { account: string; owner: string | null; pct: number; kind: 'curve' | 'program' | 'wallet'; creator: boolean }[];
+  };
+  rugcheck: null | { score: number | null; lpLockedPct: number | null; url: string; risks: { name: string; level: string; description: string }[] };
+  rugcheckNote: string | null;
+};
+
+export async function getCheck(mint: string): Promise<SafetyCheck> {
+  return json<SafetyCheck>(await fetch(`/api/coins/${encodeURIComponent(mint)}/check`));
+}

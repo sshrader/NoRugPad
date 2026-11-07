@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit",
     "dry-run": "tsx scripts/dry-run.ts",
     "rug-test": "node scripts/rug-test.mjs",
+    "check-test": "node scripts/check-test.mjs",
     "new-wallet": "tsx scripts/new-wallet.ts",
     "wallet-address": "tsx scripts/wallet-address.ts",
     "sweep": "tsx scripts/sweep.ts",

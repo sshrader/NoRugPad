@@ -64,3 +64,10 @@ export async function curveState(connection, poolAddress) {
   states.set(poolAddress, { at: Date.now(), value });
   return value;
 }
+
+/** The curve's base-token vault address (where unsold tokens sit), so holder checks can set it apart from real wallets. */
+export async function poolVault(connection, poolAddress) {
+  const raw = await client(connection).state.getPool(poolAddress);
+  const f = fields(raw?.account ?? raw);
+  return f?.baseVault ? f.baseVault.toBase58() : null;
+}

@@ -6,7 +6,8 @@ import express from 'express';
 import multer from 'multer';
 import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { getMarket } from './market.mjs';
-import { curveEnabled, verifyPool } from './curve.mjs';
+import { curveEnabled, verifyPool, poolVault } from './curve.mjs';
+import { checkCoin } from './check.mjs';
 import { applyGuards, checkNetwork, launchAllowed, launchesRestricted } from './guard.mjs';
 import * as store from './store.mjs';
 
@@ -292,6 +293,18 @@ app.get('/api/coins/:mint/market', async (req, res) => {
   const coin = await findCoin(req.params.mint);
   if (!coin) return bad(res, 'Unknown coin.', 404);
   res.json(await getMarket(coin.mint, coin, connection));
+});
+
+// On-chain safety facts for the coin page: authorities, holder concentration, and RugCheck on mainnet.
+app.get('/api/coins/:mint/check', async (req, res) => {
+  const coin = await findCoin(req.params.mint);
+  if (!coin) return bad(res, 'Unknown coin.', 404);
+  try {
+    const vault = coin.pool ? await poolVault(connection, coin.pool).catch(() => null) : null;
+    res.json(await checkCoin(connection, coin, { vault, mainnet: (process.env.SOLANA_CLUSTER || '').toLowerCase() === 'mainnet-beta' }));
+  } catch (e) {
+    bad(res, `Could not run the checks: ${e.message}`, 502);
+  }
 });
 
 // In production, serve the built client from the same process.
