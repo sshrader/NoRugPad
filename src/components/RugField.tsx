@@ -27,6 +27,9 @@ export default function RugField({ coins }: { coins: Coin[] }) {
   const shown = useMemo(() => coins.slice(0, MAX_DEFENDERS), [coins]);
 
   // Hand the engine the newest coins, with their logos once each one has loaded.
+  // `push` is kept in a ref so an image that finishes loading always reaches the latest list, even if the effect re-ran meanwhile
+  // (React's dev mode runs effects twice, which used to leave the logos unapplied).
+  const pushRef = useRef<() => void>(() => {});
   useEffect(() => {
     const push = () =>
       field.setDefenders(
@@ -35,18 +38,15 @@ export default function RugField({ coins }: { coins: Coin[] }) {
           return { mint: c.mint, name: c.name, symbol: c.symbol, image: im && im.complete && im.naturalWidth > 0 ? im : null };
         }),
       );
+    pushRef.current = push;
     push();
-    let alive = true;
     for (const c of shown) {
       if (!c.imageUrl || images.current.has(c.mint)) continue;
       const im = new Image();
       images.current.set(c.mint, im);
-      im.onload = () => alive && push();
+      im.onload = () => pushRef.current();
       im.src = c.imageUrl;
     }
-    return () => {
-      alive = false;
-    };
   }, [field, shown]);
 
   // Pause while scrolled out of view.
