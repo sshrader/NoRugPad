@@ -6,12 +6,14 @@ export type Route =
   | { name: 'explore' }
   | { name: 'launch' }
   | { name: 'admin' }
+  | { name: 'how' }
   | { name: 'coin'; mint: string };
 
 function parse(hash: string): Route {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   if (parts[0] === 'launch') return { name: 'launch' };
   if (parts[0] === 'admin') return { name: 'admin' };
+  if (parts[0] === 'how') return { name: 'how' };
   if (parts[0] === 'coin' && parts[1]) return { name: 'coin', mint: decodeURIComponent(parts[1]) };
   return { name: 'explore' };
 }
@@ -32,5 +34,6 @@ export function useRoute(): Route {
 export const href = {
   explore: '#/',
   launch: '#/launch',
+  how: '#/how',
   coin: (mint: string) => `#/coin/${encodeURIComponent(mint)}`,
 };

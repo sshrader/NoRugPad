@@ -8,6 +8,7 @@ import Explore from './pages/Explore';
 import Launch from './pages/Launch';
 import CoinPage from './pages/CoinPage';
 import Admin from './pages/Admin';
+import HowItWorks from './pages/HowItWorks';
 
 // The NoRugPad mark: a shield holding a checked gold coin.
 function Mark() {
@@ -61,7 +62,7 @@ export default function App() {
   }
 
   const section = route.name === 'coin' ? 'explore' : route.name === 'admin' ? '' : route.name;
-  const link = (name: 'explore' | 'launch', label: string) => (
+  const link = (name: 'explore' | 'launch' | 'how', label: string) => (
     <a className={section === name ? 'on' : ''} href={href[name]} aria-current={section === name ? 'page' : undefined}>
       {label}
     </a>
@@ -85,6 +86,7 @@ export default function App() {
           <nav className="nav" aria-label="Main">
             {link('explore', 'Explore')}
             {link('launch', 'Launch')}
+            {link('how', 'How it works')}
           </nav>
           <div className="wallet-area">
             {publicKey && balance !== null && <span className="bal mono">{balance.toFixed(3)} SOL</span>}
@@ -111,13 +113,15 @@ export default function App() {
         {route.name === 'explore' && <Explore />}
         {route.name === 'launch' && <Launch balance={balance} onCreated={refreshBalance} />}
         {route.name === 'admin' && <Admin />}
+        {route.name === 'how' && <HowItWorks />}
         {route.name === 'coin' && <CoinPage mint={route.mint} />}
       </main>
 
       <footer className="wrap foot muted">
         {IS_MAINNET
           ? 'NoRugPad is unaudited beta software. Coins are not endorsed by NoRugPad. Only risk what you can lose.'
-          : `Prototype running on ${CLUSTER}. Not audited.`}
+          : `Prototype running on ${CLUSTER}. Not audited.`}{' '}
+        <a href={href.how}>How it works</a>
       </footer>
     </>
   );

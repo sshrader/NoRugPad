@@ -82,7 +82,7 @@ export default function Explore() {
           </div>
         </dl>
         <p className="muted small">
-          These are facts at one moment, not a promise. A coin that passes every check can still lose its value.
+          These are facts at one moment, not a promise. A coin that passes every check can still lose its value. <a href={href.how}>How it all works</a>
         </p>
       </section>
 
