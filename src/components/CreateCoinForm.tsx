@@ -48,6 +48,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
   const [devBuy, setDevBuy] = useState('0.1');
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState('');
   const [created, setCreated] = useState<Coin | null>(null);
@@ -80,6 +81,18 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       return setError('Image must be under 2 MB.');
     }
     setImage(f);
+  }
+
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const f = e.dataTransfer.files?.[0] ?? null;
+    if (!f) return;
+    if (!/^image\/(png|jpeg|webp|gif)$/.test(f.type)) {
+      setImage(null);
+      return setError('Image must be PNG, JPEG, WebP or GIF.');
+    }
+    onImage(f);
   }
 
   async function submit(e: React.FormEvent) {
@@ -138,6 +151,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
     <form className="card form" onSubmit={submit}>
       <AiStudio
         creator={wallet.publicKey ? wallet.publicKey.toBase58() : null}
+        image={image}
         onConcept={(c) => {
           setName(c.name);
           setSymbol(c.symbol);
@@ -150,11 +164,24 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       <h3>New coin</h3>
 
       <div className="field">
-        <label htmlFor="img">Coin image</label>
-        <div className="imgrow">
-          <div className="imgprev">{preview ? <img src={preview} alt="Preview of your coin" /> : <span className="muted">No image</span>}</div>
-          <input id="img" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={(e) => onImage(e.target.files?.[0] ?? null)} />
-        </div>
+        <span className="lbl" id="img-l">Coin image</span>
+        <label
+          htmlFor="img"
+          className={`drop${dragging ? ' over' : ''}`}
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={onDrop}
+        >
+          <span className="drop-prev">{preview ? <img src={preview} alt="Preview of your coin" /> : <span className="muted">No image</span>}</span>
+          <span className="drop-text">
+            <b>{image ? image.name : 'Drag and drop a picture here'}</b>
+            <span className="muted small">{image ? 'Drop or choose another to replace it.' : 'or click to choose a file. PNG, JPEG, WebP or GIF, up to 2 MB.'}</span>
+          </span>
+          <input id="img" className="sr" type="file" accept="image/png,image/jpeg,image/webp,image/gif" aria-labelledby="img-l" onChange={(e) => onImage(e.target.files?.[0] ?? null)} />
+        </label>
       </div>
 
       <div className="row2">

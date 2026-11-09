@@ -425,3 +425,14 @@ input:focus, textarea:focus, .in:focus { border-color: var(--fg); box-shadow: 0 
 .studio-thumbs button:disabled { opacity: 0.6; cursor: default; }
 .studio-thumbs img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .studio-tick { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; display: grid; place-items: center; background: var(--lime); border: 2px solid var(--fg); border-radius: 50%; font: 800 10px/1 var(--font-body); color: var(--fg); }
+
+/* Coin image: a drop zone */
+.field .lbl { font-size: 13px; font-weight: 600; }
+.drop { display: flex; align-items: center; gap: 16px; padding: 14px; background: #fff; border: 3px dashed var(--fg); border-radius: 14px; cursor: pointer; transition: background 0.1s; }
+.drop:hover { background: var(--surface-2); }
+.drop.over { background: var(--lime); border-style: solid; }
+.drop:focus-within { box-shadow: 0 0 0 4px rgba(255, 61, 154, 0.45); }
+.drop-prev { flex: none; width: 112px; height: 112px; display: grid; place-items: center; border: 3px solid var(--fg); border-radius: 12px; background: var(--bg); overflow: hidden; font-size: 12px; }
+.drop-prev img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.drop-text { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 480px) { .drop { flex-direction: column; text-align: center; } }

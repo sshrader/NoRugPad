@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { aiConcept, aiMascot, aiStatus, type Concept } from '../lib/api';
 
 type Props = {
   creator: string | null;
+  /** The coin's current image, so the studio can show which drawing is the one on the coin. */
+  image: File | null;
   onConcept: (c: Concept) => void;
   onMascot: (f: File) => void;
 };
@@ -18,16 +20,16 @@ async function toFile(p: Pic): Promise<File> {
 }
 
 // "Describe your coin": the AI writes the name, ticker and description, then draws an original mascot.
-// Drawings are only candidates. The creator looks at them, can edit the mascot description and redraw, and the picture
-// is only put on the coin when they press "Use this mascot". Everything can still be changed in the form below.
-export default function AiStudio({ creator, onConcept, onMascot }: Props) {
+// Each new drawing goes onto the coin as its image straight away. Picking an earlier drawing puts that one on instead,
+// and the creator can edit the mascot description and redraw, or drop in their own picture below. Everything can be changed in the form.
+export default function AiStudio({ creator, image, onConcept, onMascot }: Props) {
   const [enabled, setEnabled] = useState(false);
   const [idea, setIdea] = useState('');
   const [concept, setConcept] = useState<Concept | null>(null);
   const [mascotText, setMascotText] = useState('');
   const [pics, setPics] = useState<Pic[]>([]);
   const [shown, setShown] = useState<number | null>(null); // id of the picture on display
-  const [used, setUsed] = useState<number | null>(null); // id of the picture attached to the coin
+  const files = useRef(new Map<number, File>()); // the File handed to the coin for each drawing
   const [busy, setBusy] = useState<'' | 'idea' | 'mascot'>('');
   const [error, setError] = useState('');
 
@@ -47,6 +49,15 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
   const current = pics.find((p) => p.id === shown) ?? null;
   const working = busy !== '';
 
+  async function putOnCoin(pic: Pic) {
+    let f = files.current.get(pic.id);
+    if (!f) {
+      f = await toFile(pic);
+      files.current.set(pic.id, f);
+    }
+    onMascot(f);
+  }
+
   async function draw(text: string) {
     if (!creator) throw new Error('Connect your wallet first.');
     setBusy('mascot');
@@ -55,6 +66,7 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
       const pic: Pic = { id: Date.now() + Math.random(), mime: r.mime, b64: r.image };
       setPics((all) => [...all, pic].slice(-MAX_PICS));
       setShown(pic.id);
+      await putOnCoin(pic);
     } finally {
       setBusy('');
     }
@@ -70,7 +82,7 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
       setMascotText(c.mascot);
       setPics([]);
       setShown(null);
-      setUsed(null);
+      files.current.clear();
       onConcept(c);
       setBusy('');
       await draw(c.mascot);
@@ -89,12 +101,11 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
     }
   }
 
-  async function useIt() {
-    if (!current) return;
+  async function pick(p: Pic) {
     setError('');
+    setShown(p.id);
     try {
-      onMascot(await toFile(current));
-      setUsed(current.id);
+      await putOnCoin(p);
     } catch (e) {
       setError(msg(e));
     }
@@ -104,7 +115,7 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
     <section className="studio" aria-label="Describe your coin">
       <h3>Describe your coin</h3>
       <p className="muted small">
-        Tell us the idea in a sentence. We'll write the name, ticker and description and draw an original mascot. Nothing goes on your coin until you press "Use this mascot", and you can edit everything below.
+        Tell us the idea in a sentence. We'll write the name, ticker and description and draw an original mascot. Each drawing goes on your coin as its picture straight away. Pick an earlier drawing to switch back, or upload your own below. You can edit everything.
       </p>
       <div className="field">
         <label htmlFor="idea" className="sr">Your idea</label>
@@ -143,27 +154,24 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
               <span className="muted small">Change this and press "Draw again" to get a different mascot.</span>
             </div>
             <div className="studio-btns">
-              <button type="button" className="btn primary" onClick={useIt} disabled={!current || working || used === current?.id}>
-                {used !== null && used === current?.id ? 'Using this mascot ✓' : 'Use this mascot'}
-              </button>
-              <button type="button" className="btn" onClick={redraw} disabled={working || mascotText.trim().length < 3}>
+              <button type="button" className="btn primary" onClick={redraw} disabled={working || mascotText.trim().length < 3}>
                 {busy === 'mascot' ? 'Drawing…' : 'Draw again'}
               </button>
             </div>
-            {pics.length > 1 && (
-              <div className="studio-thumbs" role="group" aria-label="Earlier drawings">
+            {pics.length > 0 && (
+              <div className="studio-thumbs" role="group" aria-label="Your drawings. The ticked one is on your coin.">
                 {pics.map((p, i) => (
                   <button
                     key={p.id}
                     type="button"
                     className={p.id === shown ? 'on' : ''}
                     aria-pressed={p.id === shown}
-                    aria-label={`Drawing ${i + 1}${p.id === used ? ', in use' : ''}`}
-                    onClick={() => setShown(p.id)}
+                    aria-label={`Drawing ${i + 1}${files.current.get(p.id) === image ? ', on your coin' : ''}`}
+                    onClick={() => pick(p)}
                     disabled={working}
                   >
                     <img src={src(p)} alt="" />
-                    {p.id === used && <span className="studio-tick" aria-hidden="true">✓</span>}
+                    {files.current.get(p.id) === image && <span className="studio-tick" aria-hidden="true">✓</span>}
                   </button>
                 ))}
               </div>
