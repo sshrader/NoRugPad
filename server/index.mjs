@@ -38,6 +38,10 @@ const app = express();
 app.disable('x-powered-by');
 applyGuards(app);
 app.use(express.json({ limit: '50kb' }));
+app.use('/api', (_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store'); // coin lists and prices must never come from a cache
+  next();
+});
 
 // Local mode only: files we saved ourselves. nosniff stops browsers from guessing a type.
 app.use(
@@ -356,9 +360,8 @@ const network = await checkNetwork(connection).catch((e) => {
   process.exit(1);
 });
 
+await store.resetIfRequested(); // before anything starts reading or writing the data files
 if (curveEnabled() && process.env.MARKET_SAMPLER !== 'off') startSampler(connection, Math.max(2000, Number(process.env.MARKET_SAMPLE_MS) || 5000));
-
-await store.resetIfRequested();
 
 app.listen(PORT, () => {
   console.log(`Network: ${network}${launchesRestricted() ? ' (launches limited to the allowlist)' : ''}`);

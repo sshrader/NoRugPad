@@ -14,9 +14,14 @@ export default function Explore() {
 
   useEffect(() => {
     let alive = true;
-    listCoins()
-      .then((c) => alive && (setCoins(c), setError('')))
-      .catch(() => alive && setError('Could not reach the API. Is the server running? (npm run dev starts both.)'));
+    const loadCoins = () =>
+      listCoins()
+        .then((c) => alive && (setCoins(c), setError('')))
+        .catch(() => alive && setError('Could not reach the API. Is the server running? (npm run dev starts both.)'));
+    loadCoins();
+    const ctimer = setInterval(loadCoins, 15000); // keep the list fresh without a reload, so a reset or a new launch shows up
+    const onFocus = () => loadCoins();
+    window.addEventListener('focus', onFocus);
     const loadMarkets = () =>
       getAllMarkets()
         .then((m) => alive && setMarkets(m))
@@ -26,6 +31,8 @@ export default function Explore() {
     return () => {
       alive = false;
       clearInterval(mtimer);
+      clearInterval(ctimer);
+      window.removeEventListener('focus', onFocus);
     };
   }, []);
 

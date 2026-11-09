@@ -36,7 +36,13 @@ export const get = (name, fallback) => read(name, fallback);
 // The old files are moved into a "reset-backup-<value>" folder next to them, not deleted.
 // On mainnet it also needs RESET_DATA_MAINNET=wipe-mainnet-list, so a stray variable can never clear a live site.
 // Coins already launched stay on chain and keep trading; this only empties this site's list.
-export async function resetIfRequested() {
+export function resetIfRequested() {
+  const result = queue.then(doReset);
+  queue = result.catch(() => {});
+  return result;
+}
+
+async function doReset() {
   const token = process.env.RESET_DATA;
   if (!token) return false;
   if ((process.env.SOLANA_CLUSTER || 'devnet') === 'mainnet-beta' && process.env.RESET_DATA_MAINNET !== 'wipe-mainnet-list') {
