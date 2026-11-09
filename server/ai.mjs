@@ -73,13 +73,30 @@ async function run(model, body, ms = 45_000, fetchImpl = fetch) {
 
 const trimTo = (s, n) => String(s ?? '').replace(/[\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, n);
 
+/** Pulls a JSON object out of a model reply: already-parsed objects, code fences, chatter around it, trailing commas, curly quotes. */
+export function extractJson(raw) {
+  if (raw && typeof raw === 'object') return raw;
+  const text = String(raw ?? '').replace(/```(?:json)?/gi, '');
+  const m = text.match(/\{[\s\S]*\}/);
+  if (!m) return null;
+  try {
+    return JSON.parse(m[0]);
+  } catch {
+    // fall through to a gentler clean-up
+  }
+  try {
+    return JSON.parse(m[0].replace(/[\u201c\u201d]/g, '"').replace(/,\s*([}\]])/g, '$1').replace(/\r?\n/g, ' '));
+  } catch {
+    return null;
+  }
+}
+
 /** Idea text in, { name, symbol, description, mascot } out. */
 export async function makeConcept(idea, fetchImpl = fetch) {
   const text = screenIdea(idea);
-  const result = await run(
-    TEXT_MODEL(),
-    {
+  const body = {
       max_tokens: 400,
+      temperature: 0.6,
       messages: [
         {
           role: 'system',
@@ -92,19 +109,18 @@ export async function makeConcept(idea, fetchImpl = fetch) {
         },
         { role: 'user', content: `Idea: """${text}"""` },
       ],
-    },
-    30_000,
-    fetchImpl,
-  );
-  const raw = typeof result === 'string' ? result : result?.response;
-  const m = String(raw ?? '').match(/\{[\s\S]*\}/);
-  let j = null;
-  try {
-    j = m ? JSON.parse(m[0]) : null;
-  } catch {
-    j = null;
+    };
+  let result = await run(TEXT_MODEL(), body, 30_000, fetchImpl);
+  let j = extractJson(typeof result === 'string' ? result : result?.response);
+  if (!j) {
+    // One more try: models sometimes ramble on the first go.
+    result = await run(TEXT_MODEL(), body, 30_000, fetchImpl);
+    j = extractJson(typeof result === 'string' ? result : result?.response);
   }
-  if (!j) throw new AiError('Could not make sense of the AI reply. Try again.', 502);
+  if (!j) {
+    console.error('AI concept: could not read the reply:', JSON.stringify(result)?.slice(0, 400));
+    throw new AiError('Could not make sense of the AI reply. Try again.', 502);
+  }
   const name = trimTo(j.name, 32);
   const symbol = trimTo(j.symbol, 10).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
   const description = trimTo(j.description, 280);
