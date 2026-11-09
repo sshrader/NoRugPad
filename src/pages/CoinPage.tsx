@@ -6,7 +6,6 @@ import { href } from '../router';
 import CopyAddress from '../components/CopyAddress';
 import MarketChart from '../components/MarketChart';
 import SafetyPanel from '../components/SafetyPanel';
-import RugBattle from '../components/RugBattle';
 import TradeBox from '../components/TradeBox';
 
 const short = (a: string) => `${a.slice(0, 4)}…${a.slice(-4)}`;
@@ -82,7 +81,6 @@ export default function CoinPage({ mint }: { mint: string }) {
 
       <MarketChart mint={coin.mint} />
 
-      <RugBattle coin={coin} />
 
       {coin.curve ? (
         <TradeBox coin={coin} />
