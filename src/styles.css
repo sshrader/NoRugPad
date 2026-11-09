@@ -438,3 +438,20 @@ input:focus, textarea:focus, .in:focus { border-color: var(--fg); box-shadow: 0 
 @media (max-width: 480px) { .drop { flex-direction: column; text-align: center; } }
 
 #mascot-text { min-height: 9.5em; max-height: 22em; line-height: 1.5; }
+
+/* Coin logos: a gentle bob and tilt on the coin page, and a wiggle on board rows when hovered or focused. */
+@keyframes logo-bob {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-6px) rotate(2deg); }
+}
+@keyframes logo-wiggle {
+  0%, 100% { transform: rotate(0) scale(1); }
+  25% { transform: rotate(-8deg) scale(1.1); }
+  75% { transform: rotate(8deg) scale(1.1); }
+}
+.coinhead img { animation: logo-bob 3.2s ease-in-out infinite; transform-origin: 50% 80%; }
+.coinhead img:hover { animation: logo-wiggle 0.5s ease-in-out infinite; }
+.row:hover .row-img, .row:focus-visible .row-img { animation: logo-wiggle 0.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .coinhead img, .coinhead img:hover, .row:hover .row-img, .row:focus-visible .row-img { animation: none; }
+}
