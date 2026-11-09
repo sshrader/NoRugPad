@@ -8,7 +8,8 @@ import { Connection, PublicKey, clusterApiUrl } from '@solana/web3.js';
 import { getMarket, startSampler } from './market.mjs';
 import { curveEnabled, verifyPool, poolVault } from './curve.mjs';
 import { checkCoin } from './check.mjs';
-import { applyGuards, checkNetwork, launchAllowed, launchesRestricted } from './guard.mjs';
+import { applyGuards, checkNetwork, launchAllowed, launchesRestricted, walletAllowed } from './guard.mjs';
+import { AiError, aiBudget, aiEnabled, makeConcept, makeMascot } from './ai.mjs';
 import * as store from './store.mjs';
 
 const PORT = Number(process.env.PORT || 8787);
@@ -295,6 +296,32 @@ app.get('/api/coins/:mint/market', async (req, res) => {
   res.json(await getMarket(coin.mint, coin, connection));
 });
 
+// AI helpers for the launch page. Both need a valid wallet that is allowed to launch, and are rate limited and capped per day.
+app.get('/api/ai/status', (_req, res) => res.json({ enabled: aiEnabled() }));
+
+function aiRoute(kind, work) {
+  return async (req, res) => {
+    try {
+      if (!aiEnabled()) return bad(res, 'The generator is not set up on this server.', 503);
+      let wallet;
+      try {
+        wallet = new PublicKey(String(req.body.creator)).toBase58();
+      } catch {
+        return bad(res, 'Connect your wallet first.');
+      }
+      if (!walletAllowed(wallet)) return bad(res, 'Launching is limited to invited wallets during the beta.', 403);
+      aiBudget(kind, req.ip, wallet);
+      res.json(await work(String(req.body.text ?? '')));
+    } catch (e) {
+      if (e instanceof AiError) return bad(res, e.message, e.status);
+      console.error('ai route failed', e);
+      bad(res, 'Something went wrong. Try again.', 500);
+    }
+  };
+}
+app.post('/api/ai/concept', aiRoute('text', (t) => makeConcept(t)));
+app.post('/api/ai/mascot', aiRoute('image', (t) => makeMascot(t)));
+
 // On-chain safety facts for the coin page: authorities, holder concentration, and RugCheck on mainnet.
 app.get('/api/coins/:mint/check', async (req, res) => {
   const coin = await findCoin(req.params.mint);
@@ -329,5 +356,5 @@ if (curveEnabled() && process.env.MARKET_SAMPLER !== 'off') startSampler(connect
 
 app.listen(PORT, () => {
   console.log(`Network: ${network}${launchesRestricted() ? ' (launches limited to the allowlist)' : ''}`);
-  console.log(`NoRugPad API on http://localhost:${PORT}  (rpc: ${RPC_HOST}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);
+  console.log(`Meme Factory API on http://localhost:${PORT}  (rpc: ${RPC_HOST}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);
 });

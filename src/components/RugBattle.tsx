@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Coin } from '../lib/api';
 import { BH, BW, SCALE, createBattle, type BattleStats } from '../lib/rugWorld';
 
-// NoRugPad Arena: the coin's own logo fights off cartoon rug pullers, scammers and bots to protect the liquidity vault.
+// Meme Factory Arena: the coin's own logo fights off cartoon rug pullers, scammers and bots to protect the liquidity vault.
 // It is only a show. It does not read or change anything on chain. Tap the scene (or the button) when the meter is full for the special move.
 export default function RugBattle({ coin }: { coin: Coin }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -91,10 +91,10 @@ export default function RugBattle({ coin }: { coin: Coin }) {
 
   const s = stats;
   return (
-    <section className="card rug" aria-label="NoRugPad Arena" ref={box}>
+    <section className="card rug" aria-label="Meme Factory Arena" ref={box}>
       <div className="park-h">
         <div>
-          <p className="eyebrow">NoRugPad Arena</p>
+          <p className="eyebrow">Meme Factory Arena</p>
           <h3>{coin.name} guards the liquidity</h3>
         </div>
         <div className="rug-btns">

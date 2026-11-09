@@ -1,6 +1,6 @@
 /**
  * Prints the PUBLIC address of a wallet key file. Never prints the secret key.
- *   npm run wallet-address -- C:\temp\keys\pawpad-deployer.json
+ *   npm run wallet-address -- C:\temp\keys\deployer.json
  * With no path, uses PARTNER_KEYPAIR from .env (or .devnet-keypair.json).
  */
 import 'dotenv/config';

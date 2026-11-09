@@ -91,3 +91,19 @@ export type SafetyCheck = {
 export async function getCheck(mint: string): Promise<SafetyCheck> {
   return json<SafetyCheck>(await fetch(`/api/coins/${encodeURIComponent(mint)}/check`));
 }
+
+export type Concept = { name: string; symbol: string; description: string; mascot: string };
+
+export async function aiStatus(): Promise<{ enabled: boolean }> {
+  return json(await fetch('/api/ai/status'));
+}
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  return json<T>(await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }));
+}
+
+/** Turns an idea into a coin name, ticker, description and a mascot description. */
+export const aiConcept = (text: string, creator: string) => post<Concept>('/api/ai/concept', { text, creator });
+
+/** Draws the mascot. Returns a base64 image. */
+export const aiMascot = (text: string, creator: string) => post<{ mime: string; image: string }>('/api/ai/mascot', { text, creator });

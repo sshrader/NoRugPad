@@ -1,5 +1,5 @@
 /**
- * One-time setup: creates the NoRugPad bonding-curve config on Meteora.
+ * One-time setup: creates the Meme Factory bonding-curve config on Meteora.
  * Every coin launched in the app is a pool made from this config, so these numbers set your fees and curve shape.
  *
  *   npm run dbc-config            build it and send it (uses .devnet-keypair.json as the partner wallet)

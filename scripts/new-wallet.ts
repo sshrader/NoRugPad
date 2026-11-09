@@ -1,6 +1,6 @@
 /**
  * Makes a brand-new wallet key file for the DEPLOYER (the wallet that pays to create the mainnet config).
- *   npm run new-wallet -- C:\keys\pawpad-deployer.json
+ *   npm run new-wallet -- C:\keys\deployer.json
  * Prints the public address to fund. The file is the secret key: keep it OUTSIDE this repo, back it up, never share it.
  * Then set PARTNER_KEYPAIR=<that path> in your local .env. (The fee claimer is a different wallet: DBC_FEE_CLAIMER.)
  */

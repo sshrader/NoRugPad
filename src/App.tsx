@@ -10,13 +10,13 @@ import CoinPage from './pages/CoinPage';
 import Admin from './pages/Admin';
 import HowItWorks from './pages/HowItWorks';
 
-// The NoRugPad mark: a shield holding a checked gold coin.
+// The Meme Factory mark: a gold coin with a small factory on it.
 function Mark() {
   return (
     <svg className="mark" viewBox="0 0 32 32" aria-hidden="true">
-      <path d="M16 1.5 28.5 6v9.2c0 7.3-5 12.6-12.5 15.3C8.5 27.8 3.5 22.5 3.5 15.2V6z" fill="#161b36" stroke="#f4b63f" strokeWidth="2" strokeLinejoin="round" />
-      <circle cx="16" cy="15.5" r="7" fill="#f4b63f" />
-      <path d="m12.5 15.7 2.4 2.5 4.8-5.2" fill="none" stroke="#1a1305" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="16" cy="16" r="14.5" fill="#f4b63f" />
+      <path d="M8 24V13l5 3.5V13l5 3.5V9h3v15z" fill="#1a1305" />
+      <circle cx="22.8" cy="6.2" r="1.7" fill="#1a1305" fillOpacity=".55" />
     </svg>
   );
 }
@@ -79,9 +79,9 @@ export default function App() {
       </div>
       <header className="top">
         <div className="wrap top-in">
-          <a className="brand" href={href.explore} aria-label="NoRugPad home">
+          <a className="brand" href={href.explore} aria-label="Meme Factory home">
             <Mark />
-            NoRugPad
+            Meme Factory
           </a>
           <nav className="nav" aria-label="Main">
             {link('explore', 'Explore')}
@@ -119,7 +119,7 @@ export default function App() {
 
       <footer className="wrap foot muted">
         {IS_MAINNET
-          ? 'NoRugPad is unaudited beta software. Coins are not endorsed by NoRugPad. Only risk what you can lose.'
+          ? 'Meme Factory is unaudited beta software. Coins are not endorsed by Meme Factory. Only risk what you can lose.'
           : `Prototype running on ${CLUSTER}. Not audited.`}{' '}
         <a href={href.how}>How it works</a>
       </footer>

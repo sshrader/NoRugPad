@@ -1,26 +1,27 @@
 import { href } from '../router';
 
-// Plain-language explanation of how NoRugPad works, what it checks, and what it cannot stop.
+// Plain-language explanation of how Meme Factory works, what it checks, and what it cannot stop.
 // Only state things the app does today. Plans stay in the "Planned" section and are not promises.
 export default function HowItWorks() {
   return (
     <div className="wrap prose">
       <p className="back"><a href={href.explore}>← All coins</a></p>
-      <h1>How NoRugPad works</h1>
+      <h1>How Meme Factory works</h1>
       <p className="lede">
         A rug pull is when the people behind a coin take the money out and leave holders with tokens worth nothing. This page explains how coins here are set up to make the common ways of doing that harder, what we check, and what no one can stop.
       </p>
 
       <h2>How a coin is launched and traded</h2>
       <ol>
-        <li>The creator launches a coin. It's a plain token with a fixed supply of 1 billion, and its name and image are locked after launch.</li>
+        <li>The creator describes an idea. AI writes the name, ticker and description and draws an original mascot, and the creator can change any of it or upload their own picture.</li>
+        <li>The creator launches the coin. It's a plain token with a fixed supply of 1 billion, and its name and image are locked after launch.</li>
         <li>Trading happens on a Meteora bonding curve. The price moves up as people buy and down as they sell, and the curve is the other side of every trade.</li>
         <li>
           When the curve fills up, the coin graduates to a Meteora DEX pool.{' '}
           {/* VERIFY before publishing: confirm in Meteora's docs how much of the graduated liquidity is locked and for how long. */}
           The liquidity moves to a Meteora DAMM v2 pool, where it is locked under Meteora's rules.
         </li>
-        <li>NoRugPad earns a 1% trading fee. We never hold your funds.</li>
+        <li>Meme Factory earns a 1% trading fee. We never hold your funds.</li>
       </ol>
 
       <h2>Common rugs, and what is done about them</h2>
@@ -57,7 +58,7 @@ export default function HowItWorks() {
         <li>Fake or copycat coins, and scam links shared elsewhere.</li>
       </ul>
       <p>
-        The checks show facts at one moment. They do not mean a coin is safe. Coins are not endorsed by NoRugPad, the service is unaudited beta software, and nothing here is financial advice. Only risk what you can afford to lose.
+        The checks show facts at one moment. They do not mean a coin is safe. Coins are not endorsed by Meme Factory, the service is unaudited beta software, and nothing here is financial advice. Only risk what you can afford to lose.
       </p>
 
       <h2>Planned</h2>

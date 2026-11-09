@@ -1,4 +1,4 @@
-/* NoRugPad: a night-watch look. Midnight navy, vault gold, alarm red. Dark only, to match the arena. */
+/* Meme Factory: a night-watch look. Midnight navy, vault gold, alarm red. Dark only, to match the arena. */
 :root {
   --font-display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
   --font-body: 'IBM Plex Sans', system-ui, sans-serif;
@@ -296,3 +296,9 @@ textarea { resize: vertical; }
 .faq dt { font-weight: 600; color: var(--accent-text); margin-bottom: 4px; }
 .faq dd { margin: 0; }
 .prose .cta { margin-top: 28px; }
+
+/* AI studio on the Launch page */
+.studio { display: grid; gap: 10px; padding: 16px; margin-bottom: 18px; border: 1px dashed var(--accent); border-radius: 4px; background: rgba(244, 182, 63, 0.05); }
+.studio h3 { margin: 0; }
+.studio textarea { width: 100%; }
+.studio-btns { display: flex; flex-wrap: wrap; gap: 8px; }

@@ -7,7 +7,7 @@ export default function Launch({ balance, onCreated }: { balance: number | null;
         <p className="eyebrow mono">New coin</p>
         <h1>Launch a coin</h1>
         <p className="lede">
-          Fill in the basics. One wallet approval creates the token and revokes mint and freeze authority.
+          Describe your idea and we'll write the coin and draw its mascot, or fill in the basics yourself. One wallet approval creates the token.
         </p>
       </header>
       <div className="launch">
@@ -16,7 +16,7 @@ export default function Launch({ balance, onCreated }: { balance: number | null;
           <section className="card">
             <h3>What happens</h3>
             <ol className="how">
-              <li>Your image and details are stored on IPFS.</li>
+              <li>Your mascot and details are stored for the coin page and wallets.</li>
               <li>You approve one transaction in your wallet.</li>
               <li>The server checks the chain, then lists your coin.</li>
               <li>Your coin gets its own page and battle arena.</li>

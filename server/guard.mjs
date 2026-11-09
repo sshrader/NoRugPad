@@ -31,7 +31,7 @@ export function applyGuards(app) {
   if (BLOCKED.length) {
     app.use('/api', (req, res, next) => {
       if (req.path === '/health') return next();
-      if (BLOCKED.includes(countryOf(req))) return res.status(451).json({ error: 'Pawpad is not available in your region.' });
+      if (BLOCKED.includes(countryOf(req))) return res.status(451).json({ error: 'Meme Factory is not available in your region.' });
       next();
     });
   }
@@ -51,6 +51,8 @@ export function launchAllowed(wallet) {
   if (!rateLimit(`launch:${wallet}`, MAX_LAUNCHES, 24 * 3_600_000)) return `Launch limit reached (${MAX_LAUNCHES} per day per wallet).`;
   return null;
 }
+/** Allowlist check only: does not count as a launch. */
+export const walletAllowed = (wallet) => !ALLOWLIST.length || ALLOWLIST.includes(wallet);
 export const launchesRestricted = () => ALLOWLIST.length > 0;
 
 /** Refuses unsafe mainnet setups. Call once at startup. Returns the network name. */

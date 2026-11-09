@@ -40,9 +40,9 @@ export default function Explore() {
     <div className="wrap">
       <section className={`hero${coins && coins.length > 0 ? '' : ' solo'}`}>
         <div className="hero-copy">
-          <h1>Launch a coin.<br />Fight off the rug.</h1>
+          <h1>Describe a coin.<br />Meet its mascot.</h1>
           <p className="lede">
-            Every coin here launches on a Meteora bonding curve. In the arena, the newest coins' logos defend the vault from cartoon rug pullers, scammers and bots.
+            Tell Meme Factory your idea and it writes the coin and draws an original mascot. Launch it on a Meteora bonding curve, then watch the newest mascots defend the vault from cartoon rug pullers, scammers and bots.
           </p>
           <ul className="guards">
             <li>Mint and freeze authority are checked live on every coin</li>

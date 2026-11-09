@@ -6,6 +6,7 @@ import { createCoinOnCurve } from '../lib/dbc';
 import { registerCoin, uploadMetadata, type Coin, type UploadResult } from '../lib/api';
 import { href } from '../router';
 import { PLATFORMS, platformUrl } from '../lib/platforms';
+import AiStudio from './AiStudio';
 
 type Phase = 'idle' | 'uploading' | 'signing' | 'confirming' | 'registering' | 'done';
 
@@ -135,6 +136,17 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
 
   return (
     <form className="card form" onSubmit={submit}>
+      <AiStudio
+        creator={wallet.publicKey ? wallet.publicKey.toBase58() : null}
+        onConcept={(c) => {
+          setName(c.name);
+          setSymbol(c.symbol);
+          setSymbolTouched(true);
+          setDescription(c.description);
+        }}
+        onMascot={(f) => onImage(f)}
+      />
+
       <h3>New coin</h3>
 
       <div className="field">
