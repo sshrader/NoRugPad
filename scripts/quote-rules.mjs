@@ -8,9 +8,9 @@ const OK_EXTENSIONS = new Set(['MetadataPointer', 'TokenMetadata']);
 const EXTENSION_NOTES = {
   TransferHook: 'A transfer hook runs the issuer\'s own program on every transfer. Meteora\'s doc does not say how it treats these, so ask them before relying on it.',
   PermanentDelegate: 'The issuer can move or burn tokens from ANY account, including the curve vault and your fee wallets.',
-  Pausable: 'The issuer can pause all transfers, which would freeze trading and fee claims.',
+  PausableConfig: 'The issuer can pause all transfers, which would freeze trading and fee claims.',
   DefaultAccountState: 'New token accounts may start frozen, so buyers or the vault could be unable to use them until the issuer thaws them.',
-  ScaledUiAmount: 'Wallets show a scaled balance, not the raw amount, so prices and amounts on the page would need converting.',
+  ScaledUiAmountConfig: 'Wallets show a scaled balance, not the raw amount, so prices and amounts on the page would need converting.',
   NonTransferable: 'Tokens cannot be moved, so it cannot work as a quote token.',
   ConfidentialTransferMint: 'Confidential transfers hide amounts, which the curve cannot use.',
   InterestBearingConfig: 'The displayed balance grows over time while the raw amount stays fixed, so amounts shown would need converting.',

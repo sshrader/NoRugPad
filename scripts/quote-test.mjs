@@ -10,7 +10,9 @@ assert.equal(judgeQuote({ program: 'token-2022', extensions: ['MetadataPointer',
 assert.equal(judgeQuote({ program: 'token-2022', extensions: ['TransferFeeConfig'], transferFee: { zero: true, authorityRevoked: true } }).level, 'ok');
 assert.equal(judgeQuote({ program: 'token-2022', extensions: ['TransferFeeConfig'], transferFee: { zero: true, authorityRevoked: false } }).level, 'badge');
 assert.equal(judgeQuote({ program: 'token-2022', extensions: ['TransferFeeConfig'], transferFee: { zero: false, authorityRevoked: true } }).level, 'badge');
-assert.equal(judgeQuote({ program: 'token-2022', extensions: ['MetadataPointer', 'PermanentDelegate', 'Pausable'] }).level, 'badge');
+assert.equal(judgeQuote({ program: 'token-2022', extensions: ['MetadataPointer', 'PermanentDelegate', 'PausableConfig'] }).level, 'badge');
+const sp = judgeQuote({ program: 'token-2022', extensions: ['PausableConfig', 'ScaledUiAmountConfig'] });
+assert.ok(sp.notes.some((n) => n.startsWith('PausableConfig')) && sp.notes.some((n) => n.startsWith('ScaledUiAmountConfig')), 'notes for the newer extension names');
 assert.equal(judgeQuote({ program: 'token-2022', extensions: ['TransferHook'] }).level, 'badge');
 assert.equal(judgeQuote({ program: 'token-2022', extensions: ['NonTransferable'] }).level, 'no');
 const r = judgeQuote({ program: 'spl-token', extensions: [], freezeAuthority: true, mintAuthority: true });
