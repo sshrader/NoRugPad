@@ -42,10 +42,10 @@ for (const count of [0, 1, 5, 30]) {
     maxOnBelt = Math.max(maxOnBelt, f.stats().onBelt);
   }
   const s = f.stats();
-  console.log(`${count} coins: made ${s.made}, most on belt ${maxOnBelt}, draw calls ${g.calls.n}`);
-  assert.ok(s.made >= 60, 'the machine should keep making things');
-  assert.ok(maxOnBelt <= 16, 'the belt should never overflow');
-  assert.ok(maxOnBelt >= 4, 'the belt should look busy');
+  console.log(`${count} coins: made ${s.made}, most on pads ${maxOnBelt}, draw calls ${g.calls.n}`);
+  assert.ok(s.made >= 30, 'rockets should keep launching');
+  assert.ok(maxOnBelt <= 3, 'there are only three pads');
+  assert.ok(maxOnBelt >= 2, 'the pads should look busy');
 }
 
 // a coin whose logo breaks must not stop the scene

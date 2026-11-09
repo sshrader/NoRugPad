@@ -2,8 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Coin } from '../lib/api';
 import { FH, FW, SCALE, createFactory } from '../lib/factory';
 
-// Orbit Pad launch control: a cartoon console pumps coins and space crew onto a conveyor belt.
-// The coins on the belt are the newest launches, with their real logos. The rest is made up, and it says nothing about any coin's safety.
+// Orbit Pad launch pads: rockets with the newest coins' logos on their sides blast off.
+// The rockets carry the newest launches, with their real logos on their sides. The rest is made up, and it says nothing about any coin's safety.
 export default function FactoryScene({ coins }: { coins: Coin[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const box = useRef<HTMLElement>(null);
@@ -57,7 +57,7 @@ export default function FactoryScene({ coins }: { coins: Coin[] }) {
     const el = canvas.current;
     const g = el?.getContext('2d');
     if (!el || !g) return;
-    // Show a few seconds of work straight away, so even a paused scene (reduced motion) shows a busy belt.
+    // Show a few seconds of work straight away, so even a paused scene (reduced motion) shows rockets mid-flight.
     for (let i = 0; i < 60 * 9; i++) factory.update(1 / 60);
     factory.draw(g);
     let raf = 0;
@@ -76,7 +76,7 @@ export default function FactoryScene({ coins }: { coins: Coin[] }) {
   }, [factory]);
 
   return (
-    <section className="factory" aria-label="Orbit Pad launch control" ref={box}>
+    <section className="factory" aria-label="Orbit Pad launch pads" ref={box}>
       <div className="fac-stage">
         <canvas
           ref={canvas}
@@ -84,15 +84,14 @@ export default function FactoryScene({ coins }: { coins: Coin[] }) {
           height={FH * SCALE}
           className="fac-canvas"
           role="img"
-          aria-label="A cartoon launch control room in space. A hopper feeds sparks of ideas into a big pink console that pumps coins and little space crew out onto a conveyor belt."
+          aria-label="A cartoon space launch site. Rockets with coin logos on their sides count down and blast off from three pads."
         />
-        <span className="fac-sign" aria-hidden="true">Orbit Pad</span>
         <button type="button" className="btn fac-btn" onClick={() => setPlaying((p) => !p)} aria-pressed={!playing}>
           {playing ? 'Pause' : 'Play'}
         </button>
       </div>
       <p className="muted small fac-foot">
-        A made-up cartoon. The coins on the belt are the newest launches, and the space crew are just for fun.
+        A made-up cartoon. The rockets carry the logos of the newest launches.
         {reduce ? ' Motion is paused because your device asks for less movement. Press Play to start it.' : ''}
       </p>
     </section>
