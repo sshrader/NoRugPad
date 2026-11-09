@@ -77,10 +77,7 @@ export default function CoinPage({ mint }: { mint: string }) {
         </p>
       )}
 
-      <SafetyPanel coin={coin} />
-
       <MarketChart mint={coin.mint} />
-
 
       {coin.curve ? (
         <TradeBox coin={coin} />
@@ -90,6 +87,8 @@ export default function CoinPage({ mint }: { mint: string }) {
           <p className="muted">This coin was launched without a bonding curve, so there is nothing to trade on this page.</p>
         </section>
       )}
+
+      <SafetyPanel coin={coin} />
     </div>
   );
 }
