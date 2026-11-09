@@ -3,7 +3,7 @@ import type { Coin } from '../lib/api';
 import { FH, FW, MAX_DEFENDERS, SCALE, createField, type FieldStats } from '../lib/rugField';
 import { href } from '../router';
 
-// Pawprint Field: every recent coin's logo defends a shared liquidity vault from cartoon rug pullers, scammers and bots.
+// Orbit Pad Field: every recent coin's logo defends a shared liquidity vault from cartoon rug pullers, scammers and bots.
 // It is only a show, run separately in each visitor's browser. A logo's strength has nothing to do with whether a coin is safe.
 export default function RugField({ coins }: { coins: Coin[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -110,10 +110,10 @@ export default function RugField({ coins }: { coins: Coin[] }) {
 
   const s = stats;
   return (
-    <section className="card rug field" aria-label="Pawprint Field" ref={box}>
+    <section className="card rug field" aria-label="Orbit Pad Field" ref={box}>
       <div className="park-h">
         <div>
-          <p className="eyebrow">Pawprint Field</p>
+          <p className="eyebrow">Orbit Pad Field</p>
           <h3>{shown.length === 1 ? '1 coin is' : `${shown.length} coins are`} guarding the vault</h3>
         </div>
         <button type="button" className="btn" onClick={() => setPlaying((p) => !p)} aria-pressed={!playing}>

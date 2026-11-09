@@ -41,9 +41,9 @@ export default function Explore() {
       <section className="hero solo">
         <div className="hero-copy">
           <span className="sticker">Beta. Not financial advice.</span>
-          <h1>Describe a coin.<br />Meet its mascot.</h1>
+          <h1>Turn an idea<br />into a coin.</h1>
           <p className="lede">
-            Tell Pawprint your idea and it writes the coin and draws an original mascot. Launch it on a Meteora bonding curve, then watch it roll off the factory belt.
+            Describe it in a sentence. AI writes the coin, draws its mascot, and you launch it on a Meteora bonding curve. Then watch it climb toward orbit.
           </p>
           <ul className="guards">
             <li>Mint and freeze authority are checked live on every coin</li>
@@ -77,7 +77,7 @@ export default function Explore() {
       {error && <p className="error">{error}</p>}
       {coins && coins.length === 0 && (
         <div className="card emptycard">
-          <h3>The factory floor is empty</h3>
+          <h3>No coins in orbit yet</h3>
           <p className="muted">Launch the first coin.</p>
           <a className="btn primary" href={href.launch}>Launch a coin</a>
         </div>

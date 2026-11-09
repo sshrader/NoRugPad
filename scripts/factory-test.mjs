@@ -1,4 +1,4 @@
-// Runs the Pawprint scene headlessly with a fake canvas. Run: node scripts/factory-test.mjs
+// Runs the Orbit Pad scene headlessly with a fake canvas. Run: node scripts/factory-test.mjs
 import assert from 'node:assert/strict';
 import { createFactory, FW } from '../src/lib/factory.ts';
 

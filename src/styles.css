@@ -1,4 +1,4 @@
-/* Pawprint: a sticker-sheet look. Lilac paper, ink outlines, hard shadows, bubblegum pink and sunny yellow. The arena stays a dark monitor. */
+/* Orbit Pad: a dark space look (see the space layer at the end of this file). */
 :root {
   --font-display: 'Anton', Impact, 'Haettenschweiler', 'Arial Narrow Bold', sans-serif;
   --font-body: 'Rubik', system-ui, sans-serif;
@@ -300,7 +300,7 @@ textarea { resize: vertical; }
 
 
 /* =====================================================================
-   Pawprint theme layer: sticker sheet. Loaded last, so it wins ties.
+   Orbit Pad theme layer: sticker sheet. Loaded last, so it wins ties.
    ===================================================================== */
 body { background: var(--bg) radial-gradient(#cbc3ff 1.6px, transparent 1.7px) 0 0 / 22px 22px; }
 h1, h2 { font-family: var(--font-display); font-weight: 400; text-transform: uppercase; letter-spacing: 0.015em; line-height: 1; }
@@ -403,7 +403,7 @@ input:focus, textarea:focus, .in:focus { border-color: var(--fg); box-shadow: 0 
 .hud-combo, .hud-banner { font-weight: 400; text-transform: uppercase; }
 .rug a { color: var(--accent-text); }
 
-/* Pawprint at work */
+/* Orbit Pad at work */
 .factory { margin: 40px 0 8px; }
 .fac-stage { position: relative; line-height: 0; border: 3px solid var(--fg); border-radius: 14px; box-shadow: 6px 6px 0 var(--fg); overflow: hidden; background: #bfe9ff; container-type: inline-size; }
 .fac-canvas { width: 100%; height: auto; display: block; }
@@ -455,3 +455,94 @@ input:focus, textarea:focus, .in:focus { border-color: var(--fg); box-shadow: 0 
 @media (prefers-reduced-motion: reduce) {
   .coinhead img, .coinhead img:hover, .row:hover .row-img, .row:focus-visible .row-img { animation: none; }
 }
+
+/* =====================================================================
+   Orbit Pad space layer: deep-space background, starlight text, bright sticker accents.
+   Loaded last, so it wins ties. Colors come from the tokens below.
+   ===================================================================== */
+:root {
+  --bg: #0b0a1f;
+  --deep: #0b0a1f;
+  --surface: #17143a;
+  --surface-2: #221e55;
+  --line: #2a2660;
+  --fg: #f4f0ff;
+  --ink: #0b0a1f;
+  --muted: #b3acd9;
+  --accent-text: #ff8fc4;
+  --ok: #8be07a;
+  --bad: #ff7a9c;
+  color-scheme: dark;
+}
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(2px 2px at 8% 12%, #fff 60%, transparent 62%), radial-gradient(1.5px 1.5px at 22% 40%, #c9c2ff 60%, transparent 62%),
+    radial-gradient(2px 2px at 37% 8%, #fff 60%, transparent 62%), radial-gradient(1.5px 1.5px at 53% 30%, #ffd426 60%, transparent 62%),
+    radial-gradient(2px 2px at 68% 14%, #fff 60%, transparent 62%), radial-gradient(1.5px 1.5px at 81% 44%, #c9c2ff 60%, transparent 62%),
+    radial-gradient(2px 2px at 92% 9%, #fff 60%, transparent 62%), radial-gradient(1.5px 1.5px at 15% 74%, #fff 60%, transparent 62%),
+    radial-gradient(2px 2px at 44% 66%, #c9c2ff 60%, transparent 62%), radial-gradient(1.5px 1.5px at 76% 80%, #fff 60%, transparent 62%);
+  background-size: 620px 520px;
+  background-attachment: fixed;
+}
+:focus-visible { outline-color: var(--yellow); }
+::placeholder { color: var(--muted); opacity: 1; }
+
+/* header */
+.banner { background: var(--surface); color: var(--fg); border-bottom: 2px solid var(--line); }
+.top { background: transparent; border-bottom: 2px solid var(--line); }
+.nav a:hover { background: var(--surface); color: var(--fg); }
+.nav a.on { background: var(--yellow); color: var(--ink); border-color: var(--ink); }
+.bal { background: var(--surface); border-color: var(--fg); }
+.wallet-adapter-button { background: var(--surface) !important; color: var(--fg) !important; border-color: var(--fg) !important; }
+.wallet-adapter-button:not([disabled]):hover { background: var(--yellow) !important; color: var(--ink) !important; }
+.note { background: var(--surface); border-color: var(--fg); box-shadow: 4px 4px 0 var(--accent); }
+
+/* buttons, cards, inputs */
+.btn { background: var(--surface); color: var(--fg); border-color: var(--fg); }
+.btn:hover:not(:disabled) { background: var(--yellow); color: var(--ink); border-color: var(--ink); }
+.btn.primary { background: var(--accent); color: var(--ink); border-color: var(--ink); box-shadow: 4px 4px 0 var(--fg); }
+.btn.primary:hover:not(:disabled) { background: #ff6db4; color: var(--ink); box-shadow: 5px 5px 0 var(--fg); }
+.btn.primary:active:not(:disabled) { box-shadow: 0 0 0 var(--fg); }
+.card { background: var(--surface); border-width: 2px; box-shadow: 6px 6px 0 var(--accent); }
+.tag, .chip, .badge { background: var(--surface); }
+.badge { background: var(--lime); color: var(--ink); border-color: var(--ink); }
+.in, input[type='text'], input:not([type]), textarea, select.in { background: var(--ink); color: var(--fg); border-color: var(--fg); }
+.imgprev, .checks li, .ca-addr, .mkt-chg, .mkt-iv, .seg, .studio-thumbs button, .studio-pic { background: var(--ink); }
+.meter, .progress { background: var(--ink); }
+.foot { border-top-color: var(--line); }
+
+/* hero and headings: starlight with a bright hard shadow */
+.hero h1, .page-h h1, .prose h1 { color: var(--fg); text-shadow: 4px 4px 0 var(--accent); }
+.ch-main h1 { color: var(--fg); text-shadow: none; }
+.sticker { color: var(--ink); border-color: var(--ink); box-shadow: 3px 3px 0 var(--fg); }
+.guards li::before { color: var(--ink); border-color: var(--ink); }
+.back a { color: var(--fg); }
+
+/* the coin board */
+.board { background: var(--surface); border-width: 2px; box-shadow: 8px 8px 0 var(--accent); }
+.board-h { background: var(--yellow); color: var(--ink); border-bottom-color: var(--ink); }
+.row { border-bottom-color: var(--line); }
+.row:hover, .row:focus-visible { background: var(--surface-2); }
+.row-img, .coinhead img { border-color: var(--fg); }
+.coinhead img { box-shadow: 4px 4px 0 var(--accent); }
+
+/* coin page */
+.mkt-iv button { color: var(--fg); }
+.mkt-iv button.on { background: var(--yellow); color: var(--ink); }
+.seg button.on { background: var(--accent); color: var(--ink); }
+.sc-list { background: var(--line); border-color: var(--line); }
+.sc-row { background: var(--surface); }
+.sc-row.warn .sc-mark { color: #ffb347; }
+.faq, .faq > div { border-color: var(--line); }
+.studio { background: var(--surface-2); }
+.studio-busy, .studio-tick { color: var(--ink); border-color: var(--ink); }
+.launched { color: var(--ink); border-color: var(--ink); box-shadow: 4px 4px 0 var(--fg); }
+.drop { background: var(--ink); }
+.drop:hover { background: var(--surface-2); }
+.drop.over { background: var(--lime); color: var(--ink); }
+.drop-prev { background: var(--surface); }
+
+/* the launch-control scene */
+.fac-stage { background: #0b0a1f; box-shadow: 6px 6px 0 var(--accent); }
+.fac-sign { color: var(--ink); }

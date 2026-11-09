@@ -1,4 +1,4 @@
-// Pawprint AI: turns a short idea into a coin concept (name, ticker, description) and draws an original mascot.
+// Orbit Pad AI: turns a short idea into a coin concept (name, ticker, description) and draws an original mascot.
 // Uses Cloudflare Workers AI over its REST API. Needs CF_ACCOUNT_ID and CF_API_TOKEN (a token with "Workers AI" permission).
 // The idea text is only ever treated as an idea. The server controls the prompts, limits how much can be generated, and screens the text.
 import { rateLimit } from './limits.mjs';

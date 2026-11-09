@@ -1,61 +1,65 @@
-INK='#14110f'; YEL='#ffd426'; PINK='#ff3d9a'; LIME='#b6f23a'; SKY='#3cc8ff'; BG='#e9e5ff'
-FONT="Inter Display, Inter, sans-serif"
+# Orbit Pad brand assets: logo mark, wordmark, X profile picture and banner. Run: python3 build.py, then render each SVG to PNG.
+INK='#0b0a1f'; PANEL='#17143a'; STAR='#f4f0ff'; YEL='#ffd426'; PINK='#ff3d9a'; LIME='#b6f23a'; SKY='#3cc8ff'
+FONT="Inter Display, Inter, sans-serif"  # Anton is the site font; swap it in here if installed
 
-def face(cx, cy, r, fill=YEL, tongue=PINK, rot=0):
-    k = r/16.0
-    p = tongue
-    return f'''<g transform="translate({cx} {cy}) rotate({rot}) scale({k}) translate(-16 -16)">
-<circle cx="16" cy="16" r="14.2" fill="{fill}" stroke="{INK}" stroke-width="2"/>
-<ellipse cx="16" cy="20.6" rx="6.4" ry="4.9" fill="{p}" stroke="{INK}" stroke-width="1.6"/>
-<ellipse cx="8.6" cy="14.8" rx="2.4" ry="3.2" transform="rotate(-22 8.6 14.8)" fill="{p}" stroke="{INK}" stroke-width="1.5"/>
-<ellipse cx="12.9" cy="9.6" rx="2.5" ry="3.4" transform="rotate(-8 12.9 9.6)" fill="{p}" stroke="{INK}" stroke-width="1.5"/>
-<ellipse cx="19.1" cy="9.6" rx="2.5" ry="3.4" transform="rotate(8 19.1 9.6)" fill="{p}" stroke="{INK}" stroke-width="1.5"/>
-<ellipse cx="23.4" cy="14.8" rx="2.4" ry="3.2" transform="rotate(22 23.4 14.8)" fill="{p}" stroke="{INK}" stroke-width="1.5"/></g>'''
+def mark(cx, cy, r):
+    k = r/24.0
+    return f'''<g transform="translate({cx} {cy}) scale({k}) translate(-24 -24)">
+<ellipse cx="24" cy="26" rx="22" ry="7" transform="rotate(-18 24 26)" fill="none" stroke="{PINK}" stroke-width="4"/>
+<circle cx="24" cy="24" r="14" fill="{YEL}" stroke="{INK}" stroke-width="3"/>
+<path d="M5 31 Q24 40 43 17" fill="none" stroke="{PINK}" stroke-width="4" stroke-linecap="round" transform="translate(0 -1)"/>
+<circle cx="19" cy="21" r="2.4" fill="{INK}"/><circle cx="29" cy="21" r="2.4" fill="{INK}"/></g>'''
 
-def stroke_text(x, y, size, txt, fill='#fff', sw=10, shadow=6, anchor='start', rot=0):
-    t = lambda dx, dy, extra: f'<text x="{x+dx}" y="{y+dy}" font-family="{FONT}" font-weight="900" font-size="{size}" text-anchor="{anchor}" letter-spacing="-1" {extra}>{txt}</text>'
-    return f'''<g transform="rotate({rot} {x} {y})">
-{t(shadow, shadow, f'fill="{INK}" stroke="{INK}" stroke-width="{sw}" stroke-linejoin="round"')}
-{t(0, 0, f'fill="{INK}" stroke="{INK}" stroke-width="{sw}" stroke-linejoin="round"')}
-{t(0, 0, f'fill="{fill}"')}</g>'''
+def text(x, y, size, txt, fill=STAR, shadow=PINK, off=5, anchor='start'):
+    t = lambda dx, dy, f: f'<text x="{x+dx}" y="{y+dy}" font-family="{FONT}" font-weight="900" font-size="{size}" text-anchor="{anchor}" letter-spacing="-1" fill="{f}">{txt}</text>'
+    return t(off, off, shadow) + t(0, 0, fill)
 
-def dots(w, h, step=30):
-    return f'<pattern id="d" width="{step}" height="{step}" patternUnits="userSpaceOnUse"><circle cx="{step/2}" cy="{step/2}" r="2.2" fill="#cfc8ff"/></pattern><rect width="{w}" height="{h}" fill="{BG}"/><rect width="{w}" height="{h}" fill="url(#d)"/>'
+def stars(w, h, n, seed=3):
+    out = []; s = seed
+    for i in range(n):
+        s = (s * 1103515245 + 12345) % 2147483648; x = s % w
+        s = (s * 1103515245 + 12345) % 2147483648; y = s % h
+        r = 1.2 + (i % 4) * 0.5
+        out.append(f'<circle cx="{x}" cy="{y}" r="{r}" fill="{YEL if i % 9 == 0 else STAR}" opacity="{0.45 + (i % 5) * 0.12:.2f}"/>')
+    return ''.join(out)
 
-def wrap(w, h, body, defs=''):
-    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}"><defs>{defs}</defs>{body}</svg>'
+def wrap(w, h, body):
+    return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w}" height="{h}">{body}</svg>'
 
-# 1. Pad logo: the mark, big, with sticker shadow
-open('logo-mark.svg','w').write(wrap(1024,1024,
-  f'<rect width="1024" height="1024" fill="{BG}"/>'
-  f'<circle cx="536" cy="536" r="408" fill="{INK}"/>' + face(512,512,408)))
+ROCKET = f'''<g>
+<circle cx="520" cy="96" r="58" fill="{SKY}" stroke="{INK}" stroke-width="4"/>
+<ellipse cx="520" cy="104" rx="96" ry="20" transform="rotate(-16 520 104)" fill="none" stroke="{YEL}" stroke-width="7"/>
+<circle cx="78" cy="84" r="26" fill="{STAR}" stroke="{INK}" stroke-width="4"/>
+<circle cx="68" cy="76" r="6" fill="#cfc9f5"/><circle cx="88" cy="94" r="4" fill="#cfc9f5"/>
+<rect x="430" y="150" width="26" height="240" fill="{PINK}" stroke="{INK}" stroke-width="4"/>
+<path d="M430 190 L456 220 M456 190 L430 220 M430 240 L456 270 M456 240 L430 270 M430 290 L456 320 M456 290 L430 320" stroke="{INK}" stroke-width="3"/>
+<rect x="352" y="176" width="80" height="12" fill="{STAR}" stroke="{INK}" stroke-width="3"/>
+<path d="M300 36 C356 84 366 190 354 286 L246 286 C234 190 244 84 300 36Z" fill="{STAR}" stroke="{INK}" stroke-width="5"/>
+<path d="M246 224 L196 306 L248 286Z" fill="{PINK}" stroke="{INK}" stroke-width="5" stroke-linejoin="round"/>
+<path d="M354 224 L404 306 L352 286Z" fill="{PINK}" stroke="{INK}" stroke-width="5" stroke-linejoin="round"/>
+<rect x="262" y="284" width="76" height="22" rx="4" fill="#3a3550" stroke="{INK}" stroke-width="4"/>
+<circle cx="300" cy="148" r="48" fill="{SKY}" stroke="{INK}" stroke-width="5"/>
+<circle cx="300" cy="148" r="36" fill="#7bd13a" stroke="{INK}" stroke-width="4"/>
+<path d="M286 116 L282 100 M314 116 L318 100" stroke="{INK}" stroke-width="4" stroke-linecap="round"/>
+<circle cx="282" cy="98" r="5" fill="{YEL}" stroke="{INK}" stroke-width="3"/><circle cx="318" cy="98" r="5" fill="{YEL}" stroke="{INK}" stroke-width="3"/>
+<ellipse cx="288" cy="144" rx="9" ry="11" fill="#fff" stroke="{INK}" stroke-width="3"/><ellipse cx="312" cy="144" rx="9" ry="11" fill="#fff" stroke="{INK}" stroke-width="3"/>
+<circle cx="290" cy="146" r="4" fill="{INK}"/><circle cx="310" cy="146" r="4" fill="{INK}"/>
+<path d="M286 164 Q300 176 314 164" fill="none" stroke="{INK}" stroke-width="4" stroke-linecap="round"/>
+<path d="M272 308 Q300 420 328 308Z" fill="{YEL}" stroke="{INK}" stroke-width="4" stroke-linejoin="round"/>
+<path d="M286 308 Q300 374 314 308Z" fill="{PINK}"/>
+<rect x="180" y="392" width="240" height="22" fill="{YEL}" stroke="{INK}" stroke-width="4"/>
+<rect x="0" y="414" width="600" height="26" fill="{PANEL}"/>
+</g>'''
 
-# 2. Wordmark lockup
-open('logo-wordmark.svg','w').write(wrap(1400,520,
-  f'<rect width="1400" height="520" fill="{BG}"/>' + face(250,260,170) +
-  stroke_text(470,250,150,'PAW',sw=14,shadow=8) + stroke_text(470,400,150,'PRINT',fill=YEL,sw=14,shadow=8)))
+open('logo-mark.svg','w').write(wrap(1024,1024, f'<rect width="1024" height="1024" fill="{INK}"/>'+stars(1024,1024,60)+mark(512,512,330)))
+open('logo-wordmark.svg','w').write(wrap(1400,520, f'<rect width="1400" height="520" fill="{INK}"/>'+stars(1400,520,70)+mark(250,260,170)+text(470,250,150,'ORBIT',off=8)+text(470,400,150,'PAD',fill=YEL,off=8)))
+open('x-profile.svg','w').write(wrap(400,400, f'<rect width="400" height="400" fill="{INK}"/>'+stars(400,400,26)+mark(200,200,150)))
 
-# 3. X profile 400x400 (circle crop safe)
-open('x-profile.svg','w').write(wrap(400,400,
-  f'<rect width="400" height="400" fill="{PINK}"/>'
-  f'<circle cx="206" cy="206" r="150" fill="{INK}"/>' + face(200,200,150)))
-
-# 4. X banner 1500x500 (profile photo covers bottom-left)
-MX=990
-belt = f'<rect x="{MX+215}" y="372" width="{1500-MX-215}" height="30" fill="{INK}"/><rect x="{MX+215}" y="372" width="{1500-MX-215}" height="12" fill="{YEL}"/>'
-belt += ''.join(f'<rect x="{x}" y="384" width="14" height="18" fill="{INK}"/>' for x in range(MX+235,1500,40))
-coins = face(1250,330,40,YEL,tongue=PINK,rot=-8) + face(1345,330,40,PINK,tongue=YEL,rot=6) + face(1440,330,40,LIME,rot=-4) + face(1380,215,30,SKY,rot=14)
-machine = f'''<rect x="{MX}" y="96" width="200" height="290" rx="22" fill="{INK}" transform="translate(9 9)"/>
-<rect x="{MX}" y="96" width="200" height="290" rx="22" fill="{PINK}" stroke="{INK}" stroke-width="7"/>
-<rect x="{MX+20}" y="125" width="160" height="96" rx="12" fill="#fff" stroke="{INK}" stroke-width="6"/>
-<text x="{MX+100}" y="190" font-family="{FONT}" font-weight="900" font-size="48" text-anchor="middle" fill="{INK}">IDEA</text>
-<rect x="{MX+190}" y="300" width="40" height="72" fill="{INK}"/>
-<circle cx="{MX+45}" cy="330" r="16" fill="{YEL}" stroke="{INK}" stroke-width="5"/><circle cx="{MX+95}" cy="330" r="16" fill="{LIME}" stroke="{INK}" stroke-width="5"/>'''
-sticker = f'''<g transform="rotate(-3 300 90)"><rect x="304" y="62" width="200" height="52" rx="10" fill="{INK}"/><rect x="298" y="56" width="200" height="52" rx="10" fill="{YEL}" stroke="{INK}" stroke-width="5"/>
-<text x="398" y="93" font-family="{FONT}" font-weight="900" font-size="30" text-anchor="middle" fill="{INK}">PAWPRINT</text></g>'''
-body = (dots(1500,500) + sticker +
-  stroke_text(300,220,60,'DESCRIBE A COIN.',sw=10,shadow=6) +
-  stroke_text(300,305,60,'MEET ITS MASCOT.',fill=YEL,sw=10,shadow=6) +
-  f'<text x="300" y="365" font-family="{FONT}" font-weight="700" font-size="26" fill="{INK}">AI writes the coin and draws its mascot.</text>' +
-  machine + belt + coins)
+# X banner 1500x500. The profile picture covers the bottom-left corner on desktop, so the copy starts at x=300.
+sticker = f'''<g transform="rotate(-3 300 90)"><rect x="304" y="62" width="196" height="52" rx="10" fill="{STAR}"/><rect x="298" y="56" width="196" height="52" rx="10" fill="{YEL}" stroke="{INK}" stroke-width="5"/>
+<text x="396" y="93" font-family="{FONT}" font-weight="900" font-size="30" text-anchor="middle" fill="{INK}">ORBIT PAD</text></g>'''
+body = (f'<rect width="1500" height="500" fill="{INK}"/>' + stars(1500,500,110,7) + sticker +
+  text(300,220,64,'TURN AN IDEA',off=5) + text(300,306,64,'INTO A COIN.',fill=YEL,off=5) +
+  f'<text x="300" y="366" font-family="{FONT}" font-weight="700" font-size="26" fill="#cfc9f5">AI writes it, draws its mascot, and launches it on Solana.</text>' +
+  f'<g transform="translate(900 20) scale(1.08)">{ROCKET}</g>')
 open('x-banner.svg','w').write(wrap(1500,500,body))

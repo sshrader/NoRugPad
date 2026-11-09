@@ -1,5 +1,5 @@
-// Pawprint at work: a cartoon scene for the Explore page. A hopper drops fish and bones into a big pink animal-eared machine,
-// which pumps coins and cartoon animals out onto a conveyor belt, where a paw stamp presses each one on the way past.
+// Orbit Pad launch control: a cartoon space scene for the Explore page. A hopper drops sparks of ideas into a big pink console,
+// which pumps coins and little space crew out onto a conveyor belt, where a star stamp presses each one on the way past.
 // The coins on the belt are the newest launches, using their real logos. Everything else is made up.
 // Pure canvas code with no React, so it can be tested on its own (scripts/factory-test.mjs). It is a show only.
 
@@ -21,7 +21,7 @@ const ITEM_Y = BELT_TOP - 9; // item centres ride on the belt
 const SPEED = 34; // belt speed in px per second
 const STAMP_X = 330;
 const MAX_ITEMS = 16;
-const ANIMALS = 5; // cat, dog, bunny, bear, frog
+const CREW = 5; // alien, robot, astronaut, cyclops, blob
 const COIN_COLORS = ['#f08a24', '#7bd13a', '#f06aa8', '#2fd3b8', '#8a6cff', '#3aa8f0'];
 
 export type FactoryCoin = { mint: string; name: string; symbol: string; image?: CanvasImageSource | null };
@@ -49,7 +49,6 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
   let t = 0;
   let spawnT = 0.4;
   let bulbT = 0.2;
-  let puffT = 0;
   let made = 0;
   let nextCoin = 0;
   let lastKind: 'coin' | 'meme' = 'meme';
@@ -72,7 +71,7 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
       coin = coins[nextCoin % coins.length];
       nextCoin++;
     }
-    items.push({ kind, x: BELT_X - 4, age: 0, stamped: false, coin, variant: Math.floor(rand() * ANIMALS), seed: Math.floor(rand() * 1000) });
+    items.push({ kind, x: BELT_X - 4, age: 0, stamped: false, coin, variant: Math.floor(rand() * CREW), seed: Math.floor(rand() * 1000) });
     made++;
     lamp = 1;
     for (let i = 0; i < 4; i++) {
@@ -91,11 +90,6 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     if (bulbT <= 0) {
       bulbs.push({ x: 56 + (rand() - 0.5) * 14, y: -6, age: 0, fish: rand() < 0.5 });
       bulbT = 0.8 + rand() * 0.5;
-    }
-    puffT -= dt;
-    if (puffT <= 0) {
-      for (const cx of [122, 146]) puffs.push({ x: cx, y: 14, r: 3 + rand() * 2, age: 0, life: 1.6 + rand() * 0.8, vx: 6 + rand() * 8 });
-      puffT = 0.45;
     }
     lamp = Math.max(0, lamp - dt * 3);
 
@@ -279,85 +273,110 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     g.strokeStyle = INK;
     g.stroke();
   }
-  // A paw print: one big pad and four toes. (x, y) is the centre of the pad.
-  function pawPrint(g: CanvasRenderingContext2D, x: number, y: number, k: number, fill: string, lw = 0) {
-    ellipse(g, x, y, 4 * k, 3.1 * k, 0, fill, lw);
-    ellipse(g, x - 5 * k, y - 4.2 * k, 1.5 * k, 2 * k, -0.4, fill, lw);
-    ellipse(g, x - 1.7 * k, y - 7 * k, 1.6 * k, 2.1 * k, -0.1, fill, lw);
-    ellipse(g, x + 1.7 * k, y - 7 * k, 1.6 * k, 2.1 * k, 0.1, fill, lw);
-    ellipse(g, x + 5 * k, y - 4.2 * k, 1.5 * k, 2 * k, 0.4, fill, lw);
+  // A four-point star, centred on (x, y) with outer radius r.
+  function star(g: CanvasRenderingContext2D, x: number, y: number, r: number, fill: string, lw = 0) {
+    g.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * Math.PI * 2 - Math.PI / 2;
+      const rr = i % 2 ? r * 0.38 : r;
+      const px = x + Math.cos(a) * rr;
+      const py = y + Math.sin(a) * rr;
+      if (i === 0) g.moveTo(px, py);
+      else g.lineTo(px, py);
+    }
+    g.closePath();
+    g.fillStyle = fill;
+    g.fill();
+    if (lw > 0) {
+      g.lineWidth = lw;
+      g.strokeStyle = INK;
+      g.stroke();
+    }
   }
 
-  // A cartoon animal head riding the belt: cat, dog, bunny, bear or frog.
-  function drawAnimal(g: CanvasRenderingContext2D, x: number, y: number, variant: number, scale: number) {
+  // A little space crew member riding the belt: alien, robot, astronaut, cyclops or blob.
+  function drawCrew(g: CanvasRenderingContext2D, x: number, y: number, variant: number, scale: number) {
     g.save();
     g.translate(x, y);
     g.scale(scale, scale);
-    const fur = ['#f4a742', '#d8b48a', '#f2f2f7', '#9b6b4a', '#7bd13a'][variant];
-    // ears go behind the head
+    g.lineCap = 'round';
+    const eye = (ex: number, ey: number, r: number, px = 0) => {
+      circle(g, ex, ey, r, '#fff', 0.7);
+      circle(g, ex + px, ey + 0.3, r * 0.45, INK, 0);
+    };
     if (variant === 0) {
-      tri(g, -8, -3, -3.5, -5.5, -7.5, -10.5, fur);
-      tri(g, 8, -3, 3.5, -5.5, 7.5, -10.5, fur);
+      // green alien with two antennae
+      g.lineWidth = 1;
+      g.strokeStyle = INK;
+      g.beginPath();
+      g.moveTo(-4, -6);
+      g.lineTo(-6, -11);
+      g.moveTo(4, -6);
+      g.lineTo(6, -11);
+      g.stroke();
+      circle(g, -6, -11.5, 1.8, GOLD, 0.9);
+      circle(g, 6, -11.5, 1.8, GOLD, 0.9);
+      ellipse(g, 0, 0, 9.5, 8.5, 0, '#7bd13a', 1.2);
+      eye(-3.6, -1, 2.3, -0.4);
+      eye(3.6, -1, 2.3, 0.4);
+      g.beginPath();
+      g.moveTo(-3.4, 4);
+      g.quadraticCurveTo(0, 6.6, 3.4, 4);
+      g.stroke();
     } else if (variant === 1) {
-      ellipse(g, -8, -1, 3, 5.2, 0.3, '#6b4a30', 1);
-      ellipse(g, 8, -1, 3, 5.2, -0.3, '#6b4a30', 1);
+      // grey robot with a square head
+      g.lineWidth = 1;
+      g.strokeStyle = INK;
+      g.beginPath();
+      g.moveTo(0, -8);
+      g.lineTo(0, -12);
+      g.stroke();
+      circle(g, 0, -12.5, 1.6, PINK, 0.9);
+      box(g, -9, -8, 18, 16, 3, '#c9cde8', 1.2);
+      box(g, -6.5, -4.5, 5, 4.5, 1, SKY, 0.8);
+      box(g, 1.5, -4.5, 5, 4.5, 1, SKY, 0.8);
+      g.fillStyle = INK;
+      g.fillRect(-4, 3, 8, 3);
+      g.fillStyle = '#c9cde8';
+      g.fillRect(-2.2, 3, 0.8, 3);
+      g.fillRect(0.4, 3, 0.8, 3);
     } else if (variant === 2) {
-      ellipse(g, -4, -10, 2.4, 6, -0.1, fur, 1);
-      ellipse(g, 4, -10, 2.4, 6, 0.1, fur, 1);
-      ellipse(g, -4, -10, 1, 4, -0.1, '#ffb3d1', 0);
-      ellipse(g, 4, -10, 1, 4, 0.1, '#ffb3d1', 0);
+      // astronaut in a white helmet
+      circle(g, 0, 0, 10, '#f4f0ff', 1.2);
+      ellipse(g, 0, 0.5, 7, 5.8, 0, '#1b1442', 1);
+      ellipse(g, -2.6, -1.6, 2, 1.1, -0.5, 'rgba(255,255,255,0.7)', 0);
+      circle(g, 4.6, 7.4, 1.6, PINK, 0.7);
     } else if (variant === 3) {
-      circle(g, -7, -6.5, 3, fur, 1);
-      circle(g, 7, -6.5, 3, fur, 1);
-    } else {
-      circle(g, -5.5, -7, 3.2, fur, 1);
-      circle(g, 5.5, -7, 3.2, fur, 1);
-    }
-    ellipse(g, 0, 0, 9.5, 8.5, 0, fur, 1.2);
-    if (variant === 3 || variant === 1) ellipse(g, 0, 3.4, 4.6, 3.4, 0, '#f3dcc0', 0);
-    // eyes
-    if (variant === 4) {
-      circle(g, -5.5, -7, 1.8, '#fff', 0.7);
-      circle(g, 5.5, -7, 1.8, '#fff', 0.7);
-      circle(g, -5.5, -6.8, 0.8, INK, 0);
-      circle(g, 5.5, -6.8, 0.8, INK, 0);
-    } else {
-      circle(g, -3.4, -1.6, 1.7, '#fff', 0.7);
-      circle(g, 3.4, -1.6, 1.7, '#fff', 0.7);
-      circle(g, -3, -1.4, 0.8, INK, 0);
-      circle(g, 3.8, -1.4, 0.8, INK, 0);
-    }
-    // nose and mouth
-    if (variant === 4) {
-      g.lineWidth = 0.9;
+      // purple cyclops with little horns
+      tri(g, -7, -5, -3, -7, -6.5, -11.5, '#8a6cff', 1);
+      tri(g, 7, -5, 3, -7, 6.5, -11.5, '#8a6cff', 1);
+      ellipse(g, 0, 0, 9.5, 8.8, 0, '#8a6cff', 1.2);
+      circle(g, 0, -1, 4.4, '#fff', 0.9);
+      circle(g, Math.sin(t * 2.4) * 1.2, -0.8, 2, INK, 0);
+      g.lineWidth = 1;
       g.strokeStyle = INK;
       g.beginPath();
-      g.moveTo(-5, 3);
-      g.quadraticCurveTo(0, 6.4, 5, 3);
+      g.moveTo(-3.6, 5);
+      g.quadraticCurveTo(0, 7.4, 3.6, 5);
       g.stroke();
     } else {
-      ellipse(g, 0, 1.6, 1.5, 1.1, 0, variant === 2 ? '#ff8fb8' : INK, 0);
-      g.lineWidth = 0.8;
+      // pink blob with stalk eyes and a tongue
+      g.lineWidth = 1;
       g.strokeStyle = INK;
       g.beginPath();
-      g.moveTo(0, 2.6);
-      g.quadraticCurveTo(-2, 5, -3.6, 3.6);
-      g.moveTo(0, 2.6);
-      g.quadraticCurveTo(2, 5, 3.6, 3.6);
+      g.moveTo(-3.5, -5);
+      g.lineTo(-4.5, -10);
+      g.moveTo(3.5, -5);
+      g.lineTo(4.5, -10);
       g.stroke();
-    }
-    if (variant === 0) {
-      g.lineWidth = 0.6;
+      eye(-4.5, -10.5, 2.2, -0.3);
+      eye(4.5, -10.5, 2.2, 0.3);
+      ellipse(g, 0, 1, 10, 8, 0, '#ff8fb8', 1.2);
       g.beginPath();
-      g.moveTo(-6, 1.6);
-      g.lineTo(-10.5, 0.8);
-      g.moveTo(-6, 3);
-      g.lineTo(-10.5, 3.6);
-      g.moveTo(6, 1.6);
-      g.lineTo(10.5, 0.8);
-      g.moveTo(6, 3);
-      g.lineTo(10.5, 3.6);
+      g.moveTo(-4.5, 3);
+      g.quadraticCurveTo(0, 7, 4.5, 3);
       g.stroke();
+      ellipse(g, 1.8, 6, 1.6, 2, 0, PINK, 0.8);
     }
     g.restore();
   }
@@ -375,42 +394,33 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     g.rect(0, 0, FW, FH);
     g.clip();
 
-    // back wall with a few windows
-    g.fillStyle = '#bfe9ff';
+    // night sky: stars, a ringed planet and a moon
+    g.fillStyle = '#0b0a1f';
     g.fillRect(0, 0, FW, FH);
-    for (let i = 0; i < 6; i++) {
-      const wx = 232 + i * 42;
-      box(g, wx, 14, 26, 22, 2, '#e9f8ff', 1.1);
-      g.fillStyle = 'rgba(60,200,255,0.45)';
-      g.fillRect(wx + 3, 17, 9, 16);
+    for (let i = 0; i < 46; i++) {
+      const sx = (i * 97) % FW;
+      const sy = (i * 53 + (i % 3) * 11) % 100;
+      const tw = 0.5 + 0.5 * Math.sin(t * 1.5 + i * 1.7);
+      g.fillStyle = `rgba(244,240,255,${(0.35 + tw * 0.6).toFixed(2)})`;
+      g.fillRect(sx, sy, i % 5 === 0 ? 1.6 : 1, i % 5 === 0 ? 1.6 : 1);
     }
-    // chimneys and smoke
-    box(g, 116, 16, 12, 22, 1.5, '#8a6cff');
-    box(g, 140, 16, 12, 22, 1.5, '#8a6cff');
-    for (const p of puffs) {
-      const a = Math.max(0, 1 - p.age / p.life) * 0.85;
-      g.fillStyle = `rgba(255,255,255,${a.toFixed(3)})`;
-      g.beginPath();
-      g.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      g.fill();
-    }
+    circle(g, 404, 44, 22, SKY, 1.4);
+    g.beginPath();
+    g.ellipse(404, 48, 38, 8, -0.28, 0, Math.PI * 2);
+    g.lineWidth = 3;
+    g.strokeStyle = GOLD;
+    g.stroke();
+    circle(g, 300, 30, 9, '#f4f0ff', 1.1);
+    circle(g, 297, 28, 1.8, '#cfc9f5', 0);
+    circle(g, 303, 33, 1.2, '#cfc9f5', 0);
+    star(g, 262, 60, 3.2, GOLD);
+    star(g, 456, 96, 2.6, LIME);
 
-    // idea hopper: a funnel fed by falling fish and bones
+    // idea hopper: a funnel fed by falling sparks
     for (const b of bulbs) {
       const a = Math.min(1, b.age * 3);
       g.globalAlpha = a;
-      if (b.fish) {
-        ellipse(g, b.x, b.y, 4, 2.4, 0, SKY, 0.9);
-        tri(g, b.x + 3, b.y, b.x + 6.4, b.y - 2.4, b.x + 6.4, b.y + 2.4, SKY, 0.8);
-        circle(g, b.x - 2, b.y - 0.5, 0.6, INK, 0);
-      } else {
-        g.lineWidth = 1;
-        g.strokeStyle = INK;
-        g.fillStyle = '#fff';
-        g.fillRect(b.x - 3.4, b.y - 1, 6.8, 2);
-        g.strokeRect(b.x - 3.4, b.y - 1, 6.8, 2);
-        for (const sx of [-1, 1]) for (const sy of [-1, 1]) circle(g, b.x + sx * 3.6, b.y + sy * 1.2, 1.3, '#fff', 0.8);
-      }
+      star(g, b.x, b.y, b.fish ? 4.4 : 3.4, b.fish ? GOLD : LIME, 0.9);
       g.globalAlpha = 1;
     }
     g.beginPath();
@@ -427,11 +437,19 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     box(g, 52, 62, 8, 16, 1, '#9aa1c7', 1.2);
     box(g, 52, 70, 48, 8, 1, '#9aa1c7', 1.2);
 
-    // the machine, with big cat ears
-    tri(g, 100, 40, 108, 14, 128, 36, PINK, 2);
-    tri(g, 202, 40, 194, 14, 174, 36, PINK, 2);
-    tri(g, 107, 36, 110, 22, 120, 34, '#ffb3d1', 0);
-    tri(g, 195, 36, 192, 22, 182, 34, '#ffb3d1', 0);
+    // the console, with a little dish on top
+    g.lineWidth = 2;
+    g.strokeStyle = '#9aa1c7';
+    g.beginPath();
+    g.moveTo(150, 34);
+    g.lineTo(150, 16);
+    g.stroke();
+    circle(g, 150, 14, 3.2, lamp > 0.05 ? '#fff176' : GOLD, 1.2);
+    g.beginPath();
+    g.arc(172, 30, 10, Math.PI, Math.PI * 1.9);
+    g.lineWidth = 2;
+    g.strokeStyle = '#9aa1c7';
+    g.stroke();
     box(g, 96, 34, 110, 90, 8, PINK, 2);
     box(g, 106, 40, 90, 16, 3, GOLD, 1.4); // the sign plate: its words are HTML, laid over this
     circle(g, 150, 88, 22, '#fff', 1.6);
@@ -439,10 +457,20 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     g.beginPath();
     g.arc(150, 88, 20.4, 0, Math.PI * 2);
     g.clip();
-    g.fillStyle = '#d9f2ff';
+    g.fillStyle = '#0b0a1f';
     g.fillRect(128, 66, 44, 44);
-    gear(g, 142, 90, 11, 8, t * 1.6, LIME);
-    gear(g, 160, 82, 8, 6, -t * 2.3 + 0.3, SKY);
+    for (let i = 0; i < 7; i++) {
+      const tw = 0.5 + 0.5 * Math.sin(t * 2 + i * 2.1);
+      g.fillStyle = `rgba(244,240,255,${(0.4 + tw * 0.6).toFixed(2)})`;
+      g.fillRect(132 + ((i * 13) % 36), 70 + ((i * 17) % 34), 1.2, 1.2);
+    }
+    circle(g, 150, 88, 10, SKY, 1);
+    g.beginPath();
+    g.ellipse(150, 90, 17, 4, -0.3, 0, Math.PI * 2);
+    g.lineWidth = 1.6;
+    g.strokeStyle = GOLD;
+    g.stroke();
+    circle(g, 150 + Math.cos(t * 1.4) * 16, 88 + Math.sin(t * 1.4) * 9, 2.6, LIME, 0.8);
     g.restore();
     circle(g, 112, 108, 4.5, lamp > 0.05 ? '#fff176' : '#7a1f4d', 1.2);
     if (lamp > 0.05) {
@@ -494,10 +522,10 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
       const s = k < 1 ? Math.max(0.2, easeOutBack(k)) : 1;
       const bob = Math.sin(t * 5 + it.seed) * 0.4;
       if (it.kind === 'coin') drawCoin(g, it.x, ITEM_Y + bob, it.coin, it.seed, s);
-      else drawAnimal(g, it.x, ITEM_Y - 1 + bob, it.variant, s);
+      else drawCrew(g, it.x, ITEM_Y - 1 + bob, it.variant, s);
       if (it.stamped) {
-        // a small lime paw where the stamp pressed
-        pawPrint(g, it.x + 9, ITEM_Y - 6, 0.6, LIME, 0.7);
+        // a small lime star where the stamp pressed
+        star(g, it.x + 9, ITEM_Y - 7, 3.6, LIME, 0.7);
       }
     }
 
@@ -505,7 +533,7 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     const headY = 54 + arm * 32;
     box(g, STAMP_X - 2.5, 0, 5, headY, 1, '#9aa1c7', 1.1);
     box(g, STAMP_X - 9, headY, 18, 8, 2, PINK, 1.4);
-    pawPrint(g, STAMP_X, headY + 11.5, 0.9, INK);
+    star(g, STAMP_X, headY + 13, 5, GOLD, 0.8);
 
     for (const s of sparks) {
       g.globalAlpha = Math.max(0, 1 - s.age / s.life);
@@ -514,10 +542,10 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     }
     g.globalAlpha = 1;
 
-    // the floor, with a trail of paw prints
+    // the floor, with a row of gold stars
     g.fillStyle = INK;
     g.fillRect(0, GROUND, FW, FH - GROUND);
-    for (let x = 6, i = 0; x < FW + 10; x += 17, i++) pawPrint(g, x, GROUND + (i % 2 ? 11 : 15), 0.8, GOLD);
+    for (let x = 6, i = 0; x < FW + 10; x += 17, i++) star(g, x, GROUND + (i % 2 ? 9 : 14), 3, GOLD);
     g.fillStyle = INK;
     g.fillRect(0, GROUND + 3, FW, 1);
 

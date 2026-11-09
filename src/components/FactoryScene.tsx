@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Coin } from '../lib/api';
 import { FH, FW, SCALE, createFactory } from '../lib/factory';
 
-// Pawprint at work: a cartoon machine pumps coins and memes onto a conveyor belt.
+// Orbit Pad launch control: a cartoon console pumps coins and space crew onto a conveyor belt.
 // The coins on the belt are the newest launches, with their real logos. The rest is made up, and it says nothing about any coin's safety.
 export default function FactoryScene({ coins }: { coins: Coin[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -76,7 +76,7 @@ export default function FactoryScene({ coins }: { coins: Coin[] }) {
   }, [factory]);
 
   return (
-    <section className="factory" aria-label="Pawprint at work" ref={box}>
+    <section className="factory" aria-label="Orbit Pad launch control" ref={box}>
       <div className="fac-stage">
         <canvas
           ref={canvas}
@@ -84,15 +84,15 @@ export default function FactoryScene({ coins }: { coins: Coin[] }) {
           height={FH * SCALE}
           className="fac-canvas"
           role="img"
-          aria-label="A cartoon factory. An idea hopper feeds a big pink machine that pumps coins and memes out onto a conveyor belt."
+          aria-label="A cartoon launch control room in space. A hopper feeds sparks of ideas into a big pink console that pumps coins and little space crew out onto a conveyor belt."
         />
-        <span className="fac-sign" aria-hidden="true">Pawprint</span>
+        <span className="fac-sign" aria-hidden="true">Orbit Pad</span>
         <button type="button" className="btn fac-btn" onClick={() => setPlaying((p) => !p)} aria-pressed={!playing}>
           {playing ? 'Pause' : 'Play'}
         </button>
       </div>
       <p className="muted small fac-foot">
-        A made-up cartoon. The coins on the belt are the newest launches, and the memes are just for fun.
+        A made-up cartoon. The coins on the belt are the newest launches, and the space crew are just for fun.
         {reduce ? ' Motion is paused because your device asks for less movement. Press Play to start it.' : ''}
       </p>
     </section>
