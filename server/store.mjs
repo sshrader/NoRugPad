@@ -32,13 +32,15 @@ export function update(name, fallback, fn) {
 
 export const get = (name, fallback) => read(name, fallback);
 
-// Devnet only: wipe the saved coins, market history and uploaded images once per RESET_DATA value.
-// Set RESET_DATA to any new text (for example "1", then "2") and restart. It never runs on mainnet.
+// Clears the saved coins, market history and uploaded images once per RESET_DATA value (set it to any new text, then restart).
+// The old files are moved into a "reset-backup-<value>" folder next to them, not deleted.
+// On mainnet it also needs RESET_DATA_MAINNET=wipe-mainnet-list, so a stray variable can never clear a live site.
+// Coins already launched stay on chain and keep trading; this only empties this site's list.
 export async function resetIfRequested() {
   const token = process.env.RESET_DATA;
   if (!token) return false;
-  if ((process.env.SOLANA_CLUSTER || 'devnet') === 'mainnet-beta') {
-    console.warn('RESET_DATA ignored: it never runs on mainnet.');
+  if ((process.env.SOLANA_CLUSTER || 'devnet') === 'mainnet-beta' && process.env.RESET_DATA_MAINNET !== 'wipe-mainnet-list') {
+    console.warn('RESET_DATA ignored on mainnet: also set RESET_DATA_MAINNET=wipe-mainnet-list to confirm.');
     return false;
   }
   const d = dir();
@@ -49,9 +51,17 @@ export async function resetIfRequested() {
     done = (await fs.readFile(marker, 'utf8')).trim();
   } catch {}
   if (done === token) return false;
-  for (const f of ['coins.json', 'market.json', 'uploads.json', 'samples.json']) await fs.rm(path.join(d, f), { force: true });
-  await fs.rm(path.join(d, 'uploads'), { recursive: true, force: true });
+  const safe = token.replace(/[^A-Za-z0-9_-]/g, '_').slice(0, 40);
+  const backup = path.join(d, `reset-backup-${safe}`);
+  await fs.mkdir(backup, { recursive: true });
+  for (const f of ['coins.json', 'market.json', 'uploads.json', 'samples.json', 'uploads']) {
+    try {
+      await fs.rename(path.join(d, f), path.join(backup, f));
+    } catch (e) {
+      if (e.code !== 'ENOENT') throw e;
+    }
+  }
   await fs.writeFile(marker, token);
-  console.log(`RESET_DATA=${token}: cleared saved coins, market history and uploads.`);
+  console.log(`RESET_DATA=${token}: moved saved coins, market history and uploads to ${backup}.`);
   return true;
 }
