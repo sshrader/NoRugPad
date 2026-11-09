@@ -10,13 +10,17 @@ import CoinPage from './pages/CoinPage';
 import Admin from './pages/Admin';
 import HowItWorks from './pages/HowItWorks';
 
-// The Meme Factory mark: a gold coin with a small factory on it.
+// The Meme Factory mark: a goofy gold coin with its tongue out.
 function Mark() {
   return (
     <svg className="mark" viewBox="0 0 32 32" aria-hidden="true">
-      <circle cx="16" cy="16" r="14.5" fill="#f4b63f" />
-      <path d="M8 24V13l5 3.5V13l5 3.5V9h3v15z" fill="#1a1305" />
-      <circle cx="22.8" cy="6.2" r="1.7" fill="#1a1305" fillOpacity=".55" />
+      <circle cx="16" cy="16" r="14.2" fill="#ffd426" stroke="#14110f" strokeWidth="2" />
+      <circle cx="11.4" cy="13" r="3.6" fill="#fff" stroke="#14110f" strokeWidth="1.6" />
+      <circle cx="20.6" cy="13" r="3.6" fill="#fff" stroke="#14110f" strokeWidth="1.6" />
+      <circle cx="12.2" cy="13.6" r="1.5" fill="#14110f" />
+      <circle cx="19.8" cy="13.6" r="1.5" fill="#14110f" />
+      <path d="M8.6 19.2Q16 26.4 23.4 19.2Z" fill="#14110f" />
+      <ellipse cx="17.6" cy="22.6" rx="2.4" ry="2" fill="#ff3d9a" />
     </svg>
   );
 }

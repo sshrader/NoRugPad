@@ -40,6 +40,7 @@ export default function Explore() {
     <div className="wrap">
       <section className={`hero${coins && coins.length > 0 ? '' : ' solo'}`}>
         <div className="hero-copy">
+          <span className="sticker">Beta. Not financial advice.</span>
           <h1>Describe a coin.<br />Meet its mascot.</h1>
           <p className="lede">
             Tell Meme Factory your idea and it writes the coin and draws an original mascot. Launch it on a Meteora bonding curve, then watch the newest mascots defend the vault from cartoon rug pullers, scammers and bots.
@@ -104,8 +105,8 @@ export default function Explore() {
       {error && <p className="error">{error}</p>}
       {coins && coins.length === 0 && (
         <div className="card emptycard">
-          <h3>No coins yet</h3>
-          <p className="muted">Launch the first one.</p>
+          <h3>The factory floor is empty</h3>
+          <p className="muted">Launch the first coin.</p>
           <a className="btn primary" href={href.launch}>Launch a coin</a>
         </div>
       )}
