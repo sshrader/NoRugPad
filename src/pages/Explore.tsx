@@ -3,7 +3,6 @@ import { getAllMarkets, listCoins, type Coin, type Market } from '../lib/api';
 import { CURVE_ON } from '../config';
 import { href } from '../router';
 import CoinCard from '../components/CoinCard';
-import RugField from '../components/RugField';
 import FactoryScene from '../components/FactoryScene';
 
 export default function Explore() {
@@ -39,12 +38,12 @@ export default function Explore() {
 
   return (
     <div className="wrap">
-      <section className={`hero${coins && coins.length > 0 ? '' : ' solo'}`}>
+      <section className="hero solo">
         <div className="hero-copy">
           <span className="sticker">Beta. Not financial advice.</span>
           <h1>Describe a coin.<br />Meet its mascot.</h1>
           <p className="lede">
-            Tell Meme Factory your idea and it writes the coin and draws an original mascot. Launch it on a Meteora bonding curve, then watch the newest mascots defend the vault from cartoon rug pullers, scammers and bots.
+            Tell Meme Factory your idea and it writes the coin and draws an original mascot. Launch it on a Meteora bonding curve, then watch it roll off the factory belt.
           </p>
           <ul className="guards">
             <li>Mint and freeze authority are checked live on every coin</li>
@@ -56,7 +55,6 @@ export default function Explore() {
             <a className="btn" href={href.how}>How it works</a>
           </div>
         </div>
-        {coins && coins.length > 0 && <RugField coins={coins} />}
       </section>
 
       {coins && coins.length > 0 && <FactoryScene coins={coins} />}

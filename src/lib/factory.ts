@@ -234,6 +234,25 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     g.arc(0, 0, 6, 0, Math.PI * 2);
     g.stroke();
     g.restore();
+    // Ticker label above a real coin.
+    if (c && c.symbol) {
+      const label = `$${c.symbol.toUpperCase().slice(0, 10)}`;
+      g.save();
+      g.font = `700 ${Math.round(6.5 * scale)}px ${UI_FONT}`;
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      const w = g.measureText(label).width + 5;
+      const h = 8 * scale;
+      const ly = y - 8 * scale - h / 2 - 2;
+      g.fillStyle = '#fff';
+      g.strokeStyle = INK;
+      g.lineWidth = 1;
+      g.fillRect(x - w / 2, ly - h / 2, w, h);
+      g.strokeRect(x - w / 2, ly - h / 2, w, h);
+      g.fillStyle = INK;
+      g.fillText(label, x, ly + 0.5);
+      g.restore();
+    }
   }
 
   function drawMeme(g: CanvasRenderingContext2D, x: number, y: number, variant: number, scale: number) {
