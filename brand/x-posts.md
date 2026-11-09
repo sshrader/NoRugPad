@@ -2,7 +2,7 @@
 Describe a coin. Meet its mascot. AI writes it and draws it, you launch it on Solana (Meteora bonding curve). Beta. Not financial advice.
 
 # Launch post
-Meme Factory is live. 🏭
+Pawprint is live. 🐾
 
 Describe a coin in a sentence.
 AI writes the name, ticker and story, then draws an original mascot.

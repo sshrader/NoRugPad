@@ -24,7 +24,7 @@ export async function verifyPool(connection, mint, creator) {
   if (!pool) return { error: 'No bonding-curve pool exists for this mint yet.' };
   const f = fields(pool.account);
   if (!f?.config || !f?.creator) return { error: `Unexpected pool data from the SDK (keys: ${Object.keys(pool.account || {}).join(', ')}).` };
-  if (f.config.toBase58() !== dbcConfig()) return { error: 'This pool was not made with the Meme Factory curve config.' };
+  if (f.config.toBase58() !== dbcConfig()) return { error: 'This pool was not made with the Pawprint curve config.' };
   if (f.creator.toBase58() !== creator) return { error: 'Pool creator does not match the wallet.' };
   return { pool: pool.publicKey.toBase58() };
 }

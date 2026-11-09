@@ -1,4 +1,4 @@
-// Meme Factory Field: a top-down arena on the Explore page. Every recent coin's logo is a defender standing in rings
+// Pawprint Field: a top-down arena on the Explore page. Every recent coin's logo is a defender standing in rings
 // around the liquidity vault. Cartoon rug pullers, scammers and bots march in from the edges and the logos fight them off.
 // Pure canvas code with no React, so it can be tested on its own (scripts/rug-test.mjs).
 // It is a show only: strength has nothing to do with a coin's real safety. The villains are made-up characters.

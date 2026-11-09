@@ -43,7 +43,7 @@ export default function Explore() {
           <span className="sticker">Beta. Not financial advice.</span>
           <h1>Describe a coin.<br />Meet its mascot.</h1>
           <p className="lede">
-            Tell Meme Factory your idea and it writes the coin and draws an original mascot. Launch it on a Meteora bonding curve, then watch it roll off the factory belt.
+            Tell Pawprint your idea and it writes the coin and draws an original mascot. Launch it on a Meteora bonding curve, then watch it roll off the factory belt.
           </p>
           <ul className="guards">
             <li>Mint and freeze authority are checked live on every coin</li>

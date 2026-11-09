@@ -2,7 +2,7 @@
 // Trading terminals a creator can jump to right after launch. The URLs are the usual token-page patterns for each site;
 // if one of them changes, edit it here. New coins can take a minute or two to show up on a terminal.
 export const PLATFORMS = [
-  { id: 'site', label: 'Meme Factory coin page', url: null as null | ((mint: string, pool?: string) => string) },
+  { id: 'site', label: 'Pawprint coin page', url: null as null | ((mint: string, pool?: string) => string) },
   { id: 'gmgn', label: 'GMGN', url: (m: string) => `https://gmgn.ai/sol/token/${m}` },
   { id: 'axiom', label: 'Axiom', url: (m: string, pool?: string) => `https://axiom.trade/meme/${pool || m}` },
   { id: 'padre', label: 'Terminal (Padre)', url: (m: string, pool?: string) => `https://trade.padre.gg/trade/solana/${pool || m}` },

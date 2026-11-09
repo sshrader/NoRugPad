@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Coin } from '../lib/api';
 import { FH, FW, SCALE, createFactory } from '../lib/factory';
 
-// Meme Factory at work: a cartoon machine pumps coins and memes onto a conveyor belt.
+// Pawprint at work: a cartoon machine pumps coins and memes onto a conveyor belt.
 // The coins on the belt are the newest launches, with their real logos. The rest is made up, and it says nothing about any coin's safety.
 export default function FactoryScene({ coins }: { coins: Coin[] }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -76,7 +76,7 @@ export default function FactoryScene({ coins }: { coins: Coin[] }) {
   }, [factory]);
 
   return (
-    <section className="factory" aria-label="Meme Factory at work" ref={box}>
+    <section className="factory" aria-label="Pawprint at work" ref={box}>
       <div className="fac-stage">
         <canvas
           ref={canvas}
@@ -86,7 +86,7 @@ export default function FactoryScene({ coins }: { coins: Coin[] }) {
           role="img"
           aria-label="A cartoon factory. An idea hopper feeds a big pink machine that pumps coins and memes out onto a conveyor belt."
         />
-        <span className="fac-sign" aria-hidden="true">Meme Factory</span>
+        <span className="fac-sign" aria-hidden="true">Pawprint</span>
         <button type="button" className="btn fac-btn" onClick={() => setPlaying((p) => !p)} aria-pressed={!playing}>
           {playing ? 'Pause' : 'Play'}
         </button>

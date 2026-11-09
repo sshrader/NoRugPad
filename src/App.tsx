@@ -10,17 +10,16 @@ import CoinPage from './pages/CoinPage';
 import Admin from './pages/Admin';
 import HowItWorks from './pages/HowItWorks';
 
-// The Meme Factory mark: a goofy gold coin with its tongue out.
+// The Pawprint mark: a gold coin with a bubblegum paw on it.
 function Mark() {
   return (
     <svg className="mark" viewBox="0 0 32 32" aria-hidden="true">
       <circle cx="16" cy="16" r="14.2" fill="#ffd426" stroke="#14110f" strokeWidth="2" />
-      <circle cx="11.4" cy="13" r="3.6" fill="#fff" stroke="#14110f" strokeWidth="1.6" />
-      <circle cx="20.6" cy="13" r="3.6" fill="#fff" stroke="#14110f" strokeWidth="1.6" />
-      <circle cx="12.2" cy="13.6" r="1.5" fill="#14110f" />
-      <circle cx="19.8" cy="13.6" r="1.5" fill="#14110f" />
-      <path d="M8.6 19.2Q16 26.4 23.4 19.2Z" fill="#14110f" />
-      <ellipse cx="17.6" cy="22.6" rx="2.4" ry="2" fill="#ff3d9a" />
+      <ellipse cx="16" cy="20.6" rx="6.4" ry="4.9" fill="#ff3d9a" stroke="#14110f" strokeWidth="1.6"/>
+      <ellipse cx="8.6" cy="14.8" rx="2.4" ry="3.2" transform="rotate(-22 8.6 14.8)" fill="#ff3d9a" stroke="#14110f" strokeWidth="1.5"/>
+      <ellipse cx="12.9" cy="9.6" rx="2.5" ry="3.4" transform="rotate(-8 12.9 9.6)" fill="#ff3d9a" stroke="#14110f" strokeWidth="1.5"/>
+      <ellipse cx="19.1" cy="9.6" rx="2.5" ry="3.4" transform="rotate(8 19.1 9.6)" fill="#ff3d9a" stroke="#14110f" strokeWidth="1.5"/>
+      <ellipse cx="23.4" cy="14.8" rx="2.4" ry="3.2" transform="rotate(22 23.4 14.8)" fill="#ff3d9a" stroke="#14110f" strokeWidth="1.5"/>
     </svg>
   );
 }
@@ -83,9 +82,9 @@ export default function App() {
       </div>
       <header className="top">
         <div className="wrap top-in">
-          <a className="brand" href={href.explore} aria-label="Meme Factory home">
+          <a className="brand" href={href.explore} aria-label="Pawprint home">
             <Mark />
-            Meme Factory
+            Pawprint
           </a>
           <nav className="nav" aria-label="Main">
             {link('explore', 'Explore')}
@@ -123,7 +122,7 @@ export default function App() {
 
       <footer className="wrap foot muted">
         {IS_MAINNET
-          ? 'Meme Factory is unaudited beta software. Coins are not endorsed by Meme Factory. Only risk what you can lose.'
+          ? 'Pawprint is unaudited beta software. Coins are not endorsed by Pawprint. Only risk what you can lose.'
           : `Prototype running on ${CLUSTER}. Not audited.`}{' '}
         <a href={href.how}>How it works</a>
       </footer>

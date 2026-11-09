@@ -1,4 +1,4 @@
-// Meme Factory at work: a cartoon scene for the Explore page. An idea hopper drops light bulbs into a big pink machine,
+// Pawprint at work: a cartoon scene for the Explore page. An idea hopper drops light bulbs into a big pink machine,
 // which pumps coins and memes out onto a conveyor belt, where a stamp presses each one on the way past.
 // The coins on the belt are the newest launches, using their real logos. Everything else is made up.
 // Pure canvas code with no React, so it can be tested on its own (scripts/factory-test.mjs). It is a show only.

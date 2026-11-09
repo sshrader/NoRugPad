@@ -1,6 +1,6 @@
-# Meme Factory (devnet starter)
+# Pawprint (devnet starter)
 
-Wallet connection, real token creation on Solana, trading on a Meteora Dynamic Bonding Curve, and a small API that stores coins. Every coin page has the **Meme Factory Arena**, a cartoon battle scene where the coin's own logo fights off rug pullers, scammers and bots to protect the liquidity vault.
+Wallet connection, real token creation on Solana, trading on a Meteora Dynamic Bonding Curve, and a small API that stores coins. Every coin page has the **Pawprint Arena**, a cartoon battle scene where the coin's own logo fights off rug pullers, scammers and bots to protect the liquidity vault.
 
 > **Status:** the token creation, wallet flow, Pinata upload and bonding-curve launch have been run on devnet. The Arena runs a headless test (`npm run rug-test`) but has not yet been checked by eye in a browser. This project grew out of an earlier version with AI pets, which have been removed.
 
@@ -32,13 +32,13 @@ Run `npm run dry-run -- --send` first if you can. It tests the on-chain part wit
 2. **One transaction** (`src/lib/createCoin.ts`, or `src/lib/dbc.ts` with the bonding curve on), signed in Phantom. All or nothing.
 3. **Register.** The browser sends the mint and signature to `POST /api/coins`. The server does not trust it. It reads the chain itself and rejects the coin unless the mint exists, the authorities are as expected, and the transaction succeeded and was paid by the creator.
 
-## Meme Factory Arena
+## Pawprint Arena
 
 Each coin page has a side-on pixel battle scene (`src/components/RugBattle.tsx`, engine in `src/lib/rugWorld.ts`).
 
 - The hero is the coin's logo. It dashes at enemies, deflects scam links and charges a **Diamond Hands** shockwave. Tap the scene when the meter is full, or let it fire on its own.
 - Enemies: rug pullers that try to yank the liquidity vault, scammers with "FREE $$$" signs that fire fake links, sniper bots that drain the vault, and a Mega Rugger boss every 4th wave.
-- **Meme Factory Field** (`src/components/RugField.tsx`, engine in `src/lib/rugField.ts`) is the shared version on the Explore page: a top-down arena where the logos of the 40 newest coins stand in rings around one liquidity vault and fight the same villains together. Each visitor's browser runs its own copy, so two people see different fights. A "Top defenders" list ranks coins by enemies stopped, and tapping a logo opens its coin. Strength has nothing to do with a coin's real safety.
+- **Pawprint Field** (`src/components/RugField.tsx`, engine in `src/lib/rugField.ts`) is the shared version on the Explore page: a top-down arena where the logos of the 40 newest coins stand in rings around one liquidity vault and fight the same villains together. Each visitor's browser runs its own copy, so two people see different fights. A "Top defenders" list ranks coins by enemies stopped, and tapping a logo opens its coin. Strength has nothing to do with a coin's real safety.
 - It is a cartoon only. It does not read or move anything on chain, and the villains are made up.
 - It pauses when scrolled out of view, and starts paused if the device asks for reduced motion.
 - Test the engine with no browser: `npm run rug-test`.
@@ -96,7 +96,7 @@ Each coin page shows a market cap chart. `MARKET_MODE=demo` (the default) draws 
 
 ## Trading on a bonding curve (Meteora)
 
-Meme Factory uses Meteora's Dynamic Bonding Curve program, so there is no curve code of our own to maintain or audit. The flow:
+Pawprint uses Meteora's Dynamic Bonding Curve program, so there is no curve code of our own to maintain or audit. The flow:
 
 1. **Once:** `npm run dbc-config -- --check` shows the curve settings. `npm run dbc-config` creates the config on chain with the partner wallet (`.devnet-keypair.json`) and prints `DBC_CONFIG` and `VITE_DBC_CONFIG` for `.env`.
 2. **Each launch:** one transaction creates the token and its curve pool (`src/lib/dbc.ts`). The server checks that the pool exists, came from your config, and was made by the paying wallet (`server/curve.mjs`).

@@ -3,12 +3,14 @@ FONT="Inter Display, Inter, sans-serif"
 
 def face(cx, cy, r, fill=YEL, tongue=PINK, rot=0):
     k = r/16.0
+    p = tongue
     return f'''<g transform="translate({cx} {cy}) rotate({rot}) scale({k}) translate(-16 -16)">
 <circle cx="16" cy="16" r="14.2" fill="{fill}" stroke="{INK}" stroke-width="2"/>
-<circle cx="11.4" cy="13" r="3.6" fill="#fff" stroke="{INK}" stroke-width="1.6"/><circle cx="20.6" cy="13" r="3.6" fill="#fff" stroke="{INK}" stroke-width="1.6"/>
-<circle cx="12.2" cy="13.6" r="1.5" fill="{INK}"/><circle cx="19.8" cy="13.6" r="1.5" fill="{INK}"/>
-<path d="M8.6 19.2Q16 26.4 23.4 19.2Z" fill="{INK}"/>
-<ellipse cx="17.6" cy="22.6" rx="2.4" ry="2" fill="{tongue}"/></g>'''
+<ellipse cx="16" cy="20.6" rx="6.4" ry="4.9" fill="{p}" stroke="{INK}" stroke-width="1.6"/>
+<ellipse cx="8.6" cy="14.8" rx="2.4" ry="3.2" transform="rotate(-22 8.6 14.8)" fill="{p}" stroke="{INK}" stroke-width="1.5"/>
+<ellipse cx="12.9" cy="9.6" rx="2.5" ry="3.4" transform="rotate(-8 12.9 9.6)" fill="{p}" stroke="{INK}" stroke-width="1.5"/>
+<ellipse cx="19.1" cy="9.6" rx="2.5" ry="3.4" transform="rotate(8 19.1 9.6)" fill="{p}" stroke="{INK}" stroke-width="1.5"/>
+<ellipse cx="23.4" cy="14.8" rx="2.4" ry="3.2" transform="rotate(22 23.4 14.8)" fill="{p}" stroke="{INK}" stroke-width="1.5"/></g>'''
 
 def stroke_text(x, y, size, txt, fill='#fff', sw=10, shadow=6, anchor='start', rot=0):
     t = lambda dx, dy, extra: f'<text x="{x+dx}" y="{y+dy}" font-family="{FONT}" font-weight="900" font-size="{size}" text-anchor="{anchor}" letter-spacing="-1" {extra}>{txt}</text>'
@@ -31,7 +33,7 @@ open('logo-mark.svg','w').write(wrap(1024,1024,
 # 2. Wordmark lockup
 open('logo-wordmark.svg','w').write(wrap(1400,520,
   f'<rect width="1400" height="520" fill="{BG}"/>' + face(250,260,170) +
-  stroke_text(470,250,150,'MEME',sw=14,shadow=8) + stroke_text(470,400,150,'FACTORY',fill=YEL,sw=14,shadow=8)))
+  stroke_text(470,250,150,'PAW',sw=14,shadow=8) + stroke_text(470,400,150,'PRINT',fill=YEL,sw=14,shadow=8)))
 
 # 3. X profile 400x400 (circle crop safe)
 open('x-profile.svg','w').write(wrap(400,400,
@@ -42,15 +44,15 @@ open('x-profile.svg','w').write(wrap(400,400,
 MX=990
 belt = f'<rect x="{MX+215}" y="372" width="{1500-MX-215}" height="30" fill="{INK}"/><rect x="{MX+215}" y="372" width="{1500-MX-215}" height="12" fill="{YEL}"/>'
 belt += ''.join(f'<rect x="{x}" y="384" width="14" height="18" fill="{INK}"/>' for x in range(MX+235,1500,40))
-coins = face(1250,330,40,YEL,rot=-8) + face(1345,330,40,PINK,tongue='#fff',rot=6) + face(1440,330,40,LIME,rot=-4) + face(1380,215,30,SKY,rot=14)
+coins = face(1250,330,40,YEL,tongue=PINK,rot=-8) + face(1345,330,40,PINK,tongue=YEL,rot=6) + face(1440,330,40,LIME,rot=-4) + face(1380,215,30,SKY,rot=14)
 machine = f'''<rect x="{MX}" y="96" width="200" height="290" rx="22" fill="{INK}" transform="translate(9 9)"/>
 <rect x="{MX}" y="96" width="200" height="290" rx="22" fill="{PINK}" stroke="{INK}" stroke-width="7"/>
 <rect x="{MX+20}" y="125" width="160" height="96" rx="12" fill="#fff" stroke="{INK}" stroke-width="6"/>
 <text x="{MX+100}" y="190" font-family="{FONT}" font-weight="900" font-size="48" text-anchor="middle" fill="{INK}">IDEA</text>
 <rect x="{MX+190}" y="300" width="40" height="72" fill="{INK}"/>
 <circle cx="{MX+45}" cy="330" r="16" fill="{YEL}" stroke="{INK}" stroke-width="5"/><circle cx="{MX+95}" cy="330" r="16" fill="{LIME}" stroke="{INK}" stroke-width="5"/>'''
-sticker = f'''<g transform="rotate(-3 300 90)"><rect x="304" y="62" width="270" height="52" rx="10" fill="{INK}"/><rect x="298" y="56" width="270" height="52" rx="10" fill="{YEL}" stroke="{INK}" stroke-width="5"/>
-<text x="433" y="93" font-family="{FONT}" font-weight="900" font-size="30" text-anchor="middle" fill="{INK}">MEME FACTORY</text></g>'''
+sticker = f'''<g transform="rotate(-3 300 90)"><rect x="304" y="62" width="200" height="52" rx="10" fill="{INK}"/><rect x="298" y="56" width="200" height="52" rx="10" fill="{YEL}" stroke="{INK}" stroke-width="5"/>
+<text x="398" y="93" font-family="{FONT}" font-weight="900" font-size="30" text-anchor="middle" fill="{INK}">PAWPRINT</text></g>'''
 body = (dots(1500,500) + sticker +
   stroke_text(300,220,60,'DESCRIBE A COIN.',sw=10,shadow=6) +
   stroke_text(300,305,60,'MEET ITS MASCOT.',fill=YEL,sw=10,shadow=6) +

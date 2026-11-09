@@ -1,4 +1,4 @@
-// Runs the Meme Factory Arena engine headlessly with a recording fake canvas: no browser, no network.
+// Runs the Pawprint Arena engine headlessly with a recording fake canvas: no browser, no network.
 //   node scripts/rug-test.mjs
 import assert from 'node:assert/strict';
 import { createBattle, BW, BH } from '../src/lib/rugWorld.ts';
@@ -67,7 +67,7 @@ for (const seed of [1, 2, 3, 4, 5]) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Meme Factory Field (the top-down arena on the Explore page)
+// Pawprint Field (the top-down arena on the Explore page)
 const coin = (i) => ({ mint: `Mint${i}`.padEnd(44, 'x'), name: `Coin ${i}`, symbol: `C${i}`, image: null });
 const coinsOf = (n, from = 0) => Array.from({ length: n }, (_, i) => coin(from + i));
 

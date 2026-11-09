@@ -1,4 +1,4 @@
-// Meme Factory Arena: the coin's logo defends the liquidity vault from rug pullers, scammers, bots and a boss.
+// Pawprint Arena: the coin's logo defends the liquidity vault from rug pullers, scammers, bots and a boss.
 // Pure canvas code with no React, so it can be tested on its own (scripts/rug-test.mjs).
 // Everything here is a cartoon. The villains are made-up characters, not real people or projects.
 
