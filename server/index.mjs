@@ -358,6 +358,8 @@ const network = await checkNetwork(connection).catch((e) => {
 
 if (curveEnabled() && process.env.MARKET_SAMPLER !== 'off') startSampler(connection, Math.max(2000, Number(process.env.MARKET_SAMPLE_MS) || 5000));
 
+await store.resetIfRequested();
+
 app.listen(PORT, () => {
   console.log(`Network: ${network}${launchesRestricted() ? ' (launches limited to the allowlist)' : ''}`);
   console.log(`Meme Factory API on http://localhost:${PORT}  (rpc: ${RPC_HOST}, storage: ${PINATA_JWT ? 'pinata' : 'local'})`);

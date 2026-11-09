@@ -31,3 +31,27 @@ export function update(name, fallback, fn) {
 }
 
 export const get = (name, fallback) => read(name, fallback);
+
+// Devnet only: wipe the saved coins, market history and uploaded images once per RESET_DATA value.
+// Set RESET_DATA to any new text (for example "1", then "2") and restart. It never runs on mainnet.
+export async function resetIfRequested() {
+  const token = process.env.RESET_DATA;
+  if (!token) return false;
+  if ((process.env.SOLANA_CLUSTER || 'devnet') === 'mainnet-beta') {
+    console.warn('RESET_DATA ignored: it never runs on mainnet.');
+    return false;
+  }
+  const d = dir();
+  const marker = path.join(d, '.reset-marker');
+  await fs.mkdir(d, { recursive: true });
+  let done = '';
+  try {
+    done = (await fs.readFile(marker, 'utf8')).trim();
+  } catch {}
+  if (done === token) return false;
+  for (const f of ['coins.json', 'market.json', 'uploads.json', 'samples.json']) await fs.rm(path.join(d, f), { force: true });
+  await fs.rm(path.join(d, 'uploads'), { recursive: true, force: true });
+  await fs.writeFile(marker, token);
+  console.log(`RESET_DATA=${token}: cleared saved coins, market history and uploads.`);
+  return true;
+}
