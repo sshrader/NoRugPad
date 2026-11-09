@@ -160,7 +160,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
       <div className="row2">
         <div className="field">
           <label htmlFor="name">Name</label>
-          <input id="name" value={name} maxLength={32} placeholder="Midnight Zoomies" onChange={(e) => onName(e.target.value)} autoComplete="off" />
+          <input id="name" value={name} maxLength={32} placeholder="Night Shift Raccoon" onChange={(e) => onName(e.target.value)} autoComplete="off" />
         </div>
         <div className="field">
           <label htmlFor="symbol">Ticker</label>
@@ -169,7 +169,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
             className="mono"
             value={symbol}
             maxLength={10}
-            placeholder="ZOOM"
+            placeholder="RACC"
             onChange={(e) => {
               setSymbolTouched(true);
               setSymbol(e.target.value.replace(/[^a-z0-9]/gi, '').toUpperCase());
@@ -181,7 +181,7 @@ export default function CreateCoinForm({ balance, onCreated }: { balance: number
 
       <div className="field">
         <label htmlFor="desc">Description</label>
-        <textarea id="desc" value={description} maxLength={280} rows={3} placeholder="What is this coin about?" onChange={(e) => setDescription(e.target.value)} />
+        <textarea id="desc" value={description} maxLength={280} rows={3} placeholder="Who is this mascot, and what is the coin about?" onChange={(e) => setDescription(e.target.value)} />
       </div>
 
       <div className="row2">

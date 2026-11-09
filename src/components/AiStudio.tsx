@@ -7,18 +7,27 @@ type Props = {
   onMascot: (f: File) => void;
 };
 
-async function toFile(mime: string, b64: string): Promise<File> {
-  const blob = await (await fetch(`data:${mime};base64,${b64}`)).blob();
-  const ext = mime === 'image/png' ? 'png' : mime === 'image/webp' ? 'webp' : 'jpg';
-  return new File([blob], `mascot.${ext}`, { type: mime });
+type Pic = { id: number; mime: string; b64: string };
+const MAX_PICS = 6;
+const src = (p: Pic) => `data:${p.mime};base64,${p.b64}`;
+
+async function toFile(p: Pic): Promise<File> {
+  const blob = await (await fetch(src(p))).blob();
+  const ext = p.mime === 'image/png' ? 'png' : p.mime === 'image/webp' ? 'webp' : 'jpg';
+  return new File([blob], `mascot.${ext}`, { type: p.mime });
 }
 
 // "Describe your coin": the AI writes the name, ticker and description, then draws an original mascot.
-// Everything it makes is put into the form below, where the creator can change it before launching.
+// Drawings are only candidates. The creator looks at them, can edit the mascot description and redraw, and the picture
+// is only put on the coin when they press "Use this mascot". Everything can still be changed in the form below.
 export default function AiStudio({ creator, onConcept, onMascot }: Props) {
   const [enabled, setEnabled] = useState(false);
   const [idea, setIdea] = useState('');
   const [concept, setConcept] = useState<Concept | null>(null);
+  const [mascotText, setMascotText] = useState('');
+  const [pics, setPics] = useState<Pic[]>([]);
+  const [shown, setShown] = useState<number | null>(null); // id of the picture on display
+  const [used, setUsed] = useState<number | null>(null); // id of the picture attached to the coin
   const [busy, setBusy] = useState<'' | 'idea' | 'mascot'>('');
   const [error, setError] = useState('');
 
@@ -35,13 +44,17 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
   if (!enabled) return null;
 
   const msg = (e: unknown) => (e instanceof Error ? e.message : 'Something went wrong. Try again.');
+  const current = pics.find((p) => p.id === shown) ?? null;
+  const working = busy !== '';
 
-  async function drawMascot(text: string) {
-    if (!creator) return;
+  async function draw(text: string) {
+    if (!creator) throw new Error('Connect your wallet first.');
     setBusy('mascot');
     try {
       const r = await aiMascot(text, creator);
-      onMascot(await toFile(r.mime, r.image));
+      const pic: Pic = { id: Date.now() + Math.random(), mime: r.mime, b64: r.image };
+      setPics((all) => [...all, pic].slice(-MAX_PICS));
+      setShown(pic.id);
     } finally {
       setBusy('');
     }
@@ -54,9 +67,13 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
     try {
       const c = await aiConcept(idea, creator);
       setConcept(c);
+      setMascotText(c.mascot);
+      setPics([]);
+      setShown(null);
+      setUsed(null);
       onConcept(c);
       setBusy('');
-      await drawMascot(c.mascot);
+      await draw(c.mascot);
     } catch (e) {
       setBusy('');
       setError(msg(e));
@@ -64,21 +81,30 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
   }
 
   async function redraw() {
-    if (!concept) return;
     setError('');
     try {
-      await drawMascot(concept.mascot);
+      await draw(mascotText);
     } catch (e) {
       setError(msg(e));
     }
   }
 
-  const working = busy !== '';
+  async function useIt() {
+    if (!current) return;
+    setError('');
+    try {
+      onMascot(await toFile(current));
+      setUsed(current.id);
+    } catch (e) {
+      setError(msg(e));
+    }
+  }
+
   return (
     <section className="studio" aria-label="Describe your coin">
       <h3>Describe your coin</h3>
       <p className="muted small">
-        Tell us the idea in a sentence. We'll write the name, ticker and description and draw an original mascot. You can edit everything below before you launch.
+        Tell us the idea in a sentence. We'll write the name, ticker and description and draw an original mascot. Nothing goes on your coin until you press "Use this mascot", and you can edit everything below.
       </p>
       <div className="field">
         <label htmlFor="idea" className="sr">Your idea</label>
@@ -93,18 +119,60 @@ export default function AiStudio({ creator, onConcept, onMascot }: Props) {
       </div>
       <div className="studio-btns">
         <button type="button" className="btn primary" onClick={generate} disabled={working || idea.trim().length < 3 || !creator}>
-          {busy === 'idea' ? 'Writing the coin…' : busy === 'mascot' ? 'Drawing the mascot…' : concept ? 'Start over with this idea' : 'Make my coin'}
+          {busy === 'idea' ? 'Writing the coin…' : concept ? 'Start over with this idea' : 'Make my coin'}
         </button>
-        {concept && (
-          <button type="button" className="btn" onClick={redraw} disabled={working}>
-            {busy === 'mascot' ? 'Drawing…' : 'Draw a new mascot'}
-          </button>
-        )}
       </div>
       {!creator && <p className="muted small">Connect your wallet to use the generator.</p>}
       {error && <p className="error" role="alert">{error}</p>}
-      {concept && <p className="muted small">Mascot idea: {concept.mascot}</p>}
-      <p className="muted small">The mascot is AI-generated. You're responsible for what you launch, so check it before you do.</p>
+
+      {concept && (
+        <div className="studio-result">
+          <div className="studio-pic" aria-live="polite">
+            {current ? (
+              <img src={src(current)} alt="Your coin's AI-drawn mascot" />
+            ) : (
+              <span className="muted">{busy === 'mascot' ? 'Drawing the mascot…' : 'No drawing yet'}</span>
+            )}
+            {busy === 'mascot' && current && <span className="studio-busy">Drawing…</span>}
+          </div>
+
+          <div className="studio-side">
+            <div className="field">
+              <label htmlFor="mascot-text">Mascot description</label>
+              <textarea id="mascot-text" rows={3} maxLength={300} value={mascotText} onChange={(e) => setMascotText(e.target.value)} />
+              <span className="muted small">Change this and press "Draw again" to get a different mascot.</span>
+            </div>
+            <div className="studio-btns">
+              <button type="button" className="btn primary" onClick={useIt} disabled={!current || working || used === current?.id}>
+                {used !== null && used === current?.id ? 'Using this mascot ✓' : 'Use this mascot'}
+              </button>
+              <button type="button" className="btn" onClick={redraw} disabled={working || mascotText.trim().length < 3}>
+                {busy === 'mascot' ? 'Drawing…' : 'Draw again'}
+              </button>
+            </div>
+            {pics.length > 1 && (
+              <div className="studio-thumbs" role="group" aria-label="Earlier drawings">
+                {pics.map((p, i) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    className={p.id === shown ? 'on' : ''}
+                    aria-pressed={p.id === shown}
+                    aria-label={`Drawing ${i + 1}${p.id === used ? ', in use' : ''}`}
+                    onClick={() => setShown(p.id)}
+                    disabled={working}
+                  >
+                    <img src={src(p)} alt="" />
+                    {p.id === used && <span className="studio-tick" aria-hidden="true">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {concept && <p className="muted small">The mascot is AI-generated. You're responsible for what you launch, so check it before you do.</p>}
     </section>
   );
 }
