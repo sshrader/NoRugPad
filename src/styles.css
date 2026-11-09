@@ -273,14 +273,6 @@ textarea { resize: vertical; }
 .sc-more summary { cursor: pointer; color: var(--muted); font-size: 14px; }
 .sc-more ol { margin: 8px 0 0; padding-left: 22px; color: var(--muted); }
 
-/* Checks explainer on the Explore page */
-.checks { margin: 36px 0 8px; max-width: 880px; }
-.checks h2 { font-size: 28px; margin-bottom: 4px; }
-.checks dl { margin: 18px 0 14px; border-top: 1px solid var(--line); }
-.checks dl > div { display: grid; grid-template-columns: minmax(150px, 220px) 1fr; gap: 6px 24px; padding: 11px 0; border-bottom: 1px solid var(--line); }
-.checks dt { font-weight: 600; color: var(--accent-text); }
-.checks dd { margin: 0; color: var(--fg); }
-@media (max-width: 600px) { .checks dl > div { grid-template-columns: 1fr; } }
 .mkt-side { display: grid; gap: 8px; justify-items: end; }
 .mkt-iv { display: inline-flex; border: 1px solid var(--line); border-radius: 3px; overflow: hidden; }
 .mkt-iv button { font: 500 12px var(--font-mono); background: transparent; color: var(--muted); border: 0; padding: 5px 10px; cursor: pointer; }
@@ -395,9 +387,9 @@ input:focus, textarea:focus, .in:focus { border-color: var(--fg); box-shadow: 0 
 .sc-list { background: var(--fg); border: 2px solid var(--fg); border-radius: 10px; }
 .sc-row { background: #fff; }
 .sc-row.warn .sc-mark { color: #b36b00; }
-.checks dl, .faq { border-top: 2px solid var(--fg); }
-.checks dl > div, .faq > div { border-bottom: 2px solid var(--fg); }
-.checks dt, .faq dt { color: var(--accent-text); }
+.faq { border-top: 2px solid var(--fg); }
+.faq > div { border-bottom: 2px solid var(--fg); }
+.faq dt { color: var(--accent-text); }
 .studio { border: 3px dashed var(--fg); border-radius: 14px; background: var(--surface-2); box-shadow: none; }
 .launched { border: 3px solid var(--fg); background: var(--lime); box-shadow: 4px 4px 0 var(--fg); }
 .devbuy { border: 3px dashed var(--fg); border-radius: 10px; }
@@ -410,3 +402,12 @@ input:focus, textarea:focus, .in:focus { border-color: var(--fg); box-shadow: 0 
 .rug h3 { color: var(--fg); }
 .hud-combo, .hud-banner { font-weight: 400; text-transform: uppercase; }
 .rug a { color: var(--accent-text); }
+
+/* Meme Factory at work */
+.factory { margin: 40px 0 8px; }
+.fac-stage { position: relative; line-height: 0; border: 3px solid var(--fg); border-radius: 14px; box-shadow: 6px 6px 0 var(--fg); overflow: hidden; background: #bfe9ff; container-type: inline-size; }
+.fac-canvas { width: 100%; height: auto; display: block; }
+.fac-sign { position: absolute; left: 22.2%; top: 26.7%; width: 18.8%; height: 10.7%; display: grid; place-items: center; font: 400 2.3cqw/1 var(--font-display); text-transform: uppercase; letter-spacing: 0.02em; color: var(--fg); white-space: nowrap; pointer-events: none; }
+.fac-btn { position: absolute; right: 12px; top: 12px; padding: 5px 12px; font-size: 13px; line-height: 1.2; }
+.fac-foot { margin-top: 12px; }
+@media (max-width: 600px) { .fac-btn { padding: 2px 8px; font-size: 11px; top: 6px; right: 6px; border-width: 2px; box-shadow: 2px 2px 0 var(--fg); } }
