@@ -38,13 +38,9 @@ ROCKET = f'''<g>
 <path d="M246 224 L196 306 L248 286Z" fill="{PINK}" stroke="{INK}" stroke-width="5" stroke-linejoin="round"/>
 <path d="M354 224 L404 306 L352 286Z" fill="{PINK}" stroke="{INK}" stroke-width="5" stroke-linejoin="round"/>
 <rect x="262" y="284" width="76" height="22" rx="4" fill="#3a3550" stroke="{INK}" stroke-width="4"/>
-<circle cx="300" cy="148" r="48" fill="{SKY}" stroke="{INK}" stroke-width="5"/>
-<circle cx="300" cy="148" r="36" fill="#7bd13a" stroke="{INK}" stroke-width="4"/>
-<path d="M286 116 L282 100 M314 116 L318 100" stroke="{INK}" stroke-width="4" stroke-linecap="round"/>
-<circle cx="282" cy="98" r="5" fill="{YEL}" stroke="{INK}" stroke-width="3"/><circle cx="318" cy="98" r="5" fill="{YEL}" stroke="{INK}" stroke-width="3"/>
-<ellipse cx="288" cy="144" rx="9" ry="11" fill="#fff" stroke="{INK}" stroke-width="3"/><ellipse cx="312" cy="144" rx="9" ry="11" fill="#fff" stroke="{INK}" stroke-width="3"/>
-<circle cx="290" cy="146" r="4" fill="{INK}"/><circle cx="310" cy="146" r="4" fill="{INK}"/>
-<path d="M286 164 Q300 176 314 164" fill="none" stroke="{INK}" stroke-width="4" stroke-linecap="round"/>
+<circle cx="300" cy="148" r="48" fill="{YEL}" stroke="{INK}" stroke-width="5"/>
+<circle cx="300" cy="148" r="38" fill="{PANEL}" stroke="{INK}" stroke-width="4"/>
+<g transform="translate(300 148) scale(1.35) translate(-24 -24)"><ellipse cx="24" cy="26" rx="22" ry="7" transform="rotate(-18 24 26)" fill="none" stroke="{PINK}" stroke-width="4"/><circle cx="24" cy="24" r="14" fill="{YEL}" stroke="{INK}" stroke-width="3"/><path d="M5 31 Q24 40 43 17" fill="none" stroke="{PINK}" stroke-width="4" stroke-linecap="round" transform="translate(0 -1)"/><circle cx="19" cy="21" r="2.4" fill="{INK}"/><circle cx="29" cy="21" r="2.4" fill="{INK}"/></g>
 <path d="M272 308 Q300 420 328 308Z" fill="{YEL}" stroke="{INK}" stroke-width="4" stroke-linejoin="round"/>
 <path d="M286 308 Q300 374 314 308Z" fill="{PINK}"/>
 <rect x="180" y="392" width="240" height="22" fill="{YEL}" stroke="{INK}" stroke-width="4"/>
