@@ -36,7 +36,10 @@ async function main() {
   if (!url) throw new Error('Set SOLANA_RPC_URL to a mainnet RPC address (for example your Helius URL) in .env first.');
   const connection = new Connection(url, 'confirmed');
   const onMainnet = (await connection.getGenesisHash()) === MAINNET_GENESIS;
-  console.log(`Network: ${onMainnet ? 'mainnet' : 'NOT mainnet (a mainnet token will not be found here)'}`);
+  if (!onMainnet && !process.argv.includes('--allow-devnet')) {
+    throw new Error('SOLANA_RPC_URL is not a mainnet address, so a mainnet token cannot be found. In PowerShell: $env:SOLANA_RPC_URL = "<your mainnet RPC URL>" and run this again.');
+  }
+  console.log('Network: mainnet');
 
   const acct = await connection.getAccountInfo(mint);
   if (!acct) throw new Error('No account at that address on this network.');
