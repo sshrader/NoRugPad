@@ -13,15 +13,15 @@ export default function HowItWorks() {
 
       <h2>How a coin is launched and traded</h2>
       <ol>
-        <li>The creator describes an idea. AI writes the name, ticker and description and draws an original mascot, and the creator can change any of it or upload their own picture.</li>
-        <li>The creator launches the coin. It's a plain token with a fixed supply of 1 billion, and its name and image are locked after launch.</li>
+        <li>The creator describes an idea in a sentence or two. AI writes the name, ticker and description and draws an original mascot. The creator can edit the text, redraw the mascot as many times as they like, or upload their own picture, then picks the one to use.</li>
+        <li>The creator launches the coin. It's a plain token with a fixed supply of 1 billion. Meme Factory has no way to change a coin's name or image after launch.</li>
         <li>Trading happens on a Meteora bonding curve. The price moves up as people buy and down as they sell, and the curve is the other side of every trade.</li>
         <li>
           When the curve fills up, the coin graduates to a Meteora DEX pool.{' '}
           {/* VERIFY before publishing: confirm in Meteora's docs how much of the graduated liquidity is locked and for how long. */}
           The liquidity moves to a Meteora DAMM v2 pool, where it is locked under Meteora's rules.
         </li>
-        <li>Meme Factory earns a 1% trading fee. We never hold your funds.</li>
+        <li>Every trade on the curve pays a 1% fee, shared between Meme Factory and Meteora. The creator earns no fees. We never hold your funds.</li>
       </ol>
 
       <h2>Common rugs, and what is done about them</h2>
@@ -56,6 +56,7 @@ export default function HowItWorks() {
         <li>Large holders selling, and groups of wallets that secretly belong to one person.</li>
         <li>Hype that fades, and prices that fall to zero.</li>
         <li>Fake or copycat coins, and scam links shared elsewhere.</li>
+        <li>AI-written text and drawings that are odd, wrong or too close to something that already exists. The creator is responsible for what they launch.</li>
       </ul>
       <p>
         The checks show facts at one moment. They do not mean a coin is safe. Coins are not endorsed by Meme Factory, the service is unaudited beta software, and nothing here is financial advice. Only risk what you can afford to lose.
