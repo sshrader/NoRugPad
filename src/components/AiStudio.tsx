@@ -29,6 +29,7 @@ export default function AiStudio({ creator, image, onConcept, onMascot }: Props)
   const [mascotText, setMascotText] = useState('');
   const [pics, setPics] = useState<Pic[]>([]);
   const [shown, setShown] = useState<number | null>(null); // id of the picture on display
+  const mascotBox = useRef<HTMLTextAreaElement>(null);
   const files = useRef(new Map<number, File>()); // the File handed to the coin for each drawing
   const [busy, setBusy] = useState<'' | 'idea' | 'mascot'>('');
   const [error, setError] = useState('');
@@ -42,6 +43,14 @@ export default function AiStudio({ creator, image, onConcept, onMascot }: Props)
       alive = false;
     };
   }, []);
+
+  // Let the mascot description grow to fit its text, so it can be read without scrolling.
+  useEffect(() => {
+    const el = mascotBox.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight + 2}px`;
+  }, [mascotText, concept]);
 
   if (!enabled) return null;
 
@@ -150,7 +159,7 @@ export default function AiStudio({ creator, image, onConcept, onMascot }: Props)
           <div className="studio-side">
             <div className="field">
               <label htmlFor="mascot-text">Mascot description</label>
-              <textarea id="mascot-text" rows={3} maxLength={300} value={mascotText} onChange={(e) => setMascotText(e.target.value)} />
+              <textarea id="mascot-text" ref={mascotBox} rows={6} maxLength={300} value={mascotText} onChange={(e) => setMascotText(e.target.value)} />
               <span className="muted small">Change this and press "Draw again" to get a different mascot.</span>
             </div>
             <div className="studio-btns">

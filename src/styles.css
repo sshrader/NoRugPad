@@ -436,3 +436,5 @@ input:focus, textarea:focus, .in:focus { border-color: var(--fg); box-shadow: 0 
 .drop-prev img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .drop-text { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 480px) { .drop { flex-direction: column; text-align: center; } }
+
+#mascot-text { min-height: 9.5em; max-height: 22em; line-height: 1.5; }
