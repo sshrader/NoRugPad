@@ -23,6 +23,8 @@
     "sweep": "tsx scripts/sweep.ts",
     "dbc-config": "tsx scripts/dbc-create-config.ts",
     "dbc-inspect": "tsx scripts/dbc-inspect.ts",
+    "dbc-check-quote": "tsx scripts/dbc-check-quote.ts",
+    "quote-test": "node scripts/quote-test.mjs",
     "dbc-fees": "tsx scripts/dbc-claim-fees.ts",
     "dbc-migrate": "tsx scripts/dbc-migrate.ts"
   },
