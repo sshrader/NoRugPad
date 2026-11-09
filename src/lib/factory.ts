@@ -1,5 +1,5 @@
-// Pawprint at work: a cartoon scene for the Explore page. An idea hopper drops light bulbs into a big pink machine,
-// which pumps coins and memes out onto a conveyor belt, where a stamp presses each one on the way past.
+// Pawprint at work: a cartoon scene for the Explore page. A hopper drops fish and bones into a big pink animal-eared machine,
+// which pumps coins and cartoon animals out onto a conveyor belt, where a paw stamp presses each one on the way past.
 // The coins on the belt are the newest launches, using their real logos. Everything else is made up.
 // Pure canvas code with no React, so it can be tested on its own (scripts/factory-test.mjs). It is a show only.
 
@@ -21,6 +21,7 @@ const ITEM_Y = BELT_TOP - 9; // item centres ride on the belt
 const SPEED = 34; // belt speed in px per second
 const STAMP_X = 330;
 const MAX_ITEMS = 16;
+const ANIMALS = 5; // cat, dog, bunny, bear, frog
 const COIN_COLORS = ['#f08a24', '#7bd13a', '#f06aa8', '#2fd3b8', '#8a6cff', '#3aa8f0'];
 
 export type FactoryCoin = { mint: string; name: string; symbol: string; image?: CanvasImageSource | null };
@@ -29,7 +30,7 @@ export type FactoryStats = { onBelt: number; made: number };
 type Item = { kind: 'coin' | 'meme'; x: number; age: number; stamped: boolean; coin: FactoryCoin | null; variant: number; seed: number };
 type Puff = { x: number; y: number; r: number; age: number; life: number; vx: number };
 type Spark = { x: number; y: number; vx: number; vy: number; age: number; life: number; color: string };
-type Bulb = { x: number; y: number; age: number };
+type Bulb = { x: number; y: number; age: number; fish: boolean };
 
 export type Factory = {
   update(dt: number): void;
@@ -71,7 +72,7 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
       coin = coins[nextCoin % coins.length];
       nextCoin++;
     }
-    items.push({ kind, x: BELT_X - 4, age: 0, stamped: false, coin, variant: Math.floor(rand() * 3), seed: Math.floor(rand() * 1000) });
+    items.push({ kind, x: BELT_X - 4, age: 0, stamped: false, coin, variant: Math.floor(rand() * ANIMALS), seed: Math.floor(rand() * 1000) });
     made++;
     lamp = 1;
     for (let i = 0; i < 4; i++) {
@@ -88,7 +89,7 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     }
     bulbT -= dt;
     if (bulbT <= 0) {
-      bulbs.push({ x: 56 + (rand() - 0.5) * 14, y: -6, age: 0 });
+      bulbs.push({ x: 56 + (rand() - 0.5) * 14, y: -6, age: 0, fish: rand() < 0.5 });
       bulbT = 0.8 + rand() * 0.5;
     }
     puffT -= dt;
@@ -255,54 +256,109 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     }
   }
 
-  function drawMeme(g: CanvasRenderingContext2D, x: number, y: number, variant: number, scale: number) {
+  function ellipse(g: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number, rot: number, fill: string, lw = 0) {
+    g.beginPath();
+    g.ellipse(x, y, rx, ry, rot, 0, Math.PI * 2);
+    g.fillStyle = fill;
+    g.fill();
+    if (lw > 0) {
+      g.lineWidth = lw;
+      g.strokeStyle = INK;
+      g.stroke();
+    }
+  }
+  function tri(g: CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, x3: number, y3: number, fill: string, lw = 1) {
+    g.beginPath();
+    g.moveTo(x1, y1);
+    g.lineTo(x2, y2);
+    g.lineTo(x3, y3);
+    g.closePath();
+    g.fillStyle = fill;
+    g.fill();
+    g.lineWidth = lw;
+    g.strokeStyle = INK;
+    g.stroke();
+  }
+  // A paw print: one big pad and four toes. (x, y) is the centre of the pad.
+  function pawPrint(g: CanvasRenderingContext2D, x: number, y: number, k: number, fill: string, lw = 0) {
+    ellipse(g, x, y, 4 * k, 3.1 * k, 0, fill, lw);
+    ellipse(g, x - 5 * k, y - 4.2 * k, 1.5 * k, 2 * k, -0.4, fill, lw);
+    ellipse(g, x - 1.7 * k, y - 7 * k, 1.6 * k, 2.1 * k, -0.1, fill, lw);
+    ellipse(g, x + 1.7 * k, y - 7 * k, 1.6 * k, 2.1 * k, 0.1, fill, lw);
+    ellipse(g, x + 5 * k, y - 4.2 * k, 1.5 * k, 2 * k, 0.4, fill, lw);
+  }
+
+  // A cartoon animal head riding the belt: cat, dog, bunny, bear or frog.
+  function drawAnimal(g: CanvasRenderingContext2D, x: number, y: number, variant: number, scale: number) {
     g.save();
     g.translate(x, y);
     g.scale(scale, scale);
-    box(g, -11, -9, 22, 18, 1.5, '#fff', 1.2);
-    // the picture
-    const bg = ['#8fe36a', '#f3c98a', '#c3a6ff'][variant];
-    g.fillStyle = bg;
-    g.fillRect(-9, -4, 18, 9);
-    // a goofy face: two big eyes and a wobbly mouth, with ears that change by variant
-    g.fillStyle = INK;
-    if (variant === 1) {
-      g.beginPath();
-      g.moveTo(-8, -4);
-      g.lineTo(-5, -4);
-      g.lineTo(-7, -1);
-      g.closePath();
-      g.moveTo(8, -4);
-      g.lineTo(5, -4);
-      g.lineTo(7, -1);
-      g.closePath();
-      g.fill();
+    const fur = ['#f4a742', '#d8b48a', '#f2f2f7', '#9b6b4a', '#7bd13a'][variant];
+    // ears go behind the head
+    if (variant === 0) {
+      tri(g, -8, -3, -3.5, -5.5, -7.5, -10.5, fur);
+      tri(g, 8, -3, 3.5, -5.5, 7.5, -10.5, fur);
+    } else if (variant === 1) {
+      ellipse(g, -8, -1, 3, 5.2, 0.3, '#6b4a30', 1);
+      ellipse(g, 8, -1, 3, 5.2, -0.3, '#6b4a30', 1);
     } else if (variant === 2) {
-      g.beginPath();
-      g.moveTo(-8, -4);
-      g.lineTo(-4, -4);
-      g.lineTo(-7, -7);
-      g.closePath();
-      g.moveTo(8, -4);
-      g.lineTo(4, -4);
-      g.lineTo(7, -7);
-      g.closePath();
-      g.fill();
+      ellipse(g, -4, -10, 2.4, 6, -0.1, fur, 1);
+      ellipse(g, 4, -10, 2.4, 6, 0.1, fur, 1);
+      ellipse(g, -4, -10, 1, 4, -0.1, '#ffb3d1', 0);
+      ellipse(g, 4, -10, 1, 4, 0.1, '#ffb3d1', 0);
+    } else if (variant === 3) {
+      circle(g, -7, -6.5, 3, fur, 1);
+      circle(g, 7, -6.5, 3, fur, 1);
+    } else {
+      circle(g, -5.5, -7, 3.2, fur, 1);
+      circle(g, 5.5, -7, 3.2, fur, 1);
     }
-    circle(g, -3, 0, 2.2, '#fff', 0.7);
-    circle(g, 3, 0, 2.2, '#fff', 0.7);
-    circle(g, -2.5 + variant * 0.4, 0.3, 0.9, INK, 0);
-    circle(g, 3.5 + variant * 0.4, 0.3, 0.9, INK, 0);
-    g.lineWidth = 0.9;
-    g.strokeStyle = INK;
-    g.beginPath();
-    g.moveTo(-3, 3.6);
-    g.quadraticCurveTo(0, 5.2, 3, 3.6);
-    g.stroke();
-    // caption bars: stand-ins for the big white meme text
-    g.fillStyle = INK;
-    g.fillRect(-7, -7.6, 14, 1.6);
-    g.fillRect(-5, 6.4, 10, 1.6);
+    ellipse(g, 0, 0, 9.5, 8.5, 0, fur, 1.2);
+    if (variant === 3 || variant === 1) ellipse(g, 0, 3.4, 4.6, 3.4, 0, '#f3dcc0', 0);
+    // eyes
+    if (variant === 4) {
+      circle(g, -5.5, -7, 1.8, '#fff', 0.7);
+      circle(g, 5.5, -7, 1.8, '#fff', 0.7);
+      circle(g, -5.5, -6.8, 0.8, INK, 0);
+      circle(g, 5.5, -6.8, 0.8, INK, 0);
+    } else {
+      circle(g, -3.4, -1.6, 1.7, '#fff', 0.7);
+      circle(g, 3.4, -1.6, 1.7, '#fff', 0.7);
+      circle(g, -3, -1.4, 0.8, INK, 0);
+      circle(g, 3.8, -1.4, 0.8, INK, 0);
+    }
+    // nose and mouth
+    if (variant === 4) {
+      g.lineWidth = 0.9;
+      g.strokeStyle = INK;
+      g.beginPath();
+      g.moveTo(-5, 3);
+      g.quadraticCurveTo(0, 6.4, 5, 3);
+      g.stroke();
+    } else {
+      ellipse(g, 0, 1.6, 1.5, 1.1, 0, variant === 2 ? '#ff8fb8' : INK, 0);
+      g.lineWidth = 0.8;
+      g.strokeStyle = INK;
+      g.beginPath();
+      g.moveTo(0, 2.6);
+      g.quadraticCurveTo(-2, 5, -3.6, 3.6);
+      g.moveTo(0, 2.6);
+      g.quadraticCurveTo(2, 5, 3.6, 3.6);
+      g.stroke();
+    }
+    if (variant === 0) {
+      g.lineWidth = 0.6;
+      g.beginPath();
+      g.moveTo(-6, 1.6);
+      g.lineTo(-10.5, 0.8);
+      g.moveTo(-6, 3);
+      g.lineTo(-10.5, 3.6);
+      g.moveTo(6, 1.6);
+      g.lineTo(10.5, 0.8);
+      g.moveTo(6, 3);
+      g.lineTo(10.5, 3.6);
+      g.stroke();
+    }
     g.restore();
   }
 
@@ -339,12 +395,22 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
       g.fill();
     }
 
-    // idea hopper: a funnel fed by falling light bulbs
+    // idea hopper: a funnel fed by falling fish and bones
     for (const b of bulbs) {
       const a = Math.min(1, b.age * 3);
       g.globalAlpha = a;
-      circle(g, b.x, b.y, 3.2, '#fff176', 1);
-      box(g, b.x - 1.4, b.y + 2.6, 2.8, 2.4, 0.6, '#9aa1c7', 0.8);
+      if (b.fish) {
+        ellipse(g, b.x, b.y, 4, 2.4, 0, SKY, 0.9);
+        tri(g, b.x + 3, b.y, b.x + 6.4, b.y - 2.4, b.x + 6.4, b.y + 2.4, SKY, 0.8);
+        circle(g, b.x - 2, b.y - 0.5, 0.6, INK, 0);
+      } else {
+        g.lineWidth = 1;
+        g.strokeStyle = INK;
+        g.fillStyle = '#fff';
+        g.fillRect(b.x - 3.4, b.y - 1, 6.8, 2);
+        g.strokeRect(b.x - 3.4, b.y - 1, 6.8, 2);
+        for (const sx of [-1, 1]) for (const sy of [-1, 1]) circle(g, b.x + sx * 3.6, b.y + sy * 1.2, 1.3, '#fff', 0.8);
+      }
       g.globalAlpha = 1;
     }
     g.beginPath();
@@ -361,7 +427,11 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     box(g, 52, 62, 8, 16, 1, '#9aa1c7', 1.2);
     box(g, 52, 70, 48, 8, 1, '#9aa1c7', 1.2);
 
-    // the machine
+    // the machine, with big cat ears
+    tri(g, 100, 40, 108, 14, 128, 36, PINK, 2);
+    tri(g, 202, 40, 194, 14, 174, 36, PINK, 2);
+    tri(g, 107, 36, 110, 22, 120, 34, '#ffb3d1', 0);
+    tri(g, 195, 36, 192, 22, 182, 34, '#ffb3d1', 0);
     box(g, 96, 34, 110, 90, 8, PINK, 2);
     box(g, 106, 40, 90, 16, 3, GOLD, 1.4); // the sign plate: its words are HTML, laid over this
     circle(g, 150, 88, 22, '#fff', 1.6);
@@ -424,17 +494,10 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
       const s = k < 1 ? Math.max(0.2, easeOutBack(k)) : 1;
       const bob = Math.sin(t * 5 + it.seed) * 0.4;
       if (it.kind === 'coin') drawCoin(g, it.x, ITEM_Y + bob, it.coin, it.seed, s);
-      else drawMeme(g, it.x, ITEM_Y - 1 + bob, it.variant, s);
+      else drawAnimal(g, it.x, ITEM_Y - 1 + bob, it.variant, s);
       if (it.stamped) {
-        // a small lime tick where the stamp pressed
-        circle(g, it.x + 8, ITEM_Y - 9, 3.6, LIME, 1);
-        g.strokeStyle = INK;
-        g.lineWidth = 1;
-        g.beginPath();
-        g.moveTo(it.x + 6.4, ITEM_Y - 9);
-        g.lineTo(it.x + 7.7, ITEM_Y - 7.7);
-        g.lineTo(it.x + 9.8, ITEM_Y - 10.4);
-        g.stroke();
+        // a small lime paw where the stamp pressed
+        pawPrint(g, it.x + 9, ITEM_Y - 6, 0.6, LIME, 0.7);
       }
     }
 
@@ -442,7 +505,7 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     const headY = 54 + arm * 32;
     box(g, STAMP_X - 2.5, 0, 5, headY, 1, '#9aa1c7', 1.1);
     box(g, STAMP_X - 9, headY, 18, 8, 2, PINK, 1.4);
-    box(g, STAMP_X - 6, headY + 8, 12, 2.4, 0.8, INK, 0.8);
+    pawPrint(g, STAMP_X, headY + 11.5, 0.9, INK);
 
     for (const s of sparks) {
       g.globalAlpha = Math.max(0, 1 - s.age / s.life);
@@ -451,19 +514,10 @@ export function createFactory(opts: { rand?: () => number } = {}): Factory {
     }
     g.globalAlpha = 1;
 
-    // the floor, with caution tape
+    // the floor, with a trail of paw prints
     g.fillStyle = INK;
     g.fillRect(0, GROUND, FW, FH - GROUND);
-    g.fillStyle = GOLD;
-    for (let x = -10; x < FW + 10; x += 14) {
-      g.beginPath();
-      g.moveTo(x, FH);
-      g.lineTo(x + 7, FH);
-      g.lineTo(x + 13, GROUND + 4);
-      g.lineTo(x + 6, GROUND + 4);
-      g.closePath();
-      g.fill();
-    }
+    for (let x = 6, i = 0; x < FW + 10; x += 17, i++) pawPrint(g, x, GROUND + (i % 2 ? 11 : 15), 0.8, GOLD);
     g.fillStyle = INK;
     g.fillRect(0, GROUND + 3, FW, 1);
 
