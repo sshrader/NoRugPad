@@ -262,9 +262,13 @@ app.post('/api/coins', async (req, res) => {
   }
 });
 
+// Images we stored ourselves are shown from this site's own /uploads path, so a link saved with
+// the wrong host (e.g. http://localhost:8787 on a deployed site) still loads.
+const localImage = (c) => ({ ...c, imageUrl: String(c.imageUrl || '').replace(/^https?:\/\/[^/]+(?=\/uploads\/)/, '') });
+
 app.get('/api/coins', async (_req, res) => {
   const coins = await store.get('coins.json', []);
-  res.json(coins.slice(0, 100));
+  res.json(coins.slice(0, 100).map(localImage));
 });
 
 /* ------------------------------ coins and market ------------------------------ */
@@ -274,7 +278,7 @@ const findCoin = async (mint) => (await store.get('coins.json', [])).find((c) =>
 app.get('/api/coins/:mint', async (req, res) => {
   const coin = await findCoin(req.params.mint);
   if (!coin) return bad(res, 'Unknown coin.', 404);
-  res.json(coin);
+  res.json(localImage(coin));
 });
 
 // Market cap for every coin (no history), for the Explore page.
