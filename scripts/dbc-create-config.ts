@@ -10,6 +10,12 @@
  *   DBC_MIGRATION_MC=300  market cap at which the curve is full and the coin moves to a DEX
  *   DBC_FEE_BPS=100       trading fee in basis points (100 = 1%). Meteora's minimum is 25.
  *   DBC_FEE_CLAIMER=<address>  wallet that can claim your fees (use a hardware wallet or multisig on mainnet). Default: the key-file wallet
+ *   DBC_START_FEE_BPS     opening "anti-sniper" fee that steps down to DBC_FEE_BPS (default: same as DBC_FEE_BPS, no schedule)
+ *   DBC_FEE_PERIODS=0     number of steps the fee takes to fall from the start fee to DBC_FEE_BPS
+ *   DBC_FEE_DURATION_SEC=0 total seconds of that fall (needs DBC_FEE_PERIODS)
+ *   DBC_DYNAMIC_FEE=on    set to off to turn the volatility fee off (then the fee is exactly what you set)
+ *   DBC_POOL_FEE_BPS=100  trading fee of the DEX pool after graduating (100 = 1%)
+ *   DBC_POOL_DYNAMIC_FEE=on  set to off to turn the DEX pool's volatility fee off
  *   DBC_CREATOR_FEE_PCT=0 share of your fees (after Meteora's 20% cut) that goes to the coin's creator, 0-100
  */
 import 'dotenv/config';
@@ -38,9 +44,19 @@ const initialMC = num('DBC_INITIAL_MC', 30);
 const migrationMC = num('DBC_MIGRATION_MC', 300);
 const feeBps = num('DBC_FEE_BPS', 100);
 const creatorFeePct = num('DBC_CREATOR_FEE_PCT', 0);
+const startFeeBps = num('DBC_START_FEE_BPS', feeBps);
+const feePeriods = num('DBC_FEE_PERIODS', 0);
+const feeDurationSec = num('DBC_FEE_DURATION_SEC', 0);
+const dynamicFee = process.env.DBC_DYNAMIC_FEE !== 'off';
+const poolFeeBps = num('DBC_POOL_FEE_BPS', 100);
+const poolDynamicFee = process.env.DBC_POOL_DYNAMIC_FEE !== 'off';
 
 if (!(initialMC > 0) || !(migrationMC > initialMC)) throw new Error('DBC_MIGRATION_MC must be larger than DBC_INITIAL_MC.');
 if (feeBps < 25) throw new Error('DBC_FEE_BPS must be at least 25 (Meteora minimum).');
+if (startFeeBps < feeBps) throw new Error('DBC_START_FEE_BPS must be at least DBC_FEE_BPS.');
+if (startFeeBps > feeBps && !(feePeriods > 0 && feeDurationSec > 0)) {
+  throw new Error('A falling fee needs DBC_FEE_PERIODS and DBC_FEE_DURATION_SEC (for example 8 and 8).');
+}
 
 const curve = buildCurveWithMarketCap({
   token: {
@@ -54,9 +70,9 @@ const curve = buildCurveWithMarketCap({
   fee: {
     baseFeeParams: {
       baseFeeMode: BaseFeeMode.FeeSchedulerLinear,
-      feeSchedulerParam: { startingFeeBps: feeBps, endingFeeBps: feeBps, numberOfPeriod: 0, totalDuration: 0 },
+      feeSchedulerParam: { startingFeeBps: startFeeBps, endingFeeBps: feeBps, numberOfPeriod: feePeriods, totalDuration: feeDurationSec },
     },
-    dynamicFeeEnabled: true,
+    dynamicFeeEnabled: dynamicFee,
     collectFeeMode: CollectFeeMode.QuoteToken,
     creatorTradingFeePercentage: creatorFeePct,
     poolCreationFee: 0,
@@ -68,8 +84,8 @@ const curve = buildCurveWithMarketCap({
     migrationFee: { feePercentage: 0, creatorFeePercentage: 0 },
     migratedPoolFee: {
       collectFeeMode: MigratedCollectFeeMode.QuoteToken,
-      dynamicFee: DammV2DynamicFeeMode.Enabled,
-      poolFeeBps: 100,
+      dynamicFee: poolDynamicFee ? DammV2DynamicFeeMode.Enabled : DammV2DynamicFeeMode.Disabled,
+      poolFeeBps,
     },
   },
   // All graduated liquidity is locked for good, so nobody (including you) can pull it from the DEX pool.
@@ -94,6 +110,8 @@ const curve = buildCurveWithMarketCap({
 console.log('\nCurve settings');
 console.log(`  starts at      ${initialMC} SOL market cap`);
 console.log(`  graduates at   ${migrationMC} SOL market cap`);
+if (startFeeBps > feeBps) console.log(`  opening fee    ${(startFeeBps / 100).toFixed(2)}%, falling to ${(feeBps / 100).toFixed(2)}% in ${feePeriods} steps over ${feeDurationSec}s`);
+console.log(`  volatility fee ${dynamicFee ? 'ON (can add to the fee)' : 'off'}; after graduating: ${(poolFeeBps / 100).toFixed(2)}% pool fee, volatility fee ${poolDynamicFee ? 'ON' : 'off'}`);
 console.log(`  trading fee    ${(feeBps / 100).toFixed(2)}% (Meteora keeps 20% of it, ${creatorFeePct}% of the rest goes to creators)`);
 // How much SOL buyers must put in before the curve is full and the coin graduates.
 const fillLamports = (curve as { migrationQuoteThreshold?: { toString(): string } }).migrationQuoteThreshold;

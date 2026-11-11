@@ -50,3 +50,24 @@ Not confirmed that every coin on their site uses it.
 - 3.25% post-graduation fee is high next to our 1%.
 - Our current config has the dynamic fee ON, so "1% fee" on How it works may be slightly low. Check before launch.
 - A new config means a new address (`DBC_CONFIG` / `VITE_DBC_CONFIG`); it cannot be edited and old coins stay on the old one.
+
+## Recipe: a Nested-style config starting at ~$12K (SOL ~ $85)
+Market cap is set in SOL: $12,000 / $85 = ~141 SOL start. Nested graduates at ~$60K: $60,000 / $85 = ~706 SOL.
+Supply only changes the per-token price, not the market cap, so keep 1B SPL (no Token-2022 work).
+Preview first (sends nothing), then create. Devnet first (`.env` pointed at devnet), then repeat on mainnet.
+```
+DBC_INITIAL_MC=141
+DBC_MIGRATION_MC=706
+DBC_FEE_BPS=350            # ending fee 3.5% (use 100 to keep 1%)
+DBC_START_FEE_BPS=5000     # opening 50% anti-sniper fee (leave out for none)
+DBC_FEE_PERIODS=8
+DBC_FEE_DURATION_SEC=8
+DBC_DYNAMIC_FEE=off
+DBC_POOL_FEE_BPS=325       # Nested's pool fee after graduating (100 keeps 1%)
+DBC_POOL_DYNAMIC_FEE=off
+DBC_FEE_CLAIMER=<hardware wallet or multisig>
+npm run dbc-config -- --check
+npm run dbc-config
+```
+Then put the printed `DBC_CONFIG` and `VITE_DBC_CONFIG` into `.env` / Railway and redeploy. The SOL needed to graduate will
+differ from Nested's 222 SOL since the curve here has one price band built by the SDK; `--check` prints the number.
